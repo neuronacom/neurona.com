@@ -8,7 +8,6 @@
     /* Сброс */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Фоновая сетка нейросвязей */
     body {
       background: #1a1a1a;
       color: #e0e0e0;
@@ -20,84 +19,71 @@
       justify-content: center;
       position: relative;
     }
-    canvas#bg {
-      position: fixed;
-      top: 0; left: 0;
+
+    /* Фоновая анимация нейросвязей */
+    #bg {
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: 0;
-      opacity: 0.2; /* тусклее */
-    }
-
-    /* Заголовок Neurona 1.0 (скрыт при загрузке) */
-    .header {
-      position: fixed;
-      top: 10px; left: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #fff;
-      z-index: 2;
-      opacity: 0;
-      transition: opacity 1s ease;
+      opacity: 0.4; /* более видная */
     }
 
     /* Заставка */
     #loader {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(26,26,26,0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 1001;
     }
     .loader-text {
       font-size: 3rem;
       letter-spacing: 0.2em;
       color: #fff;
-      animation: fade 3s ease-in-out infinite;
+      animation: fade 5s ease-in-out infinite;
     }
     @keyframes fade {
       0%,100% { opacity: 0; }
       50%      { opacity: 1; }
     }
 
-    /* После загрузки — показываем приложение и заголовок */
+    /* Заголовок (скрыт до конца загрузки) */
+    .header {
+      position: fixed; top: 10px; left: 10px;
+      font-size: 1.2rem; font-weight: bold;
+      color: #fff; z-index: 2;
+      opacity: 0; transition: opacity 1s ease;
+    }
+
+    /* Показать приложение и заголовок после загрузки */
     body.loaded .header,
     body.loaded #app {
       opacity: 1;
     }
 
-    /* Основное приложение (скрыто при загрузке) */
+    /* Основное приложение */
     #app {
       position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 400px;
-      height: 100%;
-      padding: 20px 10px 10px;
+      display: flex; flex-direction: column;
+      width: 100%; max-width: 400px;
+      height: 100%; padding: 20px 10px 10px;
       z-index: 1;
-      opacity: 0;
-      transition: opacity 1s ease;
+      opacity: 0; transition: opacity 1s ease;
+    }
+
+    /* Панель заголовка + языка */
+    .header-lang {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; height: 40px;
     }
 
     /* Кнопки выбора языка */
     .lang-select {
-      position: absolute;
-      top: 10px; right: 10px;
       display: flex;
-      z-index: 2;
     }
     .lang-select button {
-      margin-left: 5px;
-      padding: 6px 12px;
-      background: #4a4a4a;
-      border: none;
-      border-radius: 4px;
-      color: #fff;
-      font-size: 0.9rem;
-      cursor: pointer;
+      margin-left: 5px; padding: 6px 12px;
+      background: #4a4a4a; border: none; border-radius: 4px;
+      color: #fff; font-size: 0.9rem; cursor: pointer;
       transition: background 0.2s;
     }
     .lang-select button.active,
@@ -108,21 +94,19 @@
     /* Окно чата */
     .chat-container {
       flex: 1;
-      width: 100%;
+      margin-top: 10px;
       background: rgba(43,43,43,0.9);
       border-radius: 8px;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       overflow: hidden;
-      margin-top: 50px; /* отступ под кнопки/заголовок */
     }
     #messages {
       flex: 1;
-      padding: 15px;
-      overflow-y: auto;
+      display: flex; flex-direction: column-reverse;
+      padding: 15px; overflow-y: auto;
     }
     .message {
-      margin-bottom: 10px;
+      margin: 5px 0;
       line-height: 1.4;
       max-width: 80%;
       word-wrap: break-word;
@@ -142,51 +126,35 @@
 
     /* Поле ввода */
     .input-area {
-      display: flex;
-      padding: 10px;
-      background: #1f1f1f;
+      display: flex; padding: 10px; background: #1f1f1f;
     }
     #input {
-      flex: 1;
-      resize: none;
-      border: none;
-      padding: 12px;
-      border-radius: 4px;
-      background: #333;
-      color: #fff;
-      font-size: 1rem;
-      height: 50px;
+      flex: 1; resize: none; border: none;
+      padding: 12px; border-radius: 4px;
+      background: #333; color: #fff;
+      font-size: 1rem; height: 50px;
     }
     #send {
-      margin-left: 8px;
-      padding: 0 16px;
-      border: none;
-      border-radius: 4px;
-      background: #4a90e2;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
+      margin-left: 8px; padding: 0 16px;
+      border: none; border-radius: 4px;
+      background: #4a90e2; color: #fff;
+      font-size: 1rem; cursor: pointer;
       transition: background 0.2s;
     }
-    #send:hover {
-      background: #6ab0ff;
-    }
+    #send:hover { background: #6ab0ff; }
 
-    /* Мобильная адаптация: уже не растягивать окно по полной ширине */
+    /* Адаптивность: чуть уже окно на мобилках */
     @media (max-width: 600px) {
-      .chat-container {
-        width: 90%;
-        margin: 0 auto;
-      }
-      .loader-text { font-size: 2rem; }
       #app { max-width: 100%; padding: 15px 5px 5px; }
-      #send { font-size: 0.9rem; padding: 0 12px; }
+      .chat-container { width: 90%; margin: 0 auto; }
+      .loader-text { font-size: 2.5rem; }
       #input { font-size: 0.9rem; height: 40px; }
+      #send { font-size: 0.9rem; padding: 0 12px; }
     }
   </style>
 </head>
 <body>
-  <!-- Фоновая анимация нейросвязей -->
+  <!-- Canvas нейросвязей -->
   <canvas id="bg"></canvas>
 
   <!-- Заставка -->
@@ -194,16 +162,15 @@
     <div class="loader-text">NEURONA 1.0</div>
   </div>
 
-  <!-- Заголовок (скрыт до конца загрузки) -->
-  <div class="header">Neurona 1.0</div>
-
-  <!-- Основное приложение -->
+  <!-- Заголовок + язык -->
   <div id="app">
-    <!-- Выбор языка -->
-    <div class="lang-select">
-      <button data-lang="en">EN</button>
-      <button data-lang="ru" class="active">RU</button>
-      <button data-lang="ua">UA</button>
+    <div class="header-lang">
+      <div class="header">Neurona 1.0</div>
+      <div class="lang-select">
+        <button data-lang="en">EN</button>
+        <button data-lang="ru" class="active">RU</button>
+        <button data-lang="ua">UA</button>
+      </div>
     </div>
 
     <!-- Окно чата -->
@@ -232,91 +199,92 @@
         nodes.push({
           x: Math.random() * W,
           y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5
         });
       }
     }
     function draw() {
       ctx.clearRect(0,0,W,H);
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i], b = nodes[j];
+      nodes.forEach((a, i) => {
+        nodes.forEach((b, j) => {
+          if (j <= i) return;
           const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.hypot(dx, dy);
           if (dist < 200) {
-            ctx.strokeStyle = `rgba(255,255,255,${(200 - dist) / 200 * 0.15})`;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = `rgba(255,255,255,${(200 - dist) / 200 * 0.3})`;
+            ctx.lineWidth = 1.2;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
-        }
-      }
+        });
+      });
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > W) n.vx *= -1;
         if (n.y < 0 || n.y > H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 3, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); initNodes(); draw();
 
-    // Локализация интерфейса
+    // Локализация
     const i18n = {
       en: { placeholder: "Type a message...", send: "Send" },
       ru: { placeholder: "Напишите сообщение...", send: "Отправить" },
       ua: { placeholder: "Введіть повідомлення...", send: "Надіслати" }
     };
-    let lang = "ru";
-    const loader = document.getElementById('loader');
-    const input  = document.getElementById('input');
-    const send   = document.getElementById('send');
+    const input = document.getElementById('input');
+    const send  = document.getElementById('send');
+    document.querySelectorAll('.lang-select button').forEach(b => {
+      b.addEventListener('click', () => {
+        const l = b.dataset.lang;
+        input.placeholder = i18n[l].placeholder;
+        send.textContent   = i18n[l].send;
+        document.querySelectorAll('.lang-select button')
+          .forEach(x => x.classList.toggle('active', x === b));
+      });
+    });
 
-    function setLanguage(l) {
-      lang = l;
-      input.placeholder = i18n[l].placeholder;
-      send.textContent   = i18n[l].send;
-      document.querySelectorAll(".lang-select button")
-        .forEach(b => b.classList.toggle("active", b.dataset.lang === l));
-    }
-    document.querySelectorAll(".lang-select button")
-      .forEach(b => b.addEventListener("click", () => setLanguage(b.dataset.lang)));
+    // Закрыть клавиатуру при клике вне поля
+    document.body.addEventListener('click', e => {
+      if (!e.target.closest('.input-area')) input.blur();
+    });
 
-    // Показываем контент после 5 сек, плавно обнажая интерфейс
-    window.addEventListener("load", () => {
+    // Показать контент после 5 сек
+    window.addEventListener('load', () => {
       setTimeout(() => {
-        loader.style.display = "none";
-        document.body.classList.add("loaded");
+        document.getElementById('loader').style.display = 'none';
+        document.body.classList.add('loaded');
       }, 5000);
     });
 
-    // Обработка отправки сообщений
-    const messages = document.getElementById("messages");
+    // Чат
+    const messages = document.getElementById('messages');
     function addMessage(text, who) {
-      const div = document.createElement("div");
+      const div = document.createElement('div');
       div.className = `message ${who}`;
       div.textContent = text;
       messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
     }
     send.onclick = async () => {
       const txt = input.value.trim();
       if (!txt) return;
-      addMessage(txt, "user");
-      input.value = "";
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      addMessage(txt, 'user');
+      input.value = '';
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: txt })
       });
       const j = await res.json();
-      addMessage(j.reply, "bot");
+      addMessage(j.reply, 'bot');
     };
   </script>
 </body>
