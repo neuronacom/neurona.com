@@ -8,7 +8,7 @@
     /* Сброс */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Основной фон и центрирование */
+    /* Фон и центрирование */
     body {
       background: #1a1a1a;
       color: #e0e0e0;
@@ -21,22 +21,24 @@
       position: relative;
     }
 
-    /* Фоновая анимация нейросвязей */
+    /* Фон «нейросеть» */
     #bg {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: 0;
-      opacity: 0.6; /* чуть светлее */
+      opacity: 0.6;               /* более яркая при загрузке */
+      transition: opacity 1s ease;
+    }
+    /* После загрузки – затемнить фон */
+    body.loaded #bg {
+      opacity: 0.2;
     }
 
     /* Заставка */
     #loader {
       position: fixed; inset: 0;
-      background: rgba(26,26,26,0.9); /* чуть более прозрачный, чтобы сеть видна */
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: rgba(26,26,26,0.9);
+      display: flex; align-items: center; justify-content: center;
       z-index: 1001;
     }
     .loader-text {
@@ -50,63 +52,44 @@
       50%      { opacity: 1; }
     }
 
-    /* Заголовок Neurona 1.0 (скрыт до конца загрузки) */
-    .header {
-      position: fixed;
-      top: 10px; left: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: none; /* убираем свечение */
-      z-index: 2;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-
-    /* Показываем заголовок и приложение после загрузки */
-    body.loaded .header,
-    body.loaded #app {
-      opacity: 1;
-    }
-
-    /* Основная область приложения */
+    /* Основное приложение */
     #app {
       position: relative;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 400px;
+      display: flex; flex-direction: column;
+      width: 100%; max-width: 400px;
       height: 100%;
       padding: 20px 10px 10px;
       z-index: 1;
       opacity: 0;
       transition: opacity 1s ease;
     }
-
-    /* Панель заголовка + выбора языка */
-    .header-lang {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      height: 40px;
+    /* Покажем после загрузки */
+    body.loaded #app {
+      opacity: 1;
     }
 
-    /* Кнопки языка (справа) */
+    /* Заголовок и выбор языка в одной строке */
+    .header-lang {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; margin-bottom: 10px;
+    }
+    .header {
+      font-size: 1.2rem; font-weight: bold; color: #fff;
+    }
     .lang-select {
       display: flex;
     }
     .lang-select button {
       margin-left: 5px;
-      padding: 4px 8px;       /* чуть меньше */
+      padding: 4px 8px;            /* чуть меньше */
       background: #4a4a4a;
       border: none;
       border-radius: 4px;
       color: #fff;
-      font-size: 0.8rem;      /* чуть меньше */
+      font-size: 0.8rem;           /* чуть меньше */
       cursor: pointer;
       transition: background 0.2s;
-      white-space: nowrap;    /* фиксируем ширину */
+      white-space: nowrap;         /* фиксируем ширину */
     }
     .lang-select button.active,
     .lang-select button:hover {
@@ -116,19 +99,15 @@
     /* Окно чата */
     .chat-container {
       flex: 1;
-      margin-top: 60px;       /* подвинуть ниже под панель */
       background: rgba(43,43,43,0.9);
       border-radius: 8px;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       overflow: hidden;
     }
     #messages {
       flex: 1;
-      display: flex;
-      flex-direction: column-reverse; /* снизу вверх */
-      padding: 15px;
-      overflow-y: auto;
+      display: flex; flex-direction: column-reverse; /* снизу вверх */
+      padding: 15px; overflow-y: auto;
     }
     .message {
       margin: 5px 0;
@@ -151,38 +130,25 @@
 
     /* Поле ввода */
     .input-area {
-      display: flex;
-      padding: 10px;
-      background: #1f1f1f;
+      display: flex; padding: 10px; background: #1f1f1f;
     }
     #input {
-      flex: 1;
-      resize: none;
-      border: none;
-      padding: 12px;
-      border-radius: 4px;
-      background: #333;
-      color: #fff;
-      font-size: 1rem;
-      height: 50px;
+      flex: 1; resize: none; border: none;
+      padding: 12px; border-radius: 4px;
+      background: #333; color: #fff;
+      font-size: 1rem; height: 50px;
     }
     #send {
-      flex: none;             /* не растягиваем */
-      white-space: nowrap;
-      min-width: 80px;        /* фиксируем ширину */
-      margin-left: 8px;
-      padding: 0 16px;
-      border: none;
-      border-radius: 4px;
-      background: #4a90e2;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
+      flex: none; min-width: 80px;        /* фиксированная ширина */
+      margin-left: 8px; padding: 0 16px;
+      border: none; border-radius: 4px;
+      background: #4a90e2; color: #fff;
+      font-size: 1rem; cursor: pointer;
       transition: background 0.2s;
     }
     #send:hover { background: #6ab0ff; }
 
-    /* Мобильная адаптация */
+    /* Адаптивность */
     @media (max-width: 600px) {
       #app { max-width: 100%; padding: 15px 5px 5px; }
       .chat-container { width: 90%; margin: 0 auto; }
@@ -196,18 +162,15 @@
   <!-- Фоновая анимация нейросвязей -->
   <canvas id="bg"></canvas>
 
-  <!-- Экран загрузки -->
+  <!-- Заставка -->
   <div id="loader">
     <div class="loader-text">NEURONA 1.0</div>
   </div>
 
-  <!-- Заголовок -->
-  <div class="header">Neurona 1.0</div>
-
-  <!-- Основное приложение -->
+  <!-- Приложение -->
   <div id="app">
     <div class="header-lang">
-      <div></div> <!-- пустая колонка, чтобы выровнять заголовок слева -->
+      <div class="header">Neurona 1.0</div>
       <div class="lang-select">
         <button data-lang="en">EN</button>
         <button data-lang="ru" class="active">RU</button>
@@ -224,102 +187,107 @@
   </div>
 
   <script>
-    // Canvas animation: нейросеть
-    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+    // Анимация фона (нейросеть)
+    const canvas = document.getElementById('bg'),
+          ctx    = canvas.getContext('2d');
     let W, H, nodes;
     function resize() {
-      W = canvas.width = window.innerWidth;
+      W = canvas.width  = window.innerWidth;
       H = canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize);
     function initNodes() {
       nodes = [];
-      for (let i=0; i<30; i++) nodes.push({
-        x: Math.random()*W, y: Math.random()*H,
-        vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5
-      });
+      for (let i = 0; i < 30; i++) {
+        nodes.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5
+        });
+      }
     }
     function draw() {
       ctx.clearRect(0,0,W,H);
-      for (let i=0; i<nodes.length; i++) {
-        for (let j=i+1; j<nodes.length; j++) {
-          const a=nodes[i], b=nodes[j],
-                dx=a.x-b.x, dy=a.y-b.y,
-                d=Math.hypot(dx,dy);
-          if (d<200) {
-            ctx.strokeStyle = `rgba(255,255,255,${(200-d)/200*0.4})`;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j],
+                dx = a.x - b.x, dy = a.y - b.y,
+                d  = Math.hypot(dx, dy);
+          if (d < 200) {
+            ctx.strokeStyle = `rgba(255,255,255,${(200 - d)/200 * 0.4})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
         }
       }
-      nodes.forEach(n=>{
-        n.x+=n.vx; n.y+=n.vy;
-        if (n.x<0||n.x>W) n.vx*=-1;
-        if (n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(255,255,255,0.8)';
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
         ctx.beginPath();
-        ctx.arc(n.x,n.y,3.5,0,Math.PI*2);
+        ctx.arc(n.x, n.y, 3.5, 0, Math.PI*2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); initNodes(); draw();
 
-    // Локализация интерфейса
+    // Локализация
     const i18n = {
-      en:{placeholder:"Type a message...",send:"Send"},
-      ru:{placeholder:"Напишите сообщение...",send:"Отправить"},
-      ua:{placeholder:"Введіть повідомлення...",send:"Надіслати"}
+      en: { placeholder: "Type a message...", send: "Send" },
+      ru: { placeholder: "Напишите сообщение...", send: "Отправить" },
+      ua: { placeholder: "Введіть повідомлення...", send: "Надіслати" }
     };
     const input = document.getElementById('input'),
           send  = document.getElementById('send');
-    document.querySelectorAll('.lang-select button').forEach(b=>{
-      b.addEventListener('click',()=>{
-        const l=b.dataset.lang;
+    document.querySelectorAll('.lang-select button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const l = btn.dataset.lang;
         input.placeholder = i18n[l].placeholder;
         send.textContent   = i18n[l].send;
         document.querySelectorAll('.lang-select button')
-                .forEach(x=>x.classList.toggle('active',x===b));
+                .forEach(b => b.classList.toggle('active', b === btn));
       });
     });
 
-    // Скрываем клавиатуру при клике вне поля
-    document.body.addEventListener('click', e=>{
+    // Скрытие клавиатуры при клике вне поля
+    document.body.addEventListener('click', e => {
       if (!e.target.closest('.input-area')) input.blur();
     });
 
-    // Показ приложения после 5 секунд
-    window.addEventListener('load',()=> {
-      setTimeout(()=>{
-        document.getElementById('loader').style.display='none';
+    // Запуск интерфейса после 5 секунд
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
-      },5000);
+      }, 5000);
     });
 
-    // Обработка чата
+    // Чат
     const messages = document.getElementById('messages');
-    function addMessage(text, who){
-      const d=document.createElement('div');
-      d.className=`message ${who}`;
-      d.textContent=text;
-      messages.appendChild(d);
+    function addMessage(text, who) {
+      const div = document.createElement('div');
+      div.className = `message ${who}`;
+      div.textContent = text;
+      messages.appendChild(div);
     }
-    send.onclick=async()=>{
-      const txt=input.value.trim();
-      if(!txt) return;
-      addMessage(txt,'user');
-      input.value='';
-      const res=await fetch('/chat',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({message:txt})
+    send.onclick = async () => {
+      const txt = input.value.trim();
+      if (!txt) return;
+      addMessage(txt, 'user');
+      input.value = '';
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: txt })
       });
-      const j=await res.json();
-      addMessage(j.reply,'bot');
+      const j = await res.json();
+      addMessage(j.reply, 'bot');
     };
   </script>
 </body>
