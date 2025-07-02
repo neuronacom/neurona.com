@@ -21,15 +21,27 @@
       position: relative;
     }
 
-    /* Холст для анимации нейросвязей */
+    /* Canvas для анимации нейросвязей (фон) */
     #bg {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      z-index: -1;
+      z-index: 0;
+      opacity: 0.2;            /* тусклее фоновой анимации */
     }
 
-    /* Заставка */
+    /* Постоянный заголовок */
+    .header {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4a90e2;
+      z-index: 2;
+    }
+
+    /* Заставка при загрузке */
     #loader {
       position: fixed;
       inset: 0;
@@ -37,7 +49,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 1001;
     }
     .loader-text {
       font-size: 3rem;
@@ -46,28 +58,29 @@
       animation: fade 3s ease-in-out infinite;
     }
     @keyframes fade {
-      0%, 100% { opacity: 0; }
+      0%,100% { opacity: 0; }
       50%      { opacity: 1; }
     }
 
-    /* Основной контейнер */
+    /* Основное приложение */
     #app {
       display: none;
       flex-direction: column;
       align-items: center;
       width: 100%;
-      max-width: 500px;
+      max-width: 400px;
       height: 100%;
-      padding: 10px;
+      padding: 20px 10px 10px;
+      z-index: 1;
     }
 
-    /* Языковые кнопки в правом верхнем углу */
+    /* Кнопки выбора языка сверху справа */
     .lang-select {
       position: absolute;
       top: 10px;
       right: 10px;
       display: flex;
-      z-index: 10;
+      z-index: 2;
     }
     .lang-select button {
       margin-left: 5px;
@@ -78,6 +91,7 @@
       color: #fff;
       cursor: pointer;
       transition: background 0.2s;
+      font-size: 0.9rem;
     }
     .lang-select button.active,
     .lang-select button:hover {
@@ -93,7 +107,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-top: 40px; /* пространство под языковые кнопки */
+      margin-top: 50px; /* учёт заголовка и кнопок */
     }
     #messages {
       flex: 1;
@@ -129,7 +143,7 @@
       flex: 1;
       resize: none;
       border: none;
-      padding: 10px;
+      padding: 12px;
       border-radius: 4px;
       background: #333;
       color: #fff;
@@ -154,24 +168,27 @@
     /* Адаптивность */
     @media (max-width: 600px) {
       .loader-text { font-size: 2rem; }
-      #app { max-width: 100%; padding: 5px; }
+      #app { max-width: 100%; padding: 15px 5px 5px; }
       #send { font-size: 0.9rem; padding: 0 12px; }
       #input { font-size: 0.9rem; height: 40px; }
     }
   </style>
 </head>
 <body>
-  <!-- Canvas для нейросвязей -->
+  <!-- Фоновая анимация нейросвязей -->
   <canvas id="bg"></canvas>
 
-  <!-- Заставка -->
+  <!-- Постоянный заголовок -->
+  <div class="header">Neurona 1.0</div>
+
+  <!-- Заставка при загрузке -->
   <div id="loader">
     <div class="loader-text">NEURONA 1.0</div>
   </div>
 
-  <!-- Приложение -->
+  <!-- Основное приложение -->
   <div id="app">
-    <!-- Языковые кнопки -->
+    <!-- Выбор языка -->
     <div class="lang-select">
       <button data-lang="en">EN</button>
       <button data-lang="ru" class="active">RU</button>
@@ -211,14 +228,14 @@
     }
     function draw() {
       ctx.clearRect(0,0,W,H);
-      // рисуем связи
+      // связи
       for (let i=0; i<nodes.length; i++) {
         for (let j=i+1; j<nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = a.x-b.x, dy = a.y-b.y;
           const dist = Math.hypot(dx,dy);
           if (dist < 200) {
-            ctx.strokeStyle = 'rgba(74,144,226,'+((200-dist)/200*0.3)+')';
+            ctx.strokeStyle = 'rgba(74,144,226,'+((200-dist)/200*0.2)+')';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x,a.y);
@@ -227,12 +244,12 @@
           }
         }
       }
-      // рисуем узлы
+      // узлы
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy;
         if (n.x<0||n.x>W) n.vx *= -1;
         if (n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = '#4a90e2';
+        ctx.fillStyle = 'rgba(74,144,226,0.6)';
         ctx.beginPath();
         ctx.arc(n.x,n.y,3,0,Math.PI*2);
         ctx.fill();
@@ -243,7 +260,7 @@
     initNodes();
     draw();
 
-    // Загрузка интерфейса
+    // Логика загрузки и чата
     const i18n = {
       en: { placeholder: "Type a message...", send: "Send" },
       ru: { placeholder: "Напишите сообщение...", send: "Отправить" },
@@ -264,6 +281,7 @@
     }
     document.querySelectorAll(".lang-select button")
       .forEach(b => b.addEventListener("click", () => setLanguage(b.dataset.lang)));
+
     window.addEventListener("load", () => {
       setTimeout(() => {
         loader.style.display = "none";
@@ -271,7 +289,6 @@
       }, 5000);
     });
 
-    // Работа чата
     const messages = document.getElementById("messages");
     function addMessage(text, who) {
       const div = document.createElement("div");
