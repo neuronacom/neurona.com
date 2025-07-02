@@ -215,13 +215,13 @@
     }
     langButtons.forEach(btn => btn.addEventListener('click', () => updateLang(btn.dataset.lang)));
 
-    // 3. Прелоадер
+    // 3. Прелоадер (5 секунд)
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 1500);
+      }, 5000);
     });
 
     // 4. История переписки
@@ -242,9 +242,9 @@
       const today = new Date().toLocaleDateString('ru-RU', {
         year:'numeric', month:'long', day:'numeric'
       });
-      const langName = currentLang==='en' ? 'английском'
-                     : currentLang==='ua' ? 'украинском'
-                     : 'русском';
+      const langName = currentLang==='en'?'английском'
+                     : currentLang==='ua'?'украинском'
+                     :'русском';
       return {
         role: 'system',
         content: `Ты — Neurona 1.0, лицензированный AI-продукт.
@@ -273,10 +273,10 @@
     }
 
     // 7. API-ключ и эндпоинт
-    const OPENAI_API_KEY  = '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';
+    const OPENAI_API_KEY  = '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';
     const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
-    // 8. Хелперы для реальных данных
+    // 8. Реальные данные
     async function fetchMarketOverview(){
       const res = await fetch(
         'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&price_change_percentage=24h'
@@ -302,35 +302,35 @@
       const txt = input.value.trim();
       if(!txt) return;
 
-      // если первая — вставляем системное сообщение
-      if(messages.length === 0) {
-        messages.push(getSystemMessage());
-      }
-
-      // добавляем вопрос пользователя
+      if(messages.length === 0) messages.push(getSystemMessage());
       messages.push({ role:'user', content: txt });
       addMessage(txt, 'user');
       input.value = '';
 
       const typingNode = addTyping();
 
-      // собираем свежие данные
-      let marketData = '', cryptoNews = '', globalNews = '';
-      try { (await fetchMarketOverview()).forEach(c => marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`); } catch{}
-      try { (await fetchCryptoNews()).slice(0,5).forEach(n => cryptoNews += `• ${n.title}\n`); } catch{}
-      try { (await fetchGlobalNews()).forEach(a => globalNews += `• ${a.title}\n`); } catch{}
+      let marketData='', cryptoNews='', globalNews='';
+      try { (await fetchMarketOverview()).forEach(c => {
+        marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`;
+      }); } catch{}
+      try { (await fetchCryptoNews()).slice(0,5).forEach(n => {
+        cryptoNews += `• ${n.title}\n`;
+      }); } catch{}
+      try { (await fetchGlobalNews()).forEach(a => {
+        globalNews += `• ${a.title}\n`;
+      }); } catch{}
 
       const snapshot = {
         role: 'system',
         content: `--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---
 Топ-5 криптовалют:
-${marketData || 'нет данных'}
+${marketData||'нет данных'}
 
 Крипто-новости:
-${cryptoNews || 'нет данных'}
+${cryptoNews||'нет данных'}
 
 Мировые новости:
-${globalNews || 'нет данных'}
+${globalNews||'нет данных'}
 --------------------------------`
       };
 
@@ -351,14 +351,13 @@ ${globalNews || 'нет данных'}
         });
         const data = await resp.json();
         const reply = data.choices[0].message.content;
-
         typingNode.remove();
         addMessage(reply, 'bot');
         messages.push({ role:'assistant', content: reply });
         saveHistory();
       } catch(err) {
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте ключи и интернет.', 'bot');
         console.error(err);
       }
     };
