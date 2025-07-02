@@ -81,15 +81,15 @@
     }
     .lang-select button {
       margin-left: 5px;
-      padding: 4px 8px;
+      padding: 4px 8px;            
       background: #4a4a4a;
       border: none;
       border-radius: 4px;
       color: #fff;
-      font-size: 0.8rem;
+      font-size: 0.8rem;           
       cursor: pointer;
       transition: background 0.2s;
-      white-space: nowrap;
+      white-space: nowrap;         
     }
     .lang-select button.active,
     .lang-select button:hover {
@@ -106,7 +106,8 @@
     }
     #messages {
       flex: 1;
-      display: flex; flex-direction: column;
+      display: flex; 
+      flex-direction: column-reverse;  /* сообщения снизу вверх */
       padding: 15px; overflow-y: auto;
     }
     .message {
@@ -139,7 +140,7 @@
       font-size: 1rem; height: 50px;
     }
     #send {
-      flex: none; min-width: 80px;
+      flex: none; min-width: 80px;        
       margin-left: 8px; padding: 0 16px;
       border: none; border-radius: 4px;
       background: #4a90e2; color: #fff;
