@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>NEURONA Chat</title>
   <style>
     /* Сброс */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Фон и центрирование */
+    /* Фоновая сетка нейросвязей */
     body {
       background: #1a1a1a;
       color: #e0e0e0;
@@ -20,28 +20,27 @@
       justify-content: center;
       position: relative;
     }
-
-    /* Canvas для анимации нейросвязей (фон) */
-    #bg {
+    canvas#bg {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: 0;
-      opacity: 0.2;            /* тусклее фоновой анимации */
+      opacity: 0.2; /* тусклее */
     }
 
-    /* Постоянный заголовок */
+    /* Заголовок Neurona 1.0 (скрыт при загрузке) */
     .header {
       position: fixed;
-      top: 10px;
-      left: 10px;
+      top: 10px; left: 10px;
       font-size: 1.2rem;
       font-weight: bold;
-      color: #4a90e2;
+      color: #fff;
       z-index: 2;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
 
-    /* Заставка при загрузке */
+    /* Заставка */
     #loader {
       position: fixed;
       inset: 0;
@@ -54,7 +53,7 @@
     .loader-text {
       font-size: 3rem;
       letter-spacing: 0.2em;
-      color: #4a90e2;
+      color: #fff;
       animation: fade 3s ease-in-out infinite;
     }
     @keyframes fade {
@@ -62,9 +61,16 @@
       50%      { opacity: 1; }
     }
 
-    /* Основное приложение */
+    /* После загрузки — показываем приложение и заголовок */
+    body.loaded .header,
+    body.loaded #app {
+      opacity: 1;
+    }
+
+    /* Основное приложение (скрыто при загрузке) */
     #app {
-      display: none;
+      position: relative;
+      display: flex;
       flex-direction: column;
       align-items: center;
       width: 100%;
@@ -72,13 +78,14 @@
       height: 100%;
       padding: 20px 10px 10px;
       z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
 
-    /* Кнопки выбора языка сверху справа */
+    /* Кнопки выбора языка */
     .lang-select {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 10px; right: 10px;
       display: flex;
       z-index: 2;
     }
@@ -89,16 +96,16 @@
       border: none;
       border-radius: 4px;
       color: #fff;
+      font-size: 0.9rem;
       cursor: pointer;
       transition: background 0.2s;
-      font-size: 0.9rem;
     }
     .lang-select button.active,
     .lang-select button:hover {
       background: #6a6a6a;
     }
 
-    /* Чат */
+    /* Окно чата */
     .chat-container {
       flex: 1;
       width: 100%;
@@ -107,7 +114,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-top: 50px; /* учёт заголовка и кнопок */
+      margin-top: 50px; /* отступ под кнопки/заголовок */
     }
     #messages {
       flex: 1;
@@ -165,8 +172,12 @@
       background: #6ab0ff;
     }
 
-    /* Адаптивность */
+    /* Мобильная адаптация: уже не растягивать окно по полной ширине */
     @media (max-width: 600px) {
+      .chat-container {
+        width: 90%;
+        margin: 0 auto;
+      }
       .loader-text { font-size: 2rem; }
       #app { max-width: 100%; padding: 15px 5px 5px; }
       #send { font-size: 0.9rem; padding: 0 12px; }
@@ -178,13 +189,13 @@
   <!-- Фоновая анимация нейросвязей -->
   <canvas id="bg"></canvas>
 
-  <!-- Постоянный заголовок -->
-  <div class="header">Neurona 1.0</div>
-
-  <!-- Заставка при загрузке -->
+  <!-- Заставка -->
   <div id="loader">
     <div class="loader-text">NEURONA 1.0</div>
   </div>
+
+  <!-- Заголовок (скрыт до конца загрузки) -->
+  <div class="header">Neurona 1.0</div>
 
   <!-- Основное приложение -->
   <div id="app">
@@ -195,7 +206,7 @@
       <button data-lang="ua">UA</button>
     </div>
 
-    <!-- Чат -->
+    <!-- Окно чата -->
     <div class="chat-container">
       <div id="messages"></div>
       <div class="input-area">
@@ -211,7 +222,7 @@
     const ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize() {
-      W = canvas.width  = window.innerWidth;
+      W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize);
@@ -221,46 +232,42 @@
         nodes.push({
           x: Math.random() * W,
           y: Math.random() * H,
-          vx: (Math.random()-0.5)*0.3,
-          vy: (Math.random()-0.5)*0.3
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3
         });
       }
     }
     function draw() {
       ctx.clearRect(0,0,W,H);
-      // связи
-      for (let i=0; i<nodes.length; i++) {
-        for (let j=i+1; j<nodes.length; j++) {
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
-          const dx = a.x-b.x, dy = a.y-b.y;
-          const dist = Math.hypot(dx,dy);
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
           if (dist < 200) {
-            ctx.strokeStyle = 'rgba(74,144,226,'+((200-dist)/200*0.2)+')';
+            ctx.strokeStyle = `rgba(255,255,255,${(200 - dist) / 200 * 0.15})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
         }
       }
-      // узлы
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy;
-        if (n.x<0||n.x>W) n.vx *= -1;
-        if (n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(74,144,226,0.6)';
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
         ctx.beginPath();
-        ctx.arc(n.x,n.y,3,0,Math.PI*2);
+        ctx.arc(n.x, n.y, 3, 0, Math.PI * 2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
     }
-    resize();
-    initNodes();
-    draw();
+    resize(); initNodes(); draw();
 
-    // Логика загрузки и чата
+    // Локализация интерфейса
     const i18n = {
       en: { placeholder: "Type a message...", send: "Send" },
       ru: { placeholder: "Напишите сообщение...", send: "Отправить" },
@@ -268,7 +275,6 @@
     };
     let lang = "ru";
     const loader = document.getElementById('loader');
-    const app    = document.getElementById('app');
     const input  = document.getElementById('input');
     const send   = document.getElementById('send');
 
@@ -282,13 +288,15 @@
     document.querySelectorAll(".lang-select button")
       .forEach(b => b.addEventListener("click", () => setLanguage(b.dataset.lang)));
 
+    // Показываем контент после 5 сек, плавно обнажая интерфейс
     window.addEventListener("load", () => {
       setTimeout(() => {
         loader.style.display = "none";
-        app.style.display    = "flex";
+        document.body.classList.add("loaded");
       }, 5000);
     });
 
+    // Обработка отправки сообщений
     const messages = document.getElementById("messages");
     function addMessage(text, who) {
       const div = document.createElement("div");
