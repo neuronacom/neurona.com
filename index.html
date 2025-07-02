@@ -81,15 +81,15 @@
     }
     .lang-select button {
       margin-left: 5px;
-      padding: 4px 8px;            
+      padding: 4px 8px;
       background: #4a4a4a;
       border: none;
       border-radius: 4px;
       color: #fff;
-      font-size: 0.8rem;           
+      font-size: 0.8rem;
       cursor: pointer;
       transition: background 0.2s;
-      white-space: nowrap;         
+      white-space: nowrap;
     }
     .lang-select button.active,
     .lang-select button:hover {
@@ -108,10 +108,6 @@
       flex: 1;
       display: flex; flex-direction: column;
       padding: 15px; overflow-y: auto;
-    }
-    /* при отправке — скролл вниз */
-    #messages.scrolled {
-      justify-content: flex-end;
     }
     .message {
       margin: 5px 0;
@@ -143,7 +139,7 @@
       font-size: 1rem; height: 50px;
     }
     #send {
-      flex: none; min-width: 80px;        
+      flex: none; min-width: 80px;
       margin-left: 8px; padding: 0 16px;
       border: none; border-radius: 4px;
       background: #4a90e2; color: #fff;
@@ -159,6 +155,10 @@
       .loader-text { font-size: 2.5rem; }
       #input { font-size: 0.9rem; height: 40px; }
       #send { font-size: 0.9rem; padding: 0 12px; }
+
+      /* На моб версии: смещаем заголовок чуть правее и кнопки чуть левее */
+      .header { margin-left: 20px; }
+      .lang-select { margin-right: 20px; }
     }
   </style>
 </head>
@@ -182,7 +182,7 @@
       </div>
     </div>
     <div class="chat-container">
-      <div id="messages" class="scrolled"></div>
+      <div id="messages"></div>
       <div class="input-area">
         <textarea id="input" placeholder="Напишите сообщение..."></textarea>
         <button id="send">Отправить</button>
@@ -197,30 +197,43 @@
     let W,H,nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize',resize);
-    function init(){ nodes=[]; for(let i=0;i<30;i++) nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5}); }
+    function init(){ nodes=[]; for(let i=0;i<30;i++) nodes.push({
+        x:Math.random()*W,y:Math.random()*H,
+        vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5
+      }); }
     function draw(){
       ctx.clearRect(0,0,W,H);
-      for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
-        const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
-        if(d<200){
-          ctx.strokeStyle=`rgba(255,255,255,${(200-d)/200*0.4})`;
-          ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      for(let i=0;i<nodes.length;i++)
+        for(let j=i+1;j<nodes.length;j++){
+          const a=nodes[i],b=nodes[j],
+                dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+          if(d<200){
+            ctx.strokeStyle=`rgba(255,255,255,${(200-d)/200*0.4})`;
+            ctx.lineWidth=1;ctx.beginPath();
+            ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+          }
         }
-      }
-      nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(n.x,n.y,3.5,0,6.28);ctx.fill();});
+      nodes.forEach(n=>{
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        ctx.fillStyle='rgba(255,255,255,0.8)';
+        ctx.beginPath();ctx.arc(n.x,n.y,3.5,0,6.28);ctx.fill();
+      });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
     // Локализация
     const i18n={en:{ph:"Type a message...",send:"Send"},ru:{ph:"Напишите сообщение...",send:"Отправить"},ua:{ph:"Введіть повідомлення...",send:"Надіслати"}};
-    const input=document.getElementById('input'),sendBtn=document.getElementById('send');
-    document.querySelectorAll('.lang-select button').forEach(b=>{
-      b.addEventListener('click',()=>{
-        const l=b.dataset.lang;
+    const input=document.getElementById('input'), sendBtn=document.getElementById('send');
+    document.querySelectorAll('.lang-select button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const l=btn.dataset.lang;
         input.placeholder=i18n[l].ph;
         sendBtn.textContent=i18n[l].send;
-        document.querySelectorAll('.lang-select button').forEach(x=>x.classList.toggle('active',x===b));
+        document.querySelectorAll('.lang-select button')
+                .forEach(b=>b.classList.toggle('active',b===btn));
       });
     });
 
@@ -239,15 +252,17 @@
     const messages=document.getElementById('messages');
     function addMessage(text,who){
       const d=document.createElement('div');
-      d.className=`message ${who}`;
-      d.textContent=text;
+      d.className=`message ${who}`; d.textContent=text;
       messages.appendChild(d);
       messages.scrollTop=messages.scrollHeight;
     }
     sendBtn.onclick=async()=>{
       const txt=input.value.trim(); if(!txt) return;
       addMessage(txt,'user'); input.value='';
-      const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:txt})});
+      const res=await fetch('/chat',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:txt})
+      });
       const j=await res.json();
       addMessage(j.reply,'bot');
     };
