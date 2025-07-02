@@ -196,23 +196,24 @@
     }
     resize(); init(); draw();
 
-    // 2. Локализация
+    // 2. Локализация и переключение языка
     const i18n = {
       en: { ph:"Type a message...", send:"Send" },
       ru: { ph:"Напишите сообщение...", send:"Отправить" },
       ua: { ph:"Введіть повідомлення...", send:"Надіслати" }
     };
+    let currentLang = 'ru';
     const input = document.getElementById('input'),
-          sendBtn = document.getElementById('send');
-    document.querySelectorAll('.lang-select button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const l = btn.dataset.lang;
-        input.placeholder = i18n[l].ph;
-        sendBtn.textContent = i18n[l].send;
-        document.querySelectorAll('.lang-select button')
-          .forEach(b => b.classList.toggle('active', b===btn));
-      });
-    });
+          sendBtn = document.getElementById('send'),
+          langButtons = document.querySelectorAll('.lang-select button');
+
+    function updateLang(lang){
+      currentLang = lang;
+      input.placeholder = i18n[lang].ph;
+      sendBtn.textContent = i18n[lang].send;
+      langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    }
+    langButtons.forEach(btn => btn.addEventListener('click', () => updateLang(btn.dataset.lang)));
 
     // 3. Прелоадер
     window.addEventListener('load', () => {
@@ -223,7 +224,7 @@
       }, 1500);
     });
 
-    // 4. Память диалога в localStorage
+    // 4. История переписки
     let messages = [];
     function saveHistory(){
       localStorage.setItem('neurona_history', JSON.stringify(messages));
@@ -236,19 +237,21 @@
       }
     }
 
-    // 5. Системный блок с персоной и датой
-    function getBaseMessages(){
-      const today = new Date();
-      const datestr = today.toLocaleDateString('ru-RU', { year:'numeric', month:'long', day:'numeric' });
-      const lang = document.querySelector('.lang-select .active').dataset.lang;
-      const langName = lang==='en'?'English': lang==='ua'?'украинском':'русском';
-      return [{
+    // 5. Системное сообщение
+    function getSystemMessage(){
+      const today = new Date().toLocaleDateString('ru-RU', {
+        year:'numeric', month:'long', day:'numeric'
+      });
+      const langName = currentLang==='en' ? 'английском'
+                     : currentLang==='ua' ? 'украинском'
+                     : 'русском';
+      return {
         role: 'system',
-        content: `Ты — лицензированный продукт Neurona 1.0, самая продвинутая AI-система.
-Твой создатель — Ткачук Игорь Витальевич, известный бизнесмен и филантроп.
-Сегодня ${datestr}.
-Ты отвечаешь на языке ${langName}.`
-      }];
+        content: `Ты — Neurona 1.0, лицензированный AI-продукт.
+Сегодня ${today}.
+Ты отвечаешь на ${langName} языке.
+Отвечай всегда красиво, развернуто и не шаблонно.`
+      };
     }
 
     // 6. Отображение сообщений
@@ -269,74 +272,93 @@
       return d;
     }
 
-    // 7. Работа с API OpenAI и вспомогательные команды
-    const API_KEY = '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';
+    // 7. API-ключ и эндпоинт
+    const OPENAI_API_KEY  = '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';
+    const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
+    // 8. Хелперы для реальных данных
+    async function fetchMarketOverview(){
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&price_change_percentage=24h'
+      );
+      return res.json();
+    }
+    async function fetchCryptoNews(){
+      const res = await fetch(
+        `https://cryptocontrol.io/api/v1/public/news?language=${currentLang}&key=YOUR_CRYPTO_NEWS_API_KEY`
+      );
+      return res.json();
+    }
+    async function fetchGlobalNews(){
+      const res = await fetch(
+        `https://newsapi.org/v2/top-headlines?language=${currentLang}&pageSize=5&apiKey=YOUR_GLOBAL_NEWS_API_KEY`
+      );
+      const json = await res.json();
+      return json.articles || [];
+    }
+
+    // 9. Обработка отправки
     sendBtn.onclick = async () => {
       const txt = input.value.trim();
       if(!txt) return;
 
-      // Инициализация истории
-      if(messages.length === 0) messages = getBaseMessages();
+      // если первая — вставляем системное сообщение
+      if(messages.length === 0) {
+        messages.push(getSystemMessage());
+      }
 
-      // Запись сообщения пользователя
+      // добавляем вопрос пользователя
       messages.push({ role:'user', content: txt });
       addMessage(txt, 'user');
       input.value = '';
 
-      // Спец-команды
-      if(txt.startsWith('/wiki ')){
-        const term = encodeURIComponent(txt.slice(6));
-        const summary = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${term}`)
-          .then(r => r.json())
-          .then(j => j.extract || 'Ничего не найдено');
-        addMessage(summary, 'bot');
-        messages.push({ role:'assistant', content: summary });
-        saveHistory();
-        return;
-      }
-      if(txt.trim() === '/news'){
-        addMessage('Загрузка новостей…', 'bot');
-        addMessage('Для новостей подключите свой News API и реализуйте fetch("/news")', 'bot');
-        saveHistory();
-        return;
-      }
-      if(txt.startsWith('/crypto ')){
-        const id = encodeURIComponent(txt.slice(8));
-        const price = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`)
-          .then(r => r.json())
-          .then(j => j[id]?.usd ? `Цена ${id}: $${j[id].usd}` : 'Не найдено');
-        addMessage(price, 'bot');
-        messages.push({ role:'assistant', content: price });
-        saveHistory();
-        return;
-      }
-
-      // Показ “печатает…”
       const typingNode = addTyping();
 
+      // собираем свежие данные
+      let marketData = '', cryptoNews = '', globalNews = '';
+      try { (await fetchMarketOverview()).forEach(c => marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`); } catch{}
+      try { (await fetchCryptoNews()).slice(0,5).forEach(n => cryptoNews += `• ${n.title}\n`); } catch{}
+      try { (await fetchGlobalNews()).forEach(a => globalNews += `• ${a.title}\n`); } catch{}
+
+      const snapshot = {
+        role: 'system',
+        content: `--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---
+Топ-5 криптовалют:
+${marketData || 'нет данных'}
+
+Крипто-новости:
+${cryptoNews || 'нет данных'}
+
+Мировые новости:
+${globalNews || 'нет данных'}
+--------------------------------`
+      };
+
+      const payload = {
+        model: 'gpt-4',
+        messages: [ messages[0], snapshot, ...messages.slice(1) ],
+        temperature: 0.7
+      };
+
       try {
-        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        const resp = await fetch(OPENAI_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
           },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages,
-            temperature: 0.7
-          })
+          body: JSON.stringify(payload)
         });
         const data = await resp.json();
         const reply = data.choices[0].message.content;
+
         typingNode.remove();
         addMessage(reply, 'bot');
         messages.push({ role:'assistant', content: reply });
         saveHistory();
-      } catch(err){
+      } catch(err) {
         typingNode.remove();
-        addMessage('Ошибка соединения с OpenAI.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.', 'bot');
         console.error(err);
       }
     };
