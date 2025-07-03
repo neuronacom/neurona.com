@@ -60,10 +60,10 @@
     .loader-content {
       display: flex;
       align-items: center;
-      animation: fade 6s ease-in-out infinite;
+      animation: fade 8s ease-in-out infinite;
     }
     .loader-logo {
-      width: 80px;
+      width: 100px;
       height: auto;
       margin-right: 12px;
     }
@@ -73,19 +73,19 @@
       align-items: center;
     }
     .loader-title {
-      font-size: 3rem;
+      font-size: 4rem;
       letter-spacing: 0.1em;
       color: #000000;
     }
     .loader-subtitle {
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       letter-spacing: 0.05em;
       color: #000000;
       margin-top: 4px;
     }
     @keyframes fade {
       0%, 100% { opacity: 0; }
-      50% { opacity: 1; }
+      50%      { opacity: 1; }
     }
 
     /* Основное приложение */
@@ -196,14 +196,14 @@
         margin: 0 auto;
       }
       .loader-logo {
-        width: 60px;
+        width: 80px;
         margin-right: 8px;
       }
       .loader-title {
-        font-size: 2.5rem;
+        font-size: 3rem;
       }
       .loader-subtitle {
-        font-size: 1rem;
+        font-size: 1.2rem;
       }
       #input {
         font-size: 0.9rem;
@@ -264,6 +264,8 @@
       }
     }
     function draw() {
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.clearRect(0, 0, W, H);
       nodes.forEach((a, i) => {
         nodes.slice(i + 1).forEach(b => {
@@ -271,7 +273,7 @@
                 dy = a.y - b.y,
                 d  = Math.hypot(dx, dy);
           if (d < 200) {
-            ctx.strokeStyle = `rgba(0,0,0,${(200 - d)/200 * 0.8})`;
+            ctx.strokeStyle = `rgba(0,0,0,${(200 - d) / 200})`;
             ctx.lineWidth   = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -287,7 +289,7 @@
         if (n.y < 0 || n.y > H) n.vy *= -1;
         ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 3.5, 0, Math.PI*2);
+        ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
@@ -298,7 +300,7 @@
     const i18n = {
       en: { ph: "Type a message...", send: "Send" },
       ru: { ph: "Напишите сообщение...", send: "Отправить" },
-      ua:{ ph: "Введіть повідомлення...", send: "Надіслати" }
+      ua: { ph: "Введіть повідомлення...", send: "Надіслати" }
     };
     let currentLang = 'ru';
     const input   = document.getElementById('input'),
@@ -309,13 +311,13 @@
       sendBtn.textContent = i18n[lang].send;
     }
 
-    // 3. Прелоадер (6 секунд)
+    // 3. Прелоадер (8 секунд)
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 6000);
+      }, 8000);
     });
 
     // 4. История переписки
@@ -333,7 +335,11 @@
 
     // 5. Системное сообщение
     function getSystemMessage() {
-      const today = new Date().toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+      const today = new Date().toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
       const langName = currentLang === 'en' ? 'английском'
                      : currentLang === 'ua' ? 'украинском'
                      : 'русском';
@@ -398,11 +404,13 @@
           marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`;
         });
       } catch {}
+
       try {
         (await fetchCryptoNews()).slice(0, 5).forEach(n => {
           cryptoNews += `• ${n.title}\n`;
         });
       } catch {}
+
       try {
         (await fetchGlobalNews()).forEach(a => {
           globalNews += `• ${a.title}\n`;
