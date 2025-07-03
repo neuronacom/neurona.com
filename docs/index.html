@@ -10,8 +10,8 @@
 
     /* Фон и центрирование */
     body {
-      background: #1a1a1a;
-      color: #e0e0e0;
+      background: #ffffff;        /* белый фон */
+      color: #000000;             /* чёрный текст */
       font-family: sans-serif;
       height: 100vh;
       overflow: hidden;
@@ -34,14 +34,14 @@
     /* Заставка */
     #loader {
       position: fixed; inset: 0;
-      background: rgba(26,26,26,0.9);
+      background: rgba(255,255,255,0.9);  /* светлый фон */
       display: flex; align-items: center; justify-content: center;
       z-index: 1001;
     }
     .loader-text {
       font-size: 3rem;
       letter-spacing: 0.2em;
-      color: #fff;
+      color: #000000;                     /* чёрный текст */
       animation: fade 5s ease-in-out infinite;
     }
     @keyframes fade {
@@ -67,22 +67,22 @@
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 10px;
     }
-    .header { font-size: 1.2rem; font-weight: bold; color: #fff; }
+    .header { font-size: 1.2rem; font-weight: bold; color: #000000; }
     .lang-select button {
       margin-left: 5px; padding: 4px 8px;
-      background: #4a4a4a; border: none; border-radius: 4px;
-      color: #fff; font-size: 0.8rem; cursor: pointer;
+      background: #dddddd; border: none; border-radius: 4px;
+      color: #000000; font-size: 0.8rem; cursor: pointer;
       transition: background 0.2s;
     }
     .lang-select button.active,
     .lang-select button:hover {
-      background: #6a6a6a;
+      background: #bbbbbb;
     }
 
     /* Окно чата */
     .chat-container {
       flex: 1;
-      background: rgba(43,43,43,0.9);
+      background: rgba(255,255,255,0.9);
       border-radius: 8px;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -95,38 +95,41 @@
     .message {
       margin: 5px 0; line-height: 1.4; max-width: 80%;
       word-wrap: break-word; padding: 8px 12px; border-radius: 12px;
+      color: #000000;
     }
     .message.user {
-      align-self: flex-end; background: #3a3a3a;
+      align-self: flex-end;
+      background: #f0f0f0;
       border-radius: 12px 12px 0 12px;
     }
     .message.bot {
-      align-self: flex-start; background: #444;
+      align-self: flex-start;
+      background: #e0e0e0;
       border-radius: 12px 12px 12px 0;
     }
     .message.typing {
-      font-style: italic; color: #999;
+      font-style: italic; color: #666666;
     }
 
     /* Поле ввода */
     .input-area {
       display: flex; padding: 10px;
-      background: #1f1f1f;
+      background: #ffffff;
     }
     #input {
-      flex: 1; resize: none; border: none;
+      flex: 1; resize: none; border: 1px solid #cccccc;
       padding: 12px; border-radius: 4px;
-      background: #333; color: #fff;
+      background: #ffffff; color: #000000;
       font-size: 1rem; height: 50px;
     }
     #send {
       margin-left: 8px; padding: 0 16px;
       border: none; border-radius: 4px;
-      background: #4a90e2; color: #fff;
+      background: #444444; color: #ffffff;
       font-size: 1rem; cursor: pointer;
       transition: background 0.2s;
     }
-    #send:hover { background: #6ab0ff; }
+    #send:hover { background: #666666; }
 
     /* Адаптивность */
     @media (max-width: 600px) {
@@ -163,34 +166,47 @@
 
   <script>
     // 1. Анимация фона
-    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('bg'),
+          ctx    = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ nodes = []; for(let i=0; i<30; i++) nodes.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      vx: (Math.random()-.5)*.5,
-      vy: (Math.random()-.5)*.5
-    }); }
+    function init(){
+      nodes = [];
+      for(let i=0; i<30; i++){
+        nodes.push({
+          x: Math.random()*W,
+          y: Math.random()*H,
+          vx: (Math.random()-.5)*.5,
+          vy: (Math.random()-.5)*.5
+        });
+      }
+    }
     function draw(){
       ctx.clearRect(0,0,W,H);
       nodes.forEach((a,i) => {
         nodes.slice(i+1).forEach(b => {
-          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx,dy);
+          const dx = a.x - b.x, dy = a.y - b.y,
+                d  = Math.hypot(dx,dy);
           if(d < 200){
-            ctx.strokeStyle = `rgba(255,255,255,${(200-d)/200*0.4})`;
-            ctx.lineWidth = 1; ctx.beginPath();
-            ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+            ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;  // чёрные линии
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x,a.y);
+            ctx.lineTo(b.x,b.y);
+            ctx.stroke();
           }
         });
       });
       nodes.forEach(n => {
-        n.x += n.vx; n.y += n.vy;
+        n.x += n.vx;
+        n.y += n.vy;
         if(n.x<0||n.x>W) n.vx *= -1;
         if(n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,6.28); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';                     // чёрные точки
+        ctx.beginPath();
+        ctx.arc(n.x,n.y,3.5,0,6.28);
+        ctx.fill();
       });
       requestAnimationFrame(draw);
     }
@@ -203,10 +219,9 @@
       ua: { ph:"Введіть повідомлення...", send:"Надіслати" }
     };
     let currentLang = 'ru';
-    const input = document.getElementById('input'),
-          sendBtn = document.getElementById('send'),
+    const input       = document.getElementById('input'),
+          sendBtn     = document.getElementById('send'),
           langButtons = document.querySelectorAll('.lang-select button');
-
     function updateLang(lang){
       currentLang = lang;
       input.placeholder = i18n[lang].ph;
@@ -310,15 +325,21 @@
       const typingNode = addTyping();
 
       let marketData='', cryptoNews='', globalNews='';
-      try { (await fetchMarketOverview()).forEach(c => {
-        marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`;
-      }); } catch{}
-      try { (await fetchCryptoNews()).slice(0,5).forEach(n => {
-        cryptoNews += `• ${n.title}\n`;
-      }); } catch{}
-      try { (await fetchGlobalNews()).forEach(a => {
-        globalNews += `• ${a.title}\n`;
-      }); } catch{}
+      try {
+        (await fetchMarketOverview()).forEach(c => {
+          marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`;
+        });
+      } catch{}
+      try {
+        (await fetchCryptoNews()).slice(0,5).forEach(n => {
+          cryptoNews += `• ${n.title}\n`;
+        });
+      } catch{}
+      try {
+        (await fetchGlobalNews()).forEach(a => {
+          globalNews += `• ${a.title}\n`;
+        });
+      } catch{}
 
       const snapshot = {
         role: 'system',
