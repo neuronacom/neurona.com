@@ -169,16 +169,23 @@
     let W, H, nodes;
     function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ nodes = []; for(let i=0;i<30;i++) nodes.push({
-        x: Math.random()*W, y: Math.random()*H,
-        vx: (Math.random()-.5)*.5, vy: (Math.random()-.5)*.5
-    }); }
+    function init(){ 
+      nodes = []; 
+      for(let i=0; i<30; i++){
+        nodes.push({
+          x: Math.random()*W,
+          y: Math.random()*H,
+          vx: (Math.random()-.5)*.5,
+          vy: (Math.random()-.5)*.5
+        });
+      }
+    }
     function draw(){
       ctx.clearRect(0,0,W,H);
       nodes.forEach((a,i)=>{
         nodes.slice(i+1).forEach(b=>{
-          const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
-          if(d<200){
+          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx,dy);
+          if(d < 200){
             ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;
             ctx.beginPath();
             ctx.moveTo(a.x,a.y);
@@ -188,27 +195,28 @@
         });
       });
       nodes.forEach(n=>{
-        n.x+=n.vx; n.y+=n.vy;
-        if(n.x<0||n.x>W) n.vx*=-1;
-        if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(0,0,0,0.8)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,6.28); ctx.fill();
+        n.x += n.vx; n.y += n.vy;
+        if(n.x<0||n.x>W) n.vx *= -1;
+        if(n.y<0||n.y>H) n.vy *= -1;
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.beginPath();
+        ctx.arc(n.x,n.y,3.5,0,6.28);
+        ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // 2. Локализация
+    // 2. Локализация и переключение языка
     const i18n = {
       en: { ph:"Type a message...", send:"Send" },
       ru: { ph:"Напишите сообщение...", send:"Отправить" },
-      ua:{ ph:"Введіть повідомлення...", send:"Надіслати" }
+      ua: { ph:"Введіть повідомлення...", send:"Надіслати" }
     };
     let currentLang = 'ru';
-    const input = document.getElementById('input'),
-          sendBtn = document.getElementById('send');
+    const input = document.getElementById('input'), sendBtn = document.getElementById('send');
     document.querySelectorAll('.lang-select button').forEach(btn=>{
-      btn.addEventListener('click',()=>{
+      btn.addEventListener('click', ()=>{
         document.querySelectorAll('.lang-select button').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
         currentLang = btn.dataset.lang;
@@ -218,97 +226,111 @@
     });
 
     // 3. Прелоадер
-    window.addEventListener('load',()=>{
+    window.addEventListener('load', ()=>{
       setTimeout(()=>{
-        document.getElementById('loader').style.display='none';
+        document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
         loadHistory();
-      },5000);
+      }, 5000);
     });
 
-    // 4. История
+    // 4. История переписки
     let messages = [];
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){ messages = h; h.forEach(m=>addMessage(m.content, m.role)); }
+      if(h.length){
+        messages = h;
+        h.forEach(m => addMessage(m.content, m.role));
+      }
     }
 
     // 5. Системное сообщение
     function getSystemMessage(){
-      const today = new Date().toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'});
-      const langName = currentLang==='en'?'английском': currentLang==='ua'?'украинском':'русском';
+      const today = new Date().toLocaleDateString('ru-RU', { year:'numeric', month:'long', day:'numeric' });
+      const langName = currentLang==='en' ? 'английском'
+                     : currentLang==='ua' ? 'украинском'
+                     : 'русском';
       return {
-        role:'system',
-        content:`Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${langName} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
+        role: 'system',
+        content: `Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${langName} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
       };
     }
 
-    // 6. Отображение
+    // 6. Отображение сообщений
     const msgsContainer = document.getElementById('messages');
     function addMessage(text, who){
-      const d=document.createElement('div');
-      d.className=`message ${who}`;
-      d.textContent=text;
+      const d = document.createElement('div');
+      d.className = `message ${who}`;
+      d.textContent = text;
       msgsContainer.appendChild(d);
-      msgsContainer.scrollTop=msgsContainer.scrollHeight;
+      msgsContainer.scrollTop = msgsContainer.scrollHeight;
     }
     function addTyping(){
-      const d=document.createElement('div');
-      d.className='message bot typing'; d.textContent='...';
+      const d = document.createElement('div');
+      d.className = 'message bot typing';
+      d.textContent = '...';
       msgsContainer.appendChild(d);
-      msgsContainer.scrollTop=msgsContainer.scrollHeight;
+      msgsContainer.scrollTop = msgsContainer.scrollHeight;
       return d;
     }
 
-    // 7. AI21 API (универсальный endpoint)
-    const AI21_API_KEY = '8cc7c618-bdf5-41ea-9bd6-5b45fe1de6b4',
-          AI21_ENDPOINT = 'https://api.ai21.com/studio/v1/complete';
+    // 7. AI21 API — модельный endpoint
+    const AI21_API_KEY  = '8cc7c618-bdf5-41ea-9bd6-5b45fe1de6b4';
+    const AI21_ENDPOINT = 'https://api.ai21.com/studio/v1/j1-jumbo/complete';
 
-    // 8. Обработка отправки
-    sendBtn.onclick = async ()=>{
+    // 8. Отправка запроса и обработка ответа
+    sendBtn.onclick = async () => {
       const txt = input.value.trim();
-      if(!txt) return;
-      if(messages.length===0) messages.push(getSystemMessage());
-      messages.push({role:'user', content: txt});
-      addMessage(txt,'user');
-      input.value='';
+      if (!txt) return;
+
+      if (messages.length === 0) messages.push(getSystemMessage());
+      messages.push({ role:'user', content: txt });
+      addMessage(txt, 'user');
+      input.value = '';
       const typingNode = addTyping();
 
-      // Формируем единый prompt
-      const prompt = messages.map(m=>{
-        const tag = m.role==='system'?'[SYSTEM]': m.role==='user'?'[USER]':'[AI]';
+      // Собираем prompt из истории
+      const prompt = messages.map(m => {
+        const tag = m.role==='system' ? '[SYSTEM]'
+                  : m.role==='user'   ? '[USER]'
+                  : '[AI]';
         return `${tag} ${m.content}`;
       }).join('\n') + '\n[AI]';
 
       try {
-        const res = await fetch(AI21_ENDPOINT, {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
+        const resp = await fetch(AI21_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${AI21_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'j1-jumbo',
-            prompt,
-            numResults:1,
-            maxTokens:512,
-            temperature:0.7,
-            topKReturn:0,
-            topP:1.0,
-            stopSequences:['[USER]','[AI]','[SYSTEM]']
+            prompt: prompt,
+            numResults: 1,
+            maxTokens: 512,
+            temperature: 0.7,
+            topKReturn: 0,
+            topP: 1.0,
+            stopSequences: ['[USER]','[AI]','[SYSTEM]']
           })
         });
-        const json = await res.json();
-        const reply = json.completions[0].data.text.trim();
+
+        if (!resp.ok) throw new Error(`AI21 returned ${resp.status}`);
+        const json = await resp.json();
+        const comp = json.completions;
+        if (!comp || !comp.length) throw new Error('Empty completions array');
+
+        const reply = comp[0].data.text.trim();
         typingNode.remove();
-        addMessage(reply,'bot');
-        messages.push({role:'assistant', content: reply});
+        addMessage(reply, 'bot');
+        messages.push({ role:'assistant', content: reply });
         saveHistory();
-      } catch(e){
+
+      } catch (err) {
+        console.error(err);
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.','bot');
-        console.error(e);
+        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.', 'bot');
       }
     };
   </script>
