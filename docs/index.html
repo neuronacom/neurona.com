@@ -13,92 +13,83 @@
       display: flex; align-items: center; justify-content: center;
       position: relative;
     }
-    #bg {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0; opacity: 0.8;
-      transition: opacity 1s ease;
-    }
-    body.loaded #bg { opacity: 0.2; }
+    #bg { position: fixed; top:0; left:0; width:100%; height:100%;
+      z-index:0; opacity:0.8; transition:opacity 1s ease; }
+    body.loaded #bg { opacity:0.2; }
     #loader {
-      position: fixed; inset: 0;
+      position: fixed; inset:0;
       background: rgba(255,255,255,0.9);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1001;
+      z-index:1001;
     }
     .loader-text {
-      font-size: 3rem; letter-spacing: .2em; color: #000;
+      font-size:3rem; letter-spacing:.2em; color:#000;
       animation: fade 5s ease-in-out infinite;
     }
-    @keyframes fade { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
+    @keyframes fade { 0%,100%{opacity:0} 50%{opacity:1} }
     #app {
-      position: relative; display: flex; flex-direction: column;
-      width: 100%; max-width: 600px; height: 100%;
-      padding: 20px 10px 10px; z-index: 1;
-      opacity: 0; transition: opacity 1s ease;
+      position: relative; display:flex; flex-direction:column;
+      width:100%; max-width:600px; height:100%;
+      padding:20px 10px 10px; z-index:1;
+      opacity:0; transition:opacity 1s ease;
     }
-    body.loaded #app { opacity: 1 }
+    body.loaded #app { opacity:1 }
     .header-lang {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:10px;
     }
     .lang-select button {
-      margin-left: 5px; padding: 4px 8px;
-      border: 1px solid #444; background: #fff;
-      cursor: pointer;
+      margin-left:5px; padding:4px 8px; border:1px solid #444;
+      background:#fff; cursor:pointer;
     }
     .lang-select button.active {
-      background: #444; color: #fff;
+      background:#444; color:#fff;
     }
     .chat-container {
-      flex: 1;
-      background: rgba(255,255,255,0.9);
-      border-radius: 8px; border: 1px solid #ccc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column; overflow: hidden;
+      flex:1; background:rgba(255,255,255,0.9);
+      border-radius:8px; border:1px solid #ccc;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      display:flex; flex-direction:column; overflow:hidden;
     }
     #messages {
-      flex: 1; display: flex; flex-direction: column;
-      padding: 15px; overflow-y: auto;
+      flex:1; display:flex; flex-direction:column;
+      padding:15px; overflow-y:auto;
     }
     .message {
-      margin: 5px 0; line-height: 1.4; max-width: 80%;
-      word-wrap: break-word; padding: 8px 12px; border-radius: 12px;
-      color: #000;
+      margin:5px 0; line-height:1.4; max-width:80%;
+      word-wrap:break-word; padding:8px 12px; border-radius:12px;
+      color:#000;
     }
     .message.user {
-      align-self: flex-end; background: #f0f0f0;
-      border-radius: 12px 12px 0 12px;
+      align-self:flex-end; background:#f0f0f0;
+      border-radius:12px 12px 0 12px;
     }
     .message.bot {
-      align-self: flex-start; background: #e0e0e0;
-      border-radius: 12px 12px 12px 0;
+      align-self:flex-start; background:#e0e0e0;
+      border-radius:12px 12px 12px 0;
     }
     .message.typing {
-      font-style: italic; color: #666;
+      font-style:italic; color:#666;
     }
     .input-area {
-      display: flex; padding: 10px; background: #fff;
+      display:flex; padding:10px; background:#fff;
     }
     #input {
-      flex: 1; resize: none; border: 1px solid #ccc;
-      padding: 12px; border-radius: 4px;
-      background: #fff; color: #000;
-      font-size: 1rem; height: 50px;
+      flex:1; resize:none; border:1px solid #ccc;
+      padding:12px; border-radius:4px; background:#fff; color:#000;
+      font-size:1rem; height:50px;
     }
     #send {
-      margin-left: 8px; padding: 0 16px;
-      border: none; border-radius: 4px;
-      background: #444; color: #fff;
-      font-size: 1rem; cursor: pointer;
-      transition: background 0.2s ease;
+      margin-left:8px; padding:0 16px; border:none;
+      border-radius:4px; background:#444; color:#fff;
+      font-size:1rem; cursor:pointer; transition:background .2s;
     }
-    #send:hover { background: #666 }
-    @media (max-width: 600px) {
-      #app { padding: 15px 5px 5px }
-      .loader-text { font-size: 2.5rem }
-      #input { font-size: .9rem; height: 40px }
-      #send { font-size: .9rem; padding: 0 12px }
+    #send:hover { background:#666 }
+    @media (max-width:600px) {
+      #app { padding:15px 5px 5px }
+      .loader-text { font-size:2.5rem }
+      #input { font-size:.9rem; height:40px }
+      #send { font-size:.9rem; padding:0 12px }
     }
   </style>
 </head>
@@ -124,117 +115,103 @@
   </div>
 
   <script>
-    // 1. Фон
+    // ============== ФОН ==============
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
-    let W, H, nodes;
-    function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    let W,H,nodes;
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init() {
-      nodes = [];
-      for (let i = 0; i < 30; i++) {
-        nodes.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          vx: (Math.random() - .5) * .5,
-          vy: (Math.random() - .5) * .5
-        });
-      }
-    }
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      nodes.forEach((a, i) => {
-        nodes.slice(i + 1).forEach(b => {
-          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
-          if (d < 200) {
-            ctx.strokeStyle = `rgba(0,0,0,${(200 - d) / 200 * 0.4})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        });
-      });
-      nodes.forEach(n => {
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < 0 || n.x > W) n.vx *= -1;
-        if (n.y < 0 || n.y > H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
-        ctx.fill();
+    function init(){ nodes=[]; for(let i=0;i<30;i++) nodes.push({
+      x:Math.random()*W, y:Math.random()*H,
+      vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5
+    }); }
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      nodes.forEach((a,i)=>nodes.slice(i+1).forEach(b=>{
+        const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<200){
+          ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.4})`;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }));
+      nodes.forEach(n=>{
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        ctx.fillStyle='rgba(0,0,0,0.8)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // 2. Локализация
+    // ============== ЛОКАЛИЗАЦИЯ ==============
     const i18n = {
-      en: { ph: "Type a message...", send: "Send" },
-      ru: { ph: "Напишите сообщение...", send: "Отправить" },
-      ua: { ph: "Введіть повідомлення...", send: "Надіслати" }
+      en:{ph:"Type a message...",send:"Send"},
+      ru:{ph:"Напишите сообщение...",send:"Отправить"},
+      ua:{ph:"Введіть повідомлення...",send:"Надіслати"}
     };
-    let currentLang = 'ru';
-    const input = document.getElementById('input'), sendBtn = document.getElementById('send');
-    document.querySelectorAll('.lang-select button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.lang-select button').forEach(b => b.classList.remove('active'));
+    let currentLang='ru';
+    const input=document.getElementById('input'), sendBtn=document.getElementById('send');
+    document.querySelectorAll('.lang-select button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.lang-select button').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        currentLang = btn.dataset.lang;
-        input.placeholder = i18n[currentLang].ph;
-        sendBtn.textContent = i18n[currentLang].send;
+        currentLang=btn.dataset.lang;
+        input.placeholder=i18n[currentLang].ph;
+        sendBtn.textContent=i18n[currentLang].send;
       });
     });
 
-    // 3. Прелоадер
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('loader').style.display = 'none';
+    // ============== ПРЕЛОАДЕР ==============
+    window.addEventListener('load',()=>{
+      setTimeout(()=>{
+        document.getElementById('loader').style.display='none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 5000);
+      },5000);
     });
 
-    // 4. История
-    let messages = [];
-    function saveHistory() { localStorage.setItem('neurona_history', JSON.stringify(messages)); }
-    function loadHistory() {
-      const h = JSON.parse(localStorage.getItem('neurona_history') || '[]');
-      if (h.length) messages = h, h.forEach(m => addMessage(m.content, m.role));
+    // ============== ИСТОРИЯ ==============
+    let messages=[];
+    function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
+    function loadHistory(){
+      const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
+      if(h.length){ messages=h; h.forEach(m=>addMessage(m.content,m.role)); }
     }
 
-    // 5. Системное сообщение
-    function getSystemMessage() {
-      const today = new Date().toLocaleDateString('ru-RU', { year:'numeric', month:'long', day:'numeric' });
-      const ln = currentLang==='en'?'английском': currentLang==='ua'?'украинском':'русском';
+    // ============== СИСТЕМНОЕ СООБЩЕНИЕ ==============
+    function getSystemMessage(){
+      const today = new Date().toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'});
+      const ln = currentLang==='en'?'английском':currentLang==='ua'?'украинском':'русском';
       return {
-        role: 'system',
-        content: `Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${ln} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
+        role:'system',
+        content:`Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${ln} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
       };
     }
 
-    // 6. UI: показать сообщение и «печатает»
+    // ============== UI-ФУНКЦИИ ==============
     const msgsContainer = document.getElementById('messages');
-    function addMessage(text, who) {
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      d.textContent = text;
+    function addMessage(text,who){
+      const d=document.createElement('div');
+      d.className=`message ${who}`;
+      d.textContent=text;
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
     }
-    function addTyping() {
-      const d = document.createElement('div');
-      d.className = 'message bot typing';
-      d.textContent = '...';
+    function addTyping(){
+      const d=document.createElement('div');
+      d.className='message bot typing';
+      d.textContent='...';
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
       return d;
     }
 
-    // 7. HF Inference API
+    // ============== HUGGINGFACE PIPELINE ==============
     const HF_API_KEY  = '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';
-    const HF_ENDPOINT = 'https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct';
+    const HF_ENDPOINT = 'https://api-inference.huggingface.co/pipeline/text-generation/tiiuae/falcon-7b-instruct';
 
-    async function generateWithHF(prompt) {
+    async function generateWithHF(prompt){
       const res = await fetch(HF_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -246,38 +223,38 @@
           parameters: { max_new_tokens: 512, temperature: 0.7 }
         })
       });
-      if (!res.ok) throw new Error(`HF ${res.status}`);
-      const json = await res.json();
-      // отвечает в поле generated_text
-      return json.generated_text?.trim() || (json[0]?.generated_text?.trim()) || '';
+      if(!res.ok) throw new Error(`HF ${res.status}`);
+      const arr = await res.json();
+      // pipeline возвращает массив с { generated_text }
+      return arr[0]?.generated_text?.trim() || '';
     }
 
-    // 8. Обработка клика
-    sendBtn.onclick = async () => {
+    // ============== ОБРАБОТКА ОТПРАВКИ ==============
+    sendBtn.onclick = async()=>{
       const txt = input.value.trim();
-      if (!txt) return;
-      if (!messages.length) messages.push(getSystemMessage());
+      if(!txt) return;
+      if(!messages.length) messages.push(getSystemMessage());
       messages.push({ role:'user', content: txt });
-      addMessage(txt, 'user');
+      addMessage(txt,'user');
       input.value = '';
       const typingNode = addTyping();
 
-      // prompt из истории
-      const prompt = messages.map(m => {
-        const tag = m.role==='system' ? '[SYSTEM]' : m.role==='user' ? '[USER]' : '[AI]';
+      // собираем prompt
+      const prompt = messages.map(m=>{
+        const tag = m.role==='system'?'[SYSTEM]':m.role==='user'?'[USER]':'[AI]';
         return `${tag} ${m.content}`;
       }).join('\n') + '\n[AI]';
 
       try {
         const reply = await generateWithHF(prompt);
         typingNode.remove();
-        addMessage(reply, 'bot');
+        addMessage(reply,'bot');
         messages.push({ role:'assistant', content: reply });
         saveHistory();
-      } catch (err) {
+      } catch(err){
         console.error(err);
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте HF-токен и интернет.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте HF-токен и интернет.','bot');
       }
     };
   </script>
