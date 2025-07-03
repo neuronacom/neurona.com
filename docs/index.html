@@ -34,14 +34,14 @@
     /* Заставка */
     #loader {
       position: fixed; inset: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.9);  /* светлый фон */
       display: flex; align-items: center; justify-content: center;
       z-index: 1001;
     }
     .loader-text {
       font-size: 3rem;
       letter-spacing: 0.2em;
-      color: #000000;
+      color: #000000;                     /* чёрный текст */
       animation: fade 5s ease-in-out infinite;
     }
     @keyframes fade {
@@ -67,18 +67,17 @@
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 10px;
     }
-
     /* Окно чата */
     .chat-container {
-      flex: 1;
-      background: rgba(255,255,255,0.9);
-      border-radius: 8px;
-      border: 1px solid #cccccc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+  flex: 1;
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px;
+  border: 1px solid #cccccc;               /* тонкая серая рамка */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);   /* лёгкая тень */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
     #messages {
       flex: 1;
       display: flex; flex-direction: column;
@@ -176,7 +175,7 @@
           const dx = a.x - b.x, dy = a.y - b.y,
                 d  = Math.hypot(dx,dy);
           if(d < 200){
-            ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;
+            ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;  // чёрные линии
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x,a.y);
@@ -190,7 +189,7 @@
         n.y += n.vy;
         if(n.x<0||n.x>W) n.vx *= -1;
         if(n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';                     // чёрные точки
         ctx.beginPath();
         ctx.arc(n.x,n.y,3.5,0,6.28);
         ctx.fill();
@@ -217,13 +216,13 @@
     }
     langButtons.forEach(btn => btn.addEventListener('click', () => updateLang(btn.dataset.lang)));
 
-    // 3. Прелоадер (2 секунды)
+    // 3. Прелоадер (5 секунд)
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 2000);
+      }, 5000);
     });
 
     // 4. История переписки
@@ -274,11 +273,11 @@
       return d;
     }
 
-    // 7. AI21 API
-    const AI21_API_URL = 'https://api.ai21.com/studio/v1/j1-jumbo/complete';
-    const AI21_API_KEY = '1a12d8c7-240e-43ae-a0fd-f13a329ce7a8';
+    // 7. API-ключ и эндпоинт
+    const OPENAI_API_KEY  = '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';
+    const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
-    // 8. Реальные данные (рынок и новости)
+    // 8. Реальные данные
     async function fetchMarketOverview(){
       const res = await fetch(
         'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&price_change_percentage=24h'
@@ -311,7 +310,6 @@
 
       const typingNode = addTyping();
 
-      // Собираем рынок и новости
       let marketData='', cryptoNews='', globalNews='';
       try {
         (await fetchMarketOverview()).forEach(c => {
@@ -319,10 +317,14 @@
         });
       } catch{}
       try {
-        (await fetchCryptoNews()).slice(0,5).forEach(n => { cryptoNews += `• ${n.title}\n`; });
+        (await fetchCryptoNews()).slice(0,5).forEach(n => {
+          cryptoNews += `• ${n.title}\n`;
+        });
       } catch{}
       try {
-        (await fetchGlobalNews()).forEach(a => { globalNews += `• ${a.title}\n`; });
+        (await fetchGlobalNews()).forEach(a => {
+          globalNews += `• ${a.title}\n`;
+        });
       } catch{}
 
       const snapshot = {
@@ -339,37 +341,30 @@ ${globalNews||'нет данных'}
 --------------------------------`
       };
 
-      // Формируем единый prompt
-      let prompt = '';
-      [ getSystemMessage(), snapshot, ...messages.slice(1) ].forEach(m => {
-        prompt += (m.role === 'system' ? '[SYS] ' : m.role === 'user' ? '[USR] ' : '[BOT] ') + m.content + '\n';
-      });
-      prompt += '[BOT]';
+      const payload = {
+        model: 'gpt-4',
+        messages: [ messages[0], snapshot, ...messages.slice(1) ],
+        temperature: 0.7
+      };
 
       try {
-        const resp = await fetch(AI21_API_URL, {
+        const resp = await fetch(OPENAI_ENDPOINT, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${AI21_API_KEY}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
           },
-          body: JSON.stringify({
-            prompt: prompt,
-            numResults: 1,
-            maxTokens: 200,
-            stopSequences: ["\n[USR]"],
-            temperature: 0.7
-          })
+          body: JSON.stringify(payload)
         });
         const data = await resp.json();
-        const reply = data.completions?.[0]?.data?.text?.trim() || 'Ошибка в ответе AI21';
+        const reply = data.choices[0].message.content;
         typingNode.remove();
         addMessage(reply, 'bot');
         messages.push({ role:'assistant', content: reply });
         saveHistory();
       } catch(err) {
         typingNode.remove();
-        addMessage('Ошибка связи с AI21.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте ключи и интернет.', 'bot');
         console.error(err);
       }
     };
