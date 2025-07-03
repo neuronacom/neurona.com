@@ -119,7 +119,7 @@
   </div>
 
   <script>
-    // 1. Фон «нейросеть»
+    // 1. Анимация фона
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
@@ -151,11 +151,11 @@
       });
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy;
-        if (n.x < 0||n.x > W) n.vx *= -1;
-        if (n.y < 0||n.y > H) n.vy *= -1;
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
         ctx.fillStyle = 'rgba(0,0,0,0.8)';
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 3.5, 0, 2*Math.PI);
+        ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
@@ -225,28 +225,25 @@
       return d;
     }
 
-    // 7. Hugging Face Inference API
-    const HF_API_KEY  = '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';
-    const HF_ENDPOINT = 'https://api-inference.huggingface.co/pipeline/text-generation/tiiuae/falcon-7b-instruct';
+    // 7. Локальный прокси
+    const HF_PROXY = 'http://localhost:3000/generate';
 
     async function generateWithHF(prompt) {
-      const res = await fetch(HF_ENDPOINT, {
+      const res = await fetch(HF_PROXY, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           inputs: prompt,
           parameters: { max_new_tokens: 512, temperature: 0.7 }
         })
       });
-      if (!res.ok) throw new Error(`HF ${res.status}`);
-      const arr = await res.json();
-      return arr[0]?.generated_text?.trim() || '';
+      if (!res.ok) throw new Error(`Proxy ${res.status}`);
+      const data = await res.json();
+      // pipeline возвращает массив объектов с полем generated_text
+      return data[0]?.generated_text?.trim() || '';
     }
 
-    // 8. Отправка запроса
+    // 8. Обработка отправки
     sendBtn.onclick = async () => {
       const txt = input.value.trim();
       if (!txt) return;
@@ -270,7 +267,7 @@
       } catch (err) {
         console.error(err);
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте HF-токен и интернет.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте прокси и интернет.', 'bot');
       }
     };
   </script>
