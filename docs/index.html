@@ -229,33 +229,39 @@
     }
 
     // 7. Hugging Face Inference API
-    // Вставьте сюда свой токен, точно как в вашем профиле Hugging Face:
-    const HF_API_TOKEN = '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';
-    // Выбирайте модель по ID, например 'gpt2' или 'tiiuae/falcon-7b-instruct'
+    // — Замените на ваш токен:
+    const HF_API_TOKEN = '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';
+    // — Можно сменить модель на falcon-7b-instruct или другую инстр-модель:
     const HF_MODEL = 'gpt2';
 
     async function generateWithHF(prompt) {
-      const headers = new Headers();
-      headers.append('Content-Type', 'application/json');
-      headers.append('Authorization', 'Bearer ' + HF_API_TOKEN);
-
       const res = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
         method: 'POST',
-        headers: headers,
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + HF_API_TOKEN
+        },
         body: JSON.stringify({
           inputs: prompt,
           parameters: { max_new_tokens: 512, temperature: 0.7 }
         })
       });
 
+      if (res.status === 401) {
+        throw new Error('Unauthorized: проверьте ваш HF_API_TOKEN');
+      }
       if (res.status === 503) {
-        // Модель прогревается – повторим попытку через 2 секунды
+        // Модель ещё прогревается
         await new Promise(r => setTimeout(r, 2000));
         return generateWithHF(prompt);
       }
-      if (!res.ok) throw new Error(`HF API error ${res.status}`);
+      if (!res.ok) {
+        throw new Error(`HF API error ${res.status}`);
+      }
 
       const data = await res.json();
+      // Разные форматы ответа
       const gen = data.generated_text ?? data[0]?.generated_text;
       return (gen || '').trim();
     }
@@ -285,7 +291,9 @@
       } catch (err) {
         console.error(err);
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте токен и интернет.', 'bot');
+        addMessage(err.message.includes('Unauthorized')
+          ? 'Ошибка: неверный Hugging Face API токен.'
+          : 'Ошибка соединения с Neurona. Проверьте интернет и токен.', 'bot');
       }
     };
   </script>
