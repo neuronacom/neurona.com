@@ -119,7 +119,7 @@
   </div>
 
   <script>
-    // 1. Анимация фона
+    // Анимация фона
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
@@ -162,25 +162,25 @@
     }
     resize(); init(); draw();
 
-    // 2. Локализация
+    // Локализация
     const i18n = {
       en: { ph: "Type a message...", send: "Send" },
       ru: { ph: "Напишите сообщение...", send: "Отправить" },
       ua: { ph: "Введіть повідомлення...", send: "Надіслати" }
     };
     let currentLang = 'ru';
-    const input = document.getElementById('input'), sendBtn = document.getElementById('send');
+    const inputEl = document.getElementById('input'), sendBtn = document.getElementById('send');
     document.querySelectorAll('.lang-select button').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.lang-select button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentLang = btn.dataset.lang;
-        input.placeholder = i18n[currentLang].ph;
+        inputEl.placeholder = i18n[currentLang].ph;
         sendBtn.textContent = i18n[currentLang].send;
       });
     });
 
-    // 3. Прелоадер
+    // Прелоадер
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').style.display = 'none';
@@ -189,7 +189,7 @@
       }, 5000);
     });
 
-    // 4. История переписки
+    // История
     let messages = [];
     function saveHistory() { localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory() {
@@ -200,7 +200,7 @@
       }
     }
 
-    // 5. Системное сообщение
+    // Системное сообщение
     function getSystemMessage() {
       const today = new Date().toLocaleDateString('ru-RU', { year:'numeric', month:'long', day:'numeric' });
       const ln = currentLang==='en' ? 'английском' : currentLang==='ua' ? 'украинском' : 'русском';
@@ -210,11 +210,11 @@
       };
     }
 
-    // 6. UI: вывод сообщений
+    // UI
     const msgsContainer = document.getElementById('messages');
-    function addMessage(text, who) {
+    function addMessage(text, cls) {
       const d = document.createElement('div');
-      d.className = `message ${who}`;
+      d.className = `message ${cls}`;
       d.textContent = text;
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
@@ -228,72 +228,44 @@
       return d;
     }
 
-    // 7. Hugging Face Inference API
-    // — Замените на ваш токен:
-    const HF_API_TOKEN = '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';
-    // — Можно сменить модель на falcon-7b-instruct или другую инстр-модель:
-    const HF_MODEL = 'gpt2';
+    // Proxy URL воркера
+    const PROXY_URL = 'https://neurona-proxy.neuronapost.workers.dev/';
 
     async function generateWithHF(prompt) {
-      const res = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+      const res = await fetch(PROXY_URL, {
         method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + HF_API_TOKEN
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: { max_new_tokens: 512, temperature: 0.7 }
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
       });
-
-      if (res.status === 401) {
-        throw new Error('Unauthorized: проверьте ваш HF_API_TOKEN');
-      }
-      if (res.status === 503) {
-        // Модель ещё прогревается
-        await new Promise(r => setTimeout(r, 2000));
-        return generateWithHF(prompt);
-      }
-      if (!res.ok) {
-        throw new Error(`HF API error ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`Proxy error ${res.status}`);
       const data = await res.json();
-      // Разные форматы ответа
-      const gen = data.generated_text ?? data[0]?.generated_text;
-      return (gen || '').trim();
+      return (data.generated_text ?? data[0]?.generated_text ?? '').trim();
     }
 
-    // 8. Обработка отправки
+    // Отправка
     sendBtn.onclick = async () => {
-      const txt = input.value.trim();
+      const txt = inputEl.value.trim();
       if (!txt) return;
       if (!messages.length) messages.push(getSystemMessage());
 
       messages.push({ role:'user', content: txt });
       addMessage(txt, 'user');
-      input.value = '';
-      const typingNode = addTyping();
+      inputEl.value = '';
+      const typing = addTyping();
 
-      const prompt = messages.map(m => {
-        const tag = m.role==='system' ? '[SYSTEM]' : m.role==='user' ? '[USER]' : '[AI]';
-        return `${tag} ${m.content}`;
-      }).join('\n') + '\n[AI]';
+      const prompt = messages.map(m =>
+        `${m.role==='system'? '[SYSTEM]': m.role==='user'? '[USER]': '[AI]'} ${m.content}`
+      ).join('\n') + '\n[AI]';
 
       try {
         const reply = await generateWithHF(prompt);
-        typingNode.remove();
+        typing.remove();
         addMessage(reply, 'bot');
         messages.push({ role:'assistant', content: reply });
         saveHistory();
-      } catch (err) {
-        console.error(err);
-        typingNode.remove();
-        addMessage(err.message.includes('Unauthorized')
-          ? 'Ошибка: неверный Hugging Face API токен.'
-          : 'Ошибка соединения с Neurona. Проверьте интернет и токен.', 'bot');
+      } catch {
+        typing.remove();
+        addMessage('Ошибка соединения. Проверьте Worker и интернет.', 'bot');
       }
     };
   </script>
