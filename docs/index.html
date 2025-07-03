@@ -7,138 +7,93 @@
   <style>
     /* Сброс */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* Фон и центрирование */
     body {
-      background: #ffffff;
-      color: #000000;
-      font-family: sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #ffffff; color: #000000; font-family: sans-serif;
+      height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
       position: relative;
     }
-
-    /* Фон «нейросеть» */
-    #bg {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      opacity: 0.8;
-      transition: opacity 1s ease;
-    }
-    body.loaded #bg { opacity: 0.2; }
-
-    /* Заставка */
+    #bg { position: fixed; top:0; left:0; width:100%; height:100%;
+      z-index:0; opacity:0.8; transition:opacity 1s; }
+    body.loaded #bg { opacity:0.2; }
     #loader {
-      position: fixed; inset: 0;
-      background: rgba(255,255,255,0.9);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1001;
+      position: fixed; inset:0;
+      background:rgba(255,255,255,0.9);
+      display:flex; align-items:center; justify-content:center;
+      z-index:1001;
     }
     .loader-text {
-      font-size: 3rem;
-      letter-spacing: 0.2em;
-      color: #000000;
-      animation: fade 5s ease-in-out infinite;
+      font-size:3rem; letter-spacing:0.2em; color:#000;
+      animation:fade 5s ease-in-out infinite;
     }
-    @keyframes fade {
-      0%,100% { opacity: 0; }
-      50%     { opacity: 1; }
-    }
-
-    /* Основное приложение */
+    @keyframes fade { 0%,100%{opacity:0} 50%{opacity:1} }
     #app {
-      position: relative;
-      display: flex; flex-direction: column;
-      width: 100%; max-width: 600px;
-      height: 100%;
-      padding: 20px 10px 10px;
-      z-index: 1;
-      opacity: 0;
-      transition: opacity 1s ease;
+      position:relative; display:flex; flex-direction:column;
+      width:100%; max-width:600px; height:100%;
+      padding:20px 10px 10px; z-index:1;
+      opacity:0; transition:opacity 1s;
     }
-    body.loaded #app { opacity: 1; }
-
-    /* Заголовок и выбор языка */
+    body.loaded #app { opacity:1; }
     .header-lang {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:10px;
     }
     .lang-select button {
-      margin-left: 5px;
-      padding: 4px 8px;
-      border: 1px solid #444;
-      background: #fff; cursor: pointer;
+      margin-left:5px; padding:4px 8px;
+      border:1px solid #444; background:#fff;
+      cursor:pointer;
     }
     .lang-select button.active {
-      background: #444; color: #fff;
+      background:#444; color:#fff;
     }
-
-    /* Окно чата */
     .chat-container {
-      flex: 1;
-      background: rgba(255,255,255,0.9);
-      border-radius: 8px;
-      border: 1px solid #cccccc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      flex:1; background:rgba(255,255,255,0.9);
+      border-radius:8px; border:1px solid #ccc;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      display:flex; flex-direction:column; overflow:hidden;
     }
     #messages {
-      flex: 1;
-      display: flex; flex-direction: column;
-      padding: 15px; overflow-y: auto;
+      flex:1; display:flex; flex-direction:column;
+      padding:15px; overflow-y:auto;
     }
     .message {
-      margin: 5px 0; line-height: 1.4; max-width: 80%;
-      word-wrap: break-word; padding: 8px 12px; border-radius: 12px;
-      color: #000000;
+      margin:5px 0; line-height:1.4; max-width:80%;
+      word-wrap:break-word; padding:8px 12px; border-radius:12px;
+      color:#000;
     }
     .message.user {
-      align-self: flex-end;
-      background: #f0f0f0;
-      border-radius: 12px 12px 0 12px;
+      align-self:flex-end; background:#f0f0f0;
+      border-radius:12px 12px 0 12px;
     }
     .message.bot {
-      align-self: flex-start;
-      background: #e0e0e0;
-      border-radius: 12px 12px 12px 0;
+      align-self:flex-start; background:#e0e0e0;
+      border-radius:12px 12px 12px 0;
     }
     .message.typing {
-      font-style: italic; color: #666666;
+      font-style:italic; color:#666;
     }
-
-    /* Поле ввода */
     .input-area {
-      display: flex; padding: 10px;
-      background: #ffffff;
+      display:flex; padding:10px; background:#fff;
     }
     #input {
-      flex: 1; resize: none; border: 1px solid #cccccc;
-      padding: 12px; border-radius: 4px;
-      background: #ffffff; color: #000000;
-      font-size: 1rem; height: 50px;
+      flex:1; resize:none; border:1px solid #ccc;
+      padding:12px; border-radius:4px;
+      background:#fff; color:#000;
+      font-size:1rem; height:50px;
     }
     #send {
-      margin-left: 8px; padding: 0 16px;
-      border: none; border-radius: 4px;
-      background: #444444; color: #ffffff;
-      font-size: 1rem; cursor: pointer;
-      transition: background 0.2s;
+      margin-left:8px; padding:0 16px;
+      border:none; border-radius:4px;
+      background:#444; color:#fff;
+      font-size:1rem; cursor:pointer;
+      transition:background 0.2s;
     }
-    #send:hover { background: #666666; }
-
-    /* Адаптивность */
-    @media (max-width: 600px) {
-      #app { max-width: 100%; padding: 15px 5px 5px; }
-      .chat-container { width: 90%; margin: 0 auto; }
-      .loader-text { font-size: 2.5rem; }
-      #input { font-size: 0.9rem; height: 40px; }
-      #send  { font-size: 0.9rem; padding: 0 12px; }
+    #send:hover { background:#666; }
+    @media (max-width:600px) {
+      #app { max-width:100%; padding:15px 5px 5px; }
+      .loader-text { font-size:2.5rem; }
+      #input { font-size:0.9rem; height:40px; }
+      #send { font-size:0.9rem; padding:0 12px; }
     }
   </style>
 </head>
@@ -164,173 +119,137 @@
   </div>
 
   <script>
-    // 1. Анимация фона
+    // фон
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
-    function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ 
-      nodes = []; 
-      for(let i=0; i<30; i++){
-        nodes.push({
-          x: Math.random()*W,
-          y: Math.random()*H,
-          vx: (Math.random()-.5)*.5,
-          vy: (Math.random()-.5)*.5
-        });
-      }
-    }
+    function init(){ nodes=[]; for(let i=0;i<30;i++) nodes.push({
+      x:Math.random()*W, y:Math.random()*H,
+      vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5
+    }); }
     function draw(){
       ctx.clearRect(0,0,W,H);
-      nodes.forEach((a,i)=>{
-        nodes.slice(i+1).forEach(b=>{
-          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx,dy);
-          if(d < 200){
-            ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
-            ctx.stroke();
-          }
-        });
-      });
+      nodes.forEach((a,i)=>nodes.slice(i+1).forEach(b=>{
+        const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<200){
+          ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.4})`;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }));
       nodes.forEach(n=>{
-        n.x += n.vx; n.y += n.vy;
-        if(n.x<0||n.x>W) n.vx *= -1;
-        if(n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.beginPath();
-        ctx.arc(n.x,n.y,3.5,0,6.28);
-        ctx.fill();
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.beginPath();
+        ctx.arc(n.x,n.y,3.5,0,6.28); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // 2. Локализация и переключение языка
+    // локализация
     const i18n = {
-      en: { ph:"Type a message...", send:"Send" },
-      ru: { ph:"Напишите сообщение...", send:"Отправить" },
-      ua: { ph:"Введіть повідомлення...", send:"Надіслати" }
+      en:{ph:"Type a message...",send:"Send"},
+      ru:{ph:"Напишите сообщение...",send:"Отправить"},
+      ua:{ph:"Введіть повідомлення...",send:"Надіслати"}
     };
-    let currentLang = 'ru';
-    const input = document.getElementById('input'), sendBtn = document.getElementById('send');
+    let currentLang='ru';
+    const input=document.getElementById('input'), sendBtn=document.getElementById('send');
     document.querySelectorAll('.lang-select button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click',()=>{
         document.querySelectorAll('.lang-select button').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        currentLang = btn.dataset.lang;
-        input.placeholder = i18n[currentLang].ph;
-        sendBtn.textContent = i18n[currentLang].send;
+        currentLang=btn.dataset.lang;
+        input.placeholder=i18n[currentLang].ph;
+        sendBtn.textContent=i18n[currentLang].send;
       });
     });
 
-    // 3. Прелоадер
-    window.addEventListener('load', ()=>{
+    // прелоадер
+    window.addEventListener('load',()=>{
       setTimeout(()=>{
-        document.getElementById('loader').style.display = 'none';
+        document.getElementById('loader').style.display='none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 5000);
+      },5000);
     });
 
-    // 4. История переписки
-    let messages = [];
-    function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
+    // история
+    let messages=[];
+    function saveHistory(){ localStorage.setItem('neurona_history',JSON.stringify(messages)); }
     function loadHistory(){
-      const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){
-        messages = h;
-        h.forEach(m => addMessage(m.content, m.role));
-      }
+      const h=JSON.parse(localStorage.getItem('neurona_history')||'[]');
+      if(h.length){ messages=h; h.forEach(m=>addMessage(m.content,m.role)); }
     }
 
-    // 5. Системное сообщение
+    // системное сообщение
     function getSystemMessage(){
-      const today = new Date().toLocaleDateString('ru-RU', { year:'numeric', month:'long', day:'numeric' });
-      const langName = currentLang==='en' ? 'английском'
-                     : currentLang==='ua' ? 'украинском'
-                     : 'русском';
+      const today=new Date().toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'});
+      const langName=currentLang==='en'?'английском':currentLang==='ua'?'украинском':'русском';
       return {
-        role: 'system',
-        content: `Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${langName} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
+        role:'system',
+        content:`Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${langName} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
       };
     }
 
-    // 6. Отображение сообщений
-    const msgsContainer = document.getElementById('messages');
-    function addMessage(text, who){
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      d.textContent = text;
-      msgsContainer.appendChild(d);
-      msgsContainer.scrollTop = msgsContainer.scrollHeight;
+    // отображение
+    const msgsContainer=document.getElementById('messages');
+    function addMessage(text,who){
+      const d=document.createElement('div');
+      d.className=`message ${who}`; d.textContent=text;
+      msgsContainer.appendChild(d); msgsContainer.scrollTop=msgsContainer.scrollHeight;
     }
     function addTyping(){
-      const d = document.createElement('div');
-      d.className = 'message bot typing';
-      d.textContent = '...';
-      msgsContainer.appendChild(d);
-      msgsContainer.scrollTop = msgsContainer.scrollHeight;
+      const d=document.createElement('div');
+      d.className='message bot typing'; d.textContent='...';
+      msgsContainer.appendChild(d); msgsContainer.scrollTop=msgsContainer.scrollHeight;
       return d;
     }
 
-    // 7. AI21 API — модельный endpoint
-    const AI21_API_KEY  = '8cc7c618-bdf5-41ea-9bd6-5b45fe1de6b4';
-    const AI21_ENDPOINT = 'https://api.ai21.com/studio/v1/j1-jumbo/complete';
+    // AI21
+    const AI21_API_KEY='8cc7c618-bdf5-41ea-9bd6-5b45fe1de6b4',
+          AI21_ENDPOINT='https://api.ai21.com/studio/v1/complete';
 
-    // 8. Отправка запроса и обработка ответа
-    sendBtn.onclick = async () => {
-      const txt = input.value.trim();
-      if (!txt) return;
-
-      if (messages.length === 0) messages.push(getSystemMessage());
-      messages.push({ role:'user', content: txt });
-      addMessage(txt, 'user');
-      input.value = '';
-      const typingNode = addTyping();
-
-      // Собираем prompt из истории
-      const prompt = messages.map(m => {
-        const tag = m.role==='system' ? '[SYSTEM]'
-                  : m.role==='user'   ? '[USER]'
-                  : '[AI]';
+    // отправка
+    sendBtn.onclick=async()=>{
+      const txt=input.value.trim(); if(!txt) return;
+      if(messages.length===0) messages.push(getSystemMessage());
+      messages.push({role:'user',content:txt}); addMessage(txt,'user'); input.value='';
+      const typingNode=addTyping();
+      const prompt=messages.map(m=>{
+        const tag=m.role==='system'?'[SYSTEM]':m.role==='user'?'[USER]':'[AI]';
         return `${tag} ${m.content}`;
-      }).join('\n') + '\n[AI]';
-
-      try {
-        const resp = await fetch(AI21_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AI21_API_KEY}`
+      }).join('\n')+'\n[AI]';
+      try{
+        const resp=await fetch(AI21_ENDPOINT,{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':`Bearer ${AI21_API_KEY}`
           },
-          body: JSON.stringify({
-            prompt: prompt,
-            numResults: 1,
-            maxTokens: 512,
-            temperature: 0.7,
-            topKReturn: 0,
-            topP: 1.0,
-            stopSequences: ['[USER]','[AI]','[SYSTEM]']
+          body:JSON.stringify({
+            model:'j1-jumbo',
+            prompt:prompt,
+            numResults:1,
+            maxTokens:512,
+            temperature:0.7,
+            topKReturn:0,
+            topP:1.0,
+            stopSequences:['[USER]','[AI]','[SYSTEM]']
           })
         });
-
-        if (!resp.ok) throw new Error(`AI21 returned ${resp.status}`);
-        const json = await resp.json();
-        const comp = json.completions;
-        if (!comp || !comp.length) throw new Error('Empty completions array');
-
-        const reply = comp[0].data.text.trim();
-        typingNode.remove();
-        addMessage(reply, 'bot');
-        messages.push({ role:'assistant', content: reply });
-        saveHistory();
-
-      } catch (err) {
+        if(!resp.ok) throw new Error(`AI21 ${resp.status}`);
+        const json=await resp.json();
+        const comp=json.completions;
+        if(!comp||!comp.length) throw new Error('Empty response');
+        const reply=comp[0].data.text.trim();
+        typingNode.remove(); addMessage(reply,'bot');
+        messages.push({role:'assistant',content:reply}); saveHistory();
+      }catch(err){
         console.error(err);
         typingNode.remove();
-        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.', 'bot');
+        addMessage('Ошибка соединения с Neurona. Проверьте ключ и интернет.','bot');
       }
     };
   </script>
