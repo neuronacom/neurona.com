@@ -6,13 +6,23 @@
   <title>Neurona 1.0</title>
   <style>
     /* Сброс */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Общий шрифт */
+    body,
+    textarea,
+    button {
+      font-family: Arial, sans-serif;
+    }
 
     /* Фон и центрирование */
     body {
-      background: #ffffff;        /* белый фон */
-      color: #000000;             /* чёрный текст */
-      font-family: sans-serif;
+      background: #ffffff;
+      color: #000000;
       height: 100vh;
       overflow: hidden;
       display: flex;
@@ -23,69 +33,111 @@
 
     /* Фон «нейросеть» */
     #bg {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
       opacity: 0.8;
       transition: opacity 1s ease;
     }
-    body.loaded #bg { opacity: 0.2; }
+    body.loaded #bg {
+      opacity: 0.2;
+    }
 
     /* Заставка */
     #loader {
-      position: fixed; inset: 0;
-      background: rgba(255,255,255,0.9);  /* светлый фон */
-      display: flex; align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 1001;
+      flex-direction: column;
+    }
+    .loader-content {
+      display: flex;
+      align-items: center;
+      animation: fade 6s ease-in-out infinite;
+    }
+    .loader-logo {
+      width: 80px;
+      height: auto;
+      margin-right: 12px;
     }
     .loader-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .loader-title {
       font-size: 3rem;
-      letter-spacing: 0.2em;
-      color: #000000;                     /* чёрный текст */
-      animation: fade 5s ease-in-out infinite;
+      letter-spacing: 0.1em;
+      color: #000000;
+    }
+    .loader-subtitle {
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+      color: #000000;
+      margin-top: 4px;
     }
     @keyframes fade {
-      0%,100% { opacity: 0; }
-      50%     { opacity: 1; }
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
     }
 
     /* Основное приложение */
     #app {
       position: relative;
-      display: flex; flex-direction: column;
-      width: 100%; max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 600px;
       height: 100%;
       padding: 20px 10px 10px;
       z-index: 1;
       opacity: 0;
       transition: opacity 1s ease;
     }
-    body.loaded #app { opacity: 1; }
+    body.loaded #app {
+      opacity: 1;
+    }
 
     /* Заголовок и выбор языка */
     .header-lang {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
     }
+
     /* Окно чата */
     .chat-container {
-  flex: 1;
-  background: rgba(255,255,255,0.9);
-  border-radius: 8px;
-  border: 1px solid #cccccc;               /* тонкая серая рамка */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);   /* лёгкая тень */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+      flex: 1;
+      background: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      border: 1px solid #cccccc;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
     #messages {
       flex: 1;
-      display: flex; flex-direction: column;
-      padding: 15px; overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      overflow-y: auto;
     }
     .message {
-      margin: 5px 0; line-height: 1.4; max-width: 80%;
-      word-wrap: break-word; padding: 8px 12px; border-radius: 12px;
+      margin: 5px 0;
+      line-height: 1.4;
+      max-width: 80%;
+      word-wrap: break-word;
+      padding: 8px 12px;
+      border-radius: 12px;
       color: #000000;
     }
     .message.user {
@@ -99,44 +151,84 @@
       border-radius: 12px 12px 12px 0;
     }
     .message.typing {
-      font-style: italic; color: #666666;
+      font-style: italic;
+      color: #666666;
     }
 
     /* Поле ввода */
     .input-area {
-      display: flex; padding: 10px;
+      display: flex;
+      padding: 10px;
       background: #ffffff;
     }
     #input {
-      flex: 1; resize: none; border: 1px solid #cccccc;
-      padding: 12px; border-radius: 4px;
-      background: #ffffff; color: #000000;
-      font-size: 1rem; height: 50px;
+      flex: 1;
+      resize: none;
+      border: 1px solid #cccccc;
+      padding: 12px;
+      border-radius: 4px;
+      height: 50px;
+      font-size: 1rem;
     }
     #send {
-      margin-left: 8px; padding: 0 16px;
-      border: none; border-radius: 4px;
-      background: #444444; color: #ffffff;
-      font-size: 1rem; cursor: pointer;
+      margin-left: 8px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 4px;
+      background: #444444;
+      color: #ffffff;
+      font-size: 1rem;
+      cursor: pointer;
       transition: background 0.2s;
     }
-    #send:hover { background: #666666; }
+    #send:hover {
+      background: #666666;
+    }
 
     /* Адаптивность */
     @media (max-width: 600px) {
-      #app { max-width: 100%; padding: 15px 5px 5px; }
-      .chat-container { width: 90%; margin: 0 auto; }
-      .loader-text { font-size: 2.5rem; }
-      #input { font-size: 0.9rem; height: 40px; }
-      #send  { font-size: 0.9rem; padding: 0 12px; }
-      .header { margin-left: 20px; }
-      .lang-select { margin-right: 20px; }
+      #app {
+        max-width: 100%;
+        padding: 15px 5px 5px;
+      }
+      .chat-container {
+        width: 90%;
+        margin: 0 auto;
+      }
+      .loader-logo {
+        width: 60px;
+        margin-right: 8px;
+      }
+      .loader-title {
+        font-size: 2.5rem;
+      }
+      .loader-subtitle {
+        font-size: 1rem;
+      }
+      #input {
+        font-size: 0.9rem;
+        height: 40px;
+      }
+      #send {
+        font-size: 0.9rem;
+        padding: 0 12px;
+      }
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <div id="loader"><div class="loader-text">NEURONA 1.0</div></div>
+
+  <div id="loader">
+    <div class="loader-content">
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" alt="Logo" class="loader-logo"/>
+      <div class="loader-text">
+        <div class="loader-title">NEURONA</div>
+        <div class="loader-subtitle">PERSONAL AI ASSISTANT</div>
+      </div>
+    </div>
+  </div>
+
   <div id="app">
     <div class="header-lang">
       <div class="header">Neurona 1.0</div>
@@ -155,31 +247,35 @@
     const canvas = document.getElementById('bg'),
           ctx    = canvas.getContext('2d');
     let W, H, nodes;
-    function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    function resize() {
+      W = canvas.width = innerWidth;
+      H = canvas.height = innerHeight;
+    }
     window.addEventListener('resize', resize);
-    function init(){
+    function init() {
       nodes = [];
-      for(let i=0; i<30; i++){
+      for (let i = 0; i < 30; i++) {
         nodes.push({
-          x: Math.random()*W,
-          y: Math.random()*H,
-          vx: (Math.random()-.5)*.5,
-          vy: (Math.random()-.5)*.5
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5
         });
       }
     }
-    function draw(){
-      ctx.clearRect(0,0,W,H);
-      nodes.forEach((a,i) => {
-        nodes.slice(i+1).forEach(b => {
-          const dx = a.x - b.x, dy = a.y - b.y,
-                d  = Math.hypot(dx,dy);
-          if(d < 200){
-            ctx.strokeStyle = `rgba(0,0,0,${(200-d)/200*0.4})`;  // чёрные линии
-            ctx.lineWidth = 1;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      nodes.forEach((a, i) => {
+        nodes.slice(i + 1).forEach(b => {
+          const dx = a.x - b.x,
+                dy = a.y - b.y,
+                d  = Math.hypot(dx, dy);
+          if (d < 200) {
+            ctx.strokeStyle = `rgba(0,0,0,${(200 - d)/200 * 0.8})`;
+            ctx.lineWidth   = 1;
             ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
         });
@@ -187,11 +283,11 @@
       nodes.forEach(n => {
         n.x += n.vx;
         n.y += n.vy;
-        if(n.x<0||n.x>W) n.vx *= -1;
-        if(n.y<0||n.y>H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';                     // чёрные точки
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+        ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.beginPath();
-        ctx.arc(n.x,n.y,3.5,0,6.28);
+        ctx.arc(n.x, n.y, 3.5, 0, Math.PI*2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
@@ -200,71 +296,63 @@
 
     // 2. Локализация и переключение языка
     const i18n = {
-      en: { ph:"Type a message...", send:"Send" },
-      ru: { ph:"Напишите сообщение...", send:"Отправить" },
-      ua: { ph:"Введіть повідомлення...", send:"Надіслати" }
+      en: { ph: "Type a message...", send: "Send" },
+      ru: { ph: "Напишите сообщение...", send: "Отправить" },
+      ua:{ ph: "Введіть повідомлення...", send: "Надіслати" }
     };
     let currentLang = 'ru';
-    const input       = document.getElementById('input'),
-          sendBtn     = document.getElementById('send'),
-          langButtons = document.querySelectorAll('.lang-select button');
-    function updateLang(lang){
+    const input   = document.getElementById('input'),
+          sendBtn = document.getElementById('send');
+    function updateLang(lang) {
       currentLang = lang;
       input.placeholder = i18n[lang].ph;
       sendBtn.textContent = i18n[lang].send;
-      langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     }
-    langButtons.forEach(btn => btn.addEventListener('click', () => updateLang(btn.dataset.lang)));
 
-    // 3. Прелоадер (5 секунд)
+    // 3. Прелоадер (6 секунд)
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').style.display = 'none';
         document.body.classList.add('loaded');
         loadHistory();
-      }, 5000);
+      }, 6000);
     });
 
     // 4. История переписки
     let messages = [];
-    function saveHistory(){
+    function saveHistory() {
       localStorage.setItem('neurona_history', JSON.stringify(messages));
     }
-    function loadHistory(){
-      const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){
+    function loadHistory() {
+      const h = JSON.parse(localStorage.getItem('neurona_history') || '[]');
+      if (h.length) {
         messages = h;
         h.forEach(m => addMessage(m.content, m.role));
       }
     }
 
     // 5. Системное сообщение
-    function getSystemMessage(){
-      const today = new Date().toLocaleDateString('ru-RU', {
-        year:'numeric', month:'long', day:'numeric'
-      });
-      const langName = currentLang==='en'?'английском'
-                     : currentLang==='ua'?'украинском'
-                     :'русском';
+    function getSystemMessage() {
+      const today = new Date().toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+      const langName = currentLang === 'en' ? 'английском'
+                     : currentLang === 'ua' ? 'украинском'
+                     : 'русском';
       return {
         role: 'system',
-        content: `Ты — Neurona 1.0, лицензированный AI-продукт.
-Сегодня ${today}.
-Ты отвечаешь на ${langName} языке.
-Отвечай всегда красиво, развернуто и не шаблонно.`
+        content: `Ты — Neurona 1.0, лицензированный AI-продукт.\nСегодня ${today}.\nТы отвечаешь на ${langName} языке.\nОтвечай всегда красиво, развернуто и не шаблонно.`
       };
     }
 
     // 6. Отображение сообщений
     const msgsContainer = document.getElementById('messages');
-    function addMessage(text, who){
+    function addMessage(text, who) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
       d.textContent = text;
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
     }
-    function addTyping(){
+    function addTyping() {
       const d = document.createElement('div');
       d.className = 'message bot typing';
       d.textContent = '...';
@@ -278,22 +366,16 @@
     const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
     // 8. Реальные данные
-    async function fetchMarketOverview(){
-      const res = await fetch(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&price_change_percentage=24h'
-      );
+    async function fetchMarketOverview() {
+      const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&price_change_percentage=24h');
       return res.json();
     }
-    async function fetchCryptoNews(){
-      const res = await fetch(
-        `https://cryptocontrol.io/api/v1/public/news?language=${currentLang}&key=YOUR_CRYPTO_NEWS_API_KEY`
-      );
+    async function fetchCryptoNews() {
+      const res = await fetch(`https://cryptocontrol.io/api/v1/public/news?language=${currentLang}&key=YOUR_CRYPTO_NEWS_API_KEY`);
       return res.json();
     }
-    async function fetchGlobalNews(){
-      const res = await fetch(
-        `https://newsapi.org/v2/top-headlines?language=${currentLang}&pageSize=5&apiKey=YOUR_GLOBAL_NEWS_API_KEY`
-      );
+    async function fetchGlobalNews() {
+      const res = await fetch(`https://newsapi.org/v2/top-headlines?language=${currentLang}&pageSize=5&apiKey=YOUR_GLOBAL_NEWS_API_KEY`);
       const json = await res.json();
       return json.articles || [];
     }
@@ -301,44 +383,35 @@
     // 9. Обработка отправки
     sendBtn.onclick = async () => {
       const txt = input.value.trim();
-      if(!txt) return;
+      if (!txt) return;
 
-      if(messages.length === 0) messages.push(getSystemMessage());
-      messages.push({ role:'user', content: txt });
+      if (!messages.length) messages.push(getSystemMessage());
+      messages.push({ role: 'user', content: txt });
       addMessage(txt, 'user');
       input.value = '';
 
       const typingNode = addTyping();
 
-      let marketData='', cryptoNews='', globalNews='';
+      let marketData = '', cryptoNews = '', globalNews = '';
       try {
         (await fetchMarketOverview()).forEach(c => {
           marketData += `${c.name} (${c.symbol.toUpperCase()}): $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)\n`;
         });
-      } catch{}
+      } catch {}
       try {
-        (await fetchCryptoNews()).slice(0,5).forEach(n => {
+        (await fetchCryptoNews()).slice(0, 5).forEach(n => {
           cryptoNews += `• ${n.title}\n`;
         });
-      } catch{}
+      } catch {}
       try {
         (await fetchGlobalNews()).forEach(a => {
           globalNews += `• ${a.title}\n`;
         });
-      } catch{}
+      } catch {}
 
       const snapshot = {
         role: 'system',
-        content: `--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---
-Топ-5 криптовалют:
-${marketData||'нет данных'}
-
-Крипто-новости:
-${cryptoNews||'нет данных'}
-
-Мировые новости:
-${globalNews||'нет данных'}
---------------------------------`
+        content: `--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---\nТоп-5 криптовалют:\n${marketData || 'нет данных'}\n\nКрипто-новости:\n${cryptoNews || 'нет данных'}\n\nМировые новости:\n${globalNews || 'нет данных'}\n--------------------------------`
       };
 
       const payload = {
@@ -360,9 +433,9 @@ ${globalNews||'нет данных'}
         const reply = data.choices[0].message.content;
         typingNode.remove();
         addMessage(reply, 'bot');
-        messages.push({ role:'assistant', content: reply });
+        messages.push({ role: 'assistant', content: reply });
         saveHistory();
-      } catch(err) {
+      } catch (err) {
         typingNode.remove();
         addMessage('Ошибка соединения с Neurona. Проверьте ключи и интернет.', 'bot');
         console.error(err);
