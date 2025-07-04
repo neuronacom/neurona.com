@@ -14,7 +14,7 @@
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
-      z-index:0; opacity:0.98; /* почти полностью видим */
+      z-index:0; opacity:0.98;
       transition:opacity 1s;
       pointer-events:none;
     }
@@ -25,7 +25,7 @@
       width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
       background:transparent; height:56px; padding:0;
-      pointer-events:none; transition:opacity .3s;
+      pointer-events:none; transition:opacity .5s;
     }
     .top-bar-content {
       display:flex; align-items:center; height:56px; pointer-events:all;
@@ -39,7 +39,7 @@
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
-      width:36px; height:29px; margin-right:18px; /* больше отступ справа */
+      width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
     }
     .top-burger span {
@@ -53,6 +53,14 @@
       position:fixed; inset:0; background:rgba(255,255,255,0.97);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
+      opacity:1;
+      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
+      pointer-events:auto;
+    }
+    #loader.hide {
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 1.3s cubic-bezier(.22,.7,.49,1.01);
     }
     .loader-content {
       display:flex; align-items:center; justify-content:center;
@@ -75,9 +83,10 @@
       position:relative; display:flex; flex-direction:column;
       width:100%; max-width:390px; min-width:270px;
       height:calc(100vh - 110px);
-      margin:126px auto 0 auto; /* сильнее вниз */
+      margin:126px auto 0 auto;
       padding:0 18px 10px 18px;
-      z-index:1; opacity:0; transition:opacity 1s;
+      z-index:1; opacity:0; transition:opacity 1.2s;
+      will-change: opacity;
     }
     body.loaded #app { opacity:1; }
 
@@ -205,14 +214,17 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // Прелоадер + топ бар!
+    // Плавный переход прелоадера, диалога, топбара
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
-        document.getElementById('loader').style.display='none';
+        document.getElementById('loader').classList.add('hide');
         document.body.classList.add('loaded');
-        document.getElementById('top-bar').classList.remove('hide');
-        loadHistory();
+        setTimeout(()=>{
+          document.getElementById('loader').style.display='none';
+          document.getElementById('top-bar').classList.remove('hide');
+          loadHistory();
+        }, 1300); // После исчезновения прелоадера
       }, 8000);
     });
 
