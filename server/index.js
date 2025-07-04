@@ -7,7 +7,7 @@ const app     = express();
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
-// CMC Топ-5 (как было)
+// CMC
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -17,30 +17,37 @@ app.get('/api/cmc', async (req, res) => {
     const js = await r.json();
     res.json(js);
   } catch (e) {
-    console.error('CMC error', e);
     res.status(500).json({ error: 'CMC error' });
   }
 });
 
-// Новости CryptoPanic (заголовок — прямая ссылка!)
+// CryptoPanic: всегда новые новости
 app.get('/api/news', async (req, res) => {
   try {
-    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true`;
+    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
     const r = await fetch(url);
     const js = await r.json();
-    const articles = js.results.slice(0, 5).map(n => ({
-      title: n.title,
-      url: n.url,
-      time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
-      source: n.domain || 'news'
-    }));
+    const seen = new Set();
+    const articles = [];
+    for (let n of js.results) {
+      if (!seen.has(n.title)) {
+        articles.push({
+          title: n.title,
+          url: n.url,
+          time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
+          source: n.domain || 'news'
+        });
+        seen.add(n.title);
+        if (articles.length >= 7) break;
+      }
+    }
     res.json({articles});
-  } catch (e) {
+  } catch {
     res.json({ articles: [] });
   }
 });
 
-// CoinGecko API (любой тикер/имя!)
+// CoinGecko — всегда свежая цена (без кэша!)
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -50,6 +57,7 @@ app.get('/api/coingecko', async (req, res) => {
                cg.find(c=>c.id.toLowerCase()===query) ||
                cg.find(c=>c.name.toLowerCase()===query);
     if(!coin) return res.json({found:false});
+    // Нет кэша! Каждый раз свежая цена
     const market = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`).then(r=>r.json());
     res.json({
       found:true,
@@ -63,7 +71,7 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
-// TradingView уровни
+// TradingView
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol||'BTC').toUpperCase();
@@ -91,7 +99,6 @@ app.post('/api/openai', async (req, res) => {
     const js = await r.json();
     res.json(js);
   } catch (e) {
-    console.error('OpenAI error', e);
     res.status(500).json({ error: 'OpenAI error' });
   }
 });
