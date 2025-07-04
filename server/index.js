@@ -1,0 +1,44 @@
+require('dotenv').config();
+const express = require('express');
+const fetch   = require('node-fetch');
+const path    = require('path');
+const app     = express();
+
+// отдаём фронт
+app.use(express.static(path.join(__dirname,'..','public')));
+app.use(express.json());
+
+// прокси CoinMarketCap
+app.get('/api/cmc', async (req,res) => {
+  try {
+    const r = await fetch(
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=5&convert=USD',
+      { headers:{ 'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY } }
+    );
+    const js=await r.json();
+    res.json(js);
+  } catch {
+    res.status(500).json({ error:'CMC error' });
+  }
+});
+
+// прокси OpenAI
+app.post('/api/openai', async (req,res) => {
+  try {
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{
+        'Authorization':`Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify(req.body)
+    });
+    const js=await r.json();
+    res.json(js);
+  } catch {
+    res.status(500).json({ error:'OpenAI error' });
+  }
+});
+
+const PORT = process.env.PORT||3000;
+app.listen(PORT, ()=>console.log(`Server listening on ${PORT}`));
