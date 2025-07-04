@@ -21,7 +21,7 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// CryptoPanic: всегда новые новости
+// CryptoPanic — только свежие новости
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -47,7 +47,7 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// CoinGecko — всегда свежая цена (без кэша!)
+// CoinGecko — всегда свежая цена
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -57,7 +57,6 @@ app.get('/api/coingecko', async (req, res) => {
                cg.find(c=>c.id.toLowerCase()===query) ||
                cg.find(c=>c.name.toLowerCase()===query);
     if(!coin) return res.json({found:false});
-    // Нет кэша! Каждый раз свежая цена
     const market = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`).then(r=>r.json());
     res.json({
       found:true,
