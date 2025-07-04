@@ -7,9 +7,50 @@
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button { font-family:Arial,sans-serif; }
-    body { background:#fff; color:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; }
+    body { background:#fff; color:#000; overflow:hidden; height:100vh; }
     #bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.8; transition:opacity 1s ease; }
     body.loaded #bg { opacity:0.2; }
+
+    /* --- TOP BAR --- */
+    .top-bar {
+      width:100vw;
+      position:fixed;
+      top:0; left:0;
+      z-index:10;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:transparent;
+      padding: 0 0 0 0;
+      height:65px;
+      pointer-events: none; /* чтоб не мешал кликам */
+    }
+    .top-bar-content {
+      display:flex;
+      align-items:center;
+      height:65px;
+      pointer-events: all;
+    }
+    .top-logo { width:55px; height:auto; margin-left:28px; margin-right:10px; }
+    .top-title {
+      font-size:2.6rem;
+      letter-spacing:.12em;
+      font-weight:bold;
+      color:#000;
+      margin-top:5px;
+      user-select:none;
+    }
+    .top-burger {
+      display:flex; flex-direction:column; justify-content:center;
+      width:39px; height:39px; margin-right:34px; cursor:pointer; pointer-events:all;
+      margin-top:3px;
+    }
+    .top-burger span {
+      display:block;
+      height:6px; width:100%; background:#000; border-radius:3px; margin-bottom:7px;
+    }
+    .top-burger span:last-child { margin-bottom:0; }
+
     #loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; z-index:1001; flex-direction:column; }
     .loader-content { display:flex; align-items:center; animation:fade 8s ease-in-out infinite; }
     .loader-logo { width:100px; margin-right:12px; }
@@ -18,60 +59,14 @@
     .loader-subtitle { font-size:1.5rem; letter-spacing:.05em; color:#000; margin-top:4px; }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
-    /* HEADER */
-    .header-lang {
-      width:100%;
-      display:flex;
-      justify-content:flex-end;
-      align-items:flex-start;
-      position:absolute;
-      top:0; left:0;
-      padding:15px 15px 0 0;
-      z-index:5;
-    }
-    .header-box {
-      display:flex;
-      align-items:center;
-      margin-right:40px;
-    }
-    .header-logo-small { width:26px; height:auto; margin-right:7px; margin-top:0; }
-    .header-title {
-      font-weight:bold;
-      font-size:1.45rem;
-      color:#000;
-      letter-spacing:.03em;
-      margin-top:0;
-    }
-    .burger-icon {
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      width:28px;
-      height:22px;
-      margin-left:15px;
-      margin-top:0;
-      cursor:pointer;
-      align-items:center;
-    }
-    .burger-icon span {
-      display:block;
-      height:4px;
-      width:100%;
-      background:#000;
-      border-radius:2px;
-      margin-bottom:4px;
-    }
-    .burger-icon span:last-child { margin-bottom:0; }
-
     #app {
       position:relative;
       display:flex;
       flex-direction:column;
       width:100%;
       max-width:600px;
-      height:calc(100vh - 130px);
-      margin-top:80px;
-      margin-bottom:50px;
+      height:calc(100vh - 110px);
+      margin:90px auto 0 auto;
       padding:10px 10px 10px;
       z-index:1;
       opacity:0;
@@ -93,24 +88,35 @@
     #send:hover { background:#666; }
 
     @media(max-width:600px){
-      #app { padding:10px 2px 2px; height:calc(100vh - 80px); margin-top:55px; }
-      .chat-container { width:96%; margin:0 auto; }
+      .top-bar{height:41px;}
+      .top-bar-content{height:41px;}
+      .top-logo{width:33px; margin-left:7px; margin-right:7px;}
+      .top-title{font-size:1.45rem;}
+      .top-burger{width:26px; height:23px; margin-right:8px;}
+      .top-burger span{height:4px;}
+      #app { margin-top:48px; }
       .loader-logo { width:80px; margin-right:8px; }
       .loader-title { font-size:2.1rem; }
       .loader-subtitle { font-size:1.1rem; }
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; }
-      .header-lang { padding:7px 4px 0 0; }
-      .header-title { font-size:1.1rem; }
-      .burger-icon { width:22px; height:16px; margin-left:10px; }
-      .burger-icon span { height:3px; }
-      .header-logo-small { width:19px; margin-right:4px; }
-      .header-box { margin-right:15px; }
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-content">
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo"/>
+      <span class="top-title">Neurona</span>
+    </div>
+    <div class="top-burger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
   <div id="loader">
     <div class="loader-content">
       <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo"/>
@@ -121,15 +127,6 @@
     </div>
   </div>
   <div id="app">
-    <div class="header-lang">
-      <div class="header-box">
-        <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="header-logo-small" alt="logo"/>
-        <div class="header-title">Neurona</div>
-      </div>
-      <div class="burger-icon">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
     <div class="chat-container">
       <div id="messages"></div>
       <div class="input-area">
@@ -227,7 +224,7 @@
       const d = document.createElement('div');
       d.className = `message ${who}`;
       // автоматически преобразовывать ссылки в тексте
-      d.innerHTML = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+      d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
     }
@@ -249,7 +246,6 @@
       try {
         const res = await fetch(CMC_ENDPOINT);
         const js  = await res.json();
-        const url = 'https://coinmarketcap.com/';
         const list = js.data.map(c=>({
           s:c.symbol,
           p:c.quote.USD.price,
