@@ -110,7 +110,7 @@
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
     .message.typing { font-style:italic; color:#666; }
-    .message a { color:#206ad7; text-decoration:underline; font-weight:bold;}
+    .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
     .message .neurona-title {
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
@@ -119,9 +119,14 @@
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
     #send:hover { background:#666; }
-    ul, ol { padding-left: 23px; margin: 6px 0; }
-    li { margin-bottom: 2px; }
-    p { margin: 5px 0; }
+    ol, ul {
+      margin: 12px 0 12px 15px;
+      padding-left: 24px;
+    }
+    ol { list-style: decimal inside; }
+    ul { list-style: disc inside; }
+    li { margin-bottom: 5px; line-height: 1.5; }
+    p { margin: 7px 0; }
     @media(max-width:600px){
       body{padding:0;}
       .top-bar{height:38px;}
@@ -174,7 +179,7 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (оставляй как есть)
+    // --- Фон-анимация
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -215,7 +220,7 @@
           msgsContainer = document.getElementById('messages');
     msgsContainer.addEventListener('click', ()=> input.blur());
 
-    // --- предотвращаем "пропадание" содержимого после клика по ссылке
+    // предотвращаем "пропадание" после клика по ссылке
     msgsContainer.addEventListener('click', function(e){
       if(e.target.tagName === 'A') e.stopPropagation();
     }, true);
@@ -345,27 +350,37 @@ ${memoryText}
       }
     }
 
-    // --- Форматирование HTML-ответа
+    // --- Новый форматер ответов: делает ровные списки и абзацы, заменяет markdown-ссылки на красивые ---
     function formatBotMessage(text) {
-      // Переводит буллеты и абзацы в HTML (очистка от звёздочек)
-      text = text.replace(/\n\s*[\-\•]\s*/g, '</p><ul><li>')
-                 .replace(/\n\s*\d+\.\s*/g, '</p><ol><li>')
-                 .replace(/\n{2,}/g, '</p><p>')
-                 .replace(/<\/ul><li>/g, '<li>')
-                 .replace(/<\/ol><li>/g, '<li>')
-                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // на всякий случай убрать markdown
-                 .replace(/\*/g, '') // убрать все одиночные звёздочки
-                 .replace(/<p><\/p>/g, '')
-                 .replace(/<\/li>(?!<\/ul>)/g, '</li>')
-                 .replace(/<\/li><\/li>/g, '</li>');
-      // Абзацы
+      // Markdown-ссылки [текст](ссылка) => <a href="ссылка" ...>текст</a>
+      text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
+      // Markdown bold **текст** -> <b>текст</b>
+      text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
+      // Упорядоченные списки 1., 2., ... в <ol>
+      text = text.replace(/((?:^\d+\..+\n?)+)/gm, (block) => {
+        let items = block.trim().split(/\n/).filter(Boolean).map(str =>
+          '<li>' + str.replace(/^\d+\.\s?/, '').trim() + '</li>'
+        ).join('');
+        return '<ol>' + items + '</ol>';
+      });
+      // Буллет-списки (-, •) в <ul>
+      text = text.replace(/((?:^[-•]\s.+\n?)+)/gm, (block) => {
+        let items = block.trim().split(/\n/).filter(Boolean).map(str =>
+          '<li>' + str.replace(/^[-•]\s?/, '').trim() + '</li>'
+        ).join('');
+        return '<ul>' + items + '</ul>';
+      });
+      // Переводы строк в абзацы <p>
+      text = text.replace(/\n{2,}/g, '</p><p>');
+      text = text.replace(/\n/g, '<br>');
       if (!/^<p>/.test(text)) text = '<p>' + text;
-      text = text.replace(/(<br\s*\/?>)+/g, '</p><p>');
-      text = text.replace(/<\/ul>\s*<ul>/g, '');
+      text = text.replace(/(<ol>|<ul>)/g, '</p>$1<p>');
+      text = text.replace(/<\/ol>|<\/ul>/g, '$&<p>');
+      text = text.replace(/<p><\/p>/g, '');
       return text;
     }
 
-    // --- Typewriter эффект для бота (HTML форматирование)
+    // --- Typewriter эффект для бота (с учётом форматирования)
     function typeWriterEffect(text, who, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
@@ -377,7 +392,7 @@ ${memoryText}
           d.innerHTML = formatted.slice(0, i);
           scrollChatToBottom();
           i++;
-          setTimeout(type, 8 + Math.random() * 22);
+          setTimeout(type, 6 + Math.random() * 18);
         } else if (cb) cb();
       }
       type();
