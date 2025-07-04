@@ -1,4 +1,3 @@
-// server/index.js
 require('dotenv').config();
 const express = require('express');
 const fetch   = require('node-fetch');
@@ -22,6 +21,20 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
+// Новый endpoint: TradingView simple parser (support/resistance)
+app.get('/api/tview', async (req, res) => {
+  try {
+    const symbol = (req.query.symbol||'BTC').toUpperCase();
+    const url = `https://www.tradingview.com/symbols/${symbol}USD/technicals/`;
+    const page = await fetch(url).then(r=>r.text());
+    const support = page.match(/Support[\s\S]*?(\$[0-9,]+)/i)?.[1] || null;
+    const resistance = page.match(/Resistance[\s\S]*?(\$[0-9,]+)/i)?.[1] || null;
+    res.json({ support, resistance, url });
+  } catch (e) {
+    res.json({ support:null, resistance:null, url:null });
+  }
+});
+
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -40,7 +53,6 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-// Single page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
