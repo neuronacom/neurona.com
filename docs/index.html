@@ -7,101 +7,97 @@
   <title>Neurona 1.0</title>
   <style>
     /* Сброс */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin:0; padding:0; }
+
     /* Общий шрифт */
     body, textarea, button { font-family: Arial, sans-serif; }
+
     /* Фон и центрирование */
     body {
-      background: #ffffff;
-      color: #000000;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+      background:#fff; color:#000;
+      height:100vh; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      position:relative;
     }
+
     /* Фон «нейросеть» */
     #bg {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0; opacity: 0.8;
-      transition: opacity 1s ease;
+      position:fixed; top:0; left:0;
+      width:100%; height:100%;
+      z-index:0; opacity:0.8; transition:opacity 1s ease;
     }
-    body.loaded #bg { opacity: 0.2; }
+    body.loaded #bg { opacity:0.2; }
+
     /* Заставка */
     #loader {
-      position: fixed; inset: 0;
-      background: rgba(255,255,255,0.9);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1001; flex-direction: column;
+      position:fixed; inset:0;
+      background:rgba(255,255,255,0.9);
+      display:flex; align-items:center; justify-content:center;
+      z-index:1001; flex-direction:column;
     }
     .loader-content {
-      display: flex; align-items: center;
-      animation: fade 8s ease-in-out infinite;
+      display:flex; align-items:center;
+      animation:fade 8s ease-in-out infinite;
     }
-    .loader-logo { width: 100px; margin-right: 12px; }
-    .loader-text { display: flex; flex-direction: column; align-items: center; }
-    .loader-title { font-size: 4rem; letter-spacing: .1em; color: #000; }
-    .loader-subtitle { font-size: 1.5rem; letter-spacing: .05em; color: #000; margin-top: 4px; }
-    @keyframes fade { 0%,100% { opacity: 0; } 50% { opacity: 1; } }
+    .loader-logo { width:100px; margin-right:12px; }
+    .loader-text { display:flex; flex-direction:column; align-items:center; }
+    .loader-title { font-size:4rem; letter-spacing:.1em; color:#000; }
+    .loader-subtitle { font-size:1.5rem; letter-spacing:.05em; color:#000; margin-top:4px; }
+    @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
+
     /* Основное приложение */
     #app {
-      position: relative; display: flex; flex-direction: column;
-      width: 100%; max-width: 600px; height: 100%;
-      padding: 20px 10px 10px; z-index: 1; opacity: 0;
-      transition: opacity 1s ease;
+      position:relative; display:flex; flex-direction:column;
+      width:100%; max-width:600px; height:100%;
+      padding:20px 10px 10px;
+      z-index:1; opacity:0; transition:opacity 1s ease;
     }
-    body.loaded #app { opacity: 1; }
+    body.loaded #app { opacity:1; }
+
     /* Заголовок */
-    .header-lang { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+    .header-lang { display:flex; justify-content:center; align-items:center; margin-bottom:10px; }
+
     /* Окно чата */
     .chat-container {
-      flex: 1; background: rgba(255,255,255,0.9);
-      border-radius: 8px; border: 1px solid #cccccc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column; overflow: hidden;
+      flex:1; background:rgba(255,255,255,0.9);
+      border-radius:8px; border:1px solid #ccc;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      display:flex; flex-direction:column; overflow:hidden;
     }
     #messages {
-      flex: 1; display: flex; flex-direction: column;
-      padding: 15px; overflow-y: auto;
+      flex:1; display:flex; flex-direction:column;
+      padding:15px; overflow-y:auto;
     }
     .message {
-      margin: 5px 0; line-height: 1.4; max-width: 80%; word-wrap: break-word;
-      padding: 8px 12px; border-radius: 12px; color: #000;
+      margin:5px 0; line-height:1.4; max-width:80%; word-wrap:break-word;
+      padding:8px 12px; border-radius:12px; color:#000;
     }
-    .message.user {
-      align-self: flex-end; background: #f0f0f0;
-      border-radius: 12px 12px 0 12px;
-    }
-    .message.bot {
-      align-self: flex-start; background: #e0e0e0;
-      border-radius: 12px 12px 12px 0;
-    }
-    .message.typing { font-style: italic; color: #666; }
+    .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
+    .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
+    .message.typing { font-style:italic; color:#666; }
+
     /* Поле ввода */
-    .input-area {
-      display: flex; padding: 10px; background: #ffffff;
-    }
+    .input-area { display:flex; padding:10px; background:#fff; }
     #input {
-      flex: 1; resize: none; border: 1px solid #cccccc;
-      padding: 12px; border-radius: 4px; height: 50px; font-size: 1rem;
+      flex:1; resize:none; border:1px solid #ccc;
+      padding:12px; border-radius:4px; height:50px; font-size:1rem;
     }
     #send {
-      margin-left: 8px; padding: 0 16px; border: none;
-      border-radius: 4px; background: #444; color: #fff;
-      font-size: 1rem; cursor: pointer; transition: background .2s;
+      margin-left:8px; padding:0 16px; border:none;
+      border-radius:4px; background:#444; color:#fff;
+      font-size:1rem; cursor:pointer; transition:background .2s;
     }
-    #send:hover { background: #666; }
+    #send:hover { background:#666; }
+
     /* Адаптив */
-    @media (max-width: 600px) {
-      #app { padding: 15px 5px 5px; }
-      .chat-container { width: 90%; margin: 0 auto; }
-      .loader-logo { width: 80px; margin-right: 8px; }
-      .loader-title { font-size: 3rem; }
-      .loader-subtitle { font-size: 1.2rem; }
-      #input { font-size: .9rem; height: 40px; }
-      #send { font-size: .9rem; padding: 0 12px; }
+    @media(max-width:600px){
+      #app { padding:15px 5px 5px; }
+      .chat-container { width:90%; margin:0 auto; }
+      .loader-logo { width:80px; margin-right:8px; }
+      .loader-title { font-size:3rem; }
+      .loader-subtitle { font-size:1.2rem; }
+      #input { font-size:.9rem; height:40px; }
+      #send { font-size:.9rem; padding:0 12px; }
     }
   </style>
 </head>
@@ -128,248 +124,250 @@
     </div>
   </div>
 
-  <!-- Подключаем файл env.js (игнорируется Git) -->
-  <script src="env.js"></script>
-
   <script>
-    // 1. Анимация фона
-    const canvasEl = document.getElementById('bg'), ctx = canvasEl.getContext('2d');
-    let W, H, nodes;
-    function resize() { W = canvasEl.width = innerWidth; H = canvasEl.height = innerHeight; }
-    window.addEventListener('resize', resize);
-    function init() {
-      nodes = [];
-      for (let i = 0; i < 30; i++) {
-        nodes.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5
-        });
+    // 1. Фоновые точки
+    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+    let W,H,nodes;
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    window.addEventListener('resize',resize);
+    function init(){
+      nodes=[]; for(let i=0;i<30;i++){
+        nodes.push({ x:Math.random()*W, y:Math.random()*H,
+                     vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5 });
       }
     }
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      nodes.forEach((a, i) => {
-        nodes.slice(i + 1).forEach(b => {
-          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
-          if (d < 200) {
-            ctx.strokeStyle = `rgba(0,0,0,${(200 - d) / 200})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        });
-      });
-      nodes.forEach(n => {
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < 0 || n.x > W) n.vx *= -1;
-        if (n.y < 0 || n.y > H) n.vy *= -1;
-        ctx.fillStyle = 'rgba(0,0,0,1)';
+    function draw(){
+      ctx.clearRect(0,0,W,H); ctx.lineCap='round'; ctx.lineJoin='round';
+      nodes.forEach((a,i)=>{ nodes.slice(i+1).forEach(b=>{
+        const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<200){
+          ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200})`;
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y);
+          ctx.lineTo(b.x,b.y);
+          ctx.stroke();
+        }
+      });});
+      nodes.forEach(n=>{
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        ctx.fillStyle='rgba(0,0,0,1)';
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
+        ctx.arc(n.x,n.y,3.5,0,Math.PI*2);
         ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // 2. Элементы управления
+    // 2. Управление
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
-          msgs = document.getElementById('messages');
-    msgs.addEventListener('click', () => input.blur());
+          msgsContainer = document.getElementById('messages');
+    msgsContainer.addEventListener('click',()=>input.blur());
 
     // 3. i18n
-    const i18nMap = {
-      en: { ph: "Type a message...", send: "Send" },
-      ru: { ph: "Напишите сообщение...", send: "Отправить" },
-      ua: { ph: "Введіть повідомлення...", send: "Надіслати" }
+    const i18n = {
+      en:{ph:"Type a message...",send:"Send"},
+      ru:{ph:"Напишите сообщение...",send:"Отправить"},
+      ua:{ph:"Введіть повідомлення...",send:"Надіслати"}
     };
-    let lang = navigator.language.slice(0, 2);
-    if (!i18nMap[lang]) lang = 'en';
-    input.placeholder = i18nMap[lang].ph;
-    sendBtn.textContent = i18nMap[lang].send;
+    let lang = navigator.language.slice(0,2);
+    if(!i18n[lang]) lang='en';
+    input.placeholder = i18n[lang].ph;
+    sendBtn.textContent = i18n[lang].send;
 
     // 4. Прелоадер
-    window.addEventListener('load', () => setTimeout(() => {
-      document.getElementById('loader').style.display = 'none';
+    window.addEventListener('load',()=>setTimeout(()=>{
+      document.getElementById('loader').style.display='none';
       document.body.classList.add('loaded');
       loadHistory();
-    }, 8000));
+    },8000));
 
     // 5. История
-    let messages = [];
-    function saveHistory() { localStorage.setItem('neurona_history', JSON.stringify(messages)); }
-    function loadHistory() {
-      const h = JSON.parse(localStorage.getItem('neurona_history') || '[]');
-      if (h.length) {
-        messages = h;
-        h.forEach(m => addMessage(m.content, m.role));
-      }
+    let messages=[];
+    function saveHistory(){ localStorage.setItem('neurona_history',JSON.stringify(messages)); }
+    function loadHistory(){
+      const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
+      if(h.length){ messages=h; h.forEach(m=>addMessage(m.content,m.role)); }
     }
 
     // 6. Системное сообщение
-    function getSystemMessage() {
-      const today = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-      return {
-        role: 'system',
-        content:
+    function getSystemMessage(){
+      const today=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+      return { role:'system', content:
 `Ты — Neurona 1.0, лицензированный AI-продукт.
 Сегодня ${today}.
 Отвечай на языке пользователя.
-Пиши:
+Предоставляй:
 — последние крипто-новости;
-— цены топ-5 из CMC, Gecko, CoinAPI;
-— прогноз Bitcoin;
+— цены топ-5 монет из CoinMarketCap, CoinGecko и CoinAPI;
+— прогноз цены Bitcoin на завтра;
 — рекомендации LONG/SHORT;
 — общие новости.
-Без ссылок.`
-      };
+Без ссылок на сайты.` };
     }
 
-    // 7. Вывод сообщений
-    function addMessage(text, who) {
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      d.textContent = text;
-      msgs.appendChild(d);
-      msgs.scrollTop = msgs.scrollHeight;
+    // 7. Вывод
+    function addMessage(text,who){
+      const d=document.createElement('div');
+      d.className=`message ${who}`; d.textContent=text;
+      msgsContainer.appendChild(d);
+      msgsContainer.scrollTop=msgsContainer.scrollHeight;
     }
-    function addTyping() {
-      const d = document.createElement('div');
-      d.className = 'message bot typing';
-      d.textContent = '...';
-      msgs.appendChild(d);
-      msgs.scrollTop = msgs.scrollHeight;
+    function addTyping(){
+      const d=document.createElement('div');
+      d.className='message bot typing'; d.textContent='...';
+      msgsContainer.appendChild(d);
+      msgsContainer.scrollTop=msgsContainer.scrollHeight;
       return d;
     }
 
-    // 8. Чтение ключей из env.js
-    const {
-      OPENAI_API_KEY,
-      CMC_API_KEY,
-      COINAPI_KEY,
-      GNEWS_API_KEY,
-      NEWSAPI_KEY
-    } = window._env_;
+    // 8. Ключи
+    const OPENAI_API_KEY   = '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',
+          OPENAI_ENDPOINT  = 'https://api.openai.com/v1/chat/completions',
+          CMC_API_KEY      = 'df5cedf1-5fa4-4641-b0b4-1fcc20f6925b',
+          COINAPI_KEY      = 'aade6fac0aaf9ab8c5d28e5d7760cb1a8d98beeb6fc99fd2a4b84ec6c4f83a55',
+          GNEWS_API_KEY    = '98bc30eaa117747c8b5b8de68d8ae960',
+          NEWSAPI_KEY      = 'ecc4cccff281465da6a16b244953a37c';
 
-    // 9. Функции для данных
-    async function fetchCMC() {
-      const js = await fetch(
-        'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=5&convert=USD',
-        { headers: { 'X-CMC_PRO_API_KEY': CMC_API_KEY } }
-      ).then(r => r.json());
-      return js.data.map(c =>
-        `${c.symbol}: $${c.quote.USD.price.toFixed(2)} (${c.quote.USD.percent_change_24h.toFixed(2)}%)`
-      ).join('\n');
-    }
-    async function fetchCoinGecko() {
-      const js = await fetch(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1'
-      ).then(r => r.json());
-      return js.map(c =>
-        `${c.symbol.toUpperCase()}: $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)`
-      ).join('\n');
-    }
-    async function fetchCoinAPI() {
-      const arr = await Promise.all(['BTC','ETH','XRP','LTC','BCH'].map(async s => {
-        const js = await fetch(
-          `https://rest.coinapi.io/v1/exchangerate/${s}/USD`,
-          { headers: { 'X-CoinAPI-Key': COINAPI_KEY } }
-        ).then(r => r.json());
-        return `${s}: $${js.rate.toFixed(2)}`;
-      }));
-      return arr.join('\n');
-    }
-    async function fetchCryptoNews() {
-      const js = await fetch(
-        `https://gnews.io/api/v4/search?q=cryptocurrency&lang=${lang}&max=5&token=${GNEWS_API_KEY}`
-      ).then(r => r.json());
-      return (js.articles||[]).map(a => `• ${a.title}`).join('\n');
-    }
-    async function fetchGeneralNews() {
-      const js = await fetch(
-        `https://newsapi.org/v2/top-headlines?language=${lang}&pageSize=5&apiKey=${NEWSAPI_KEY}`
-      ).then(r => r.json());
-      return (js.articles||[]).map(a => `• ${a.title}`).join('\n');
-    }
-    async function fetchForecast() {
-      const js = await fetch(
-        'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7'
-      ).then(r => r.json());
-      const arr = js.prices.map((p,i) => ({ x: i, y: p[1] }));
-      const n = arr.length;
-      const sumX = arr.reduce((s,p) => s + p.x, 0),
-            sumY = arr.reduce((s,p) => s + p.y, 0),
-            sumXY = arr.reduce((s,p) => s + p.x*p.y, 0),
-            sumXX = arr.reduce((s,p) => s + p.x*p.x, 0);
-      const m = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX),
-            b = (sumY - m*sumX) / n;
-      return '$' + (b + m*n).toFixed(2);
+    // 9. CoinMarketCap
+    async function fetchCMC(){
+      try {
+        const res=await fetch(
+          'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=5&convert=USD',
+          { headers:{ 'X-CMC_PRO_API_KEY':CMC_API_KEY } }
+        );
+        const js=await res.json();
+        const list=js.data.map(c=>({s:c.symbol,p:c.quote.USD.price,ch:c.quote.USD.percent_change_24h}));
+        const txt=list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%)`).join('\n');
+        const rec=list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%)`).join('\n');
+        return { txt, rec };
+      } catch { return { txt:'нет данных CMC', rec:'' }; }
     }
 
-    // 10. Обработка отправки
-    sendBtn.onclick = async () => {
-      const txt = input.value.trim(); if (!txt) return;
-      if (!messages.length) messages.push(getSystemMessage());
-      messages.push({ role: 'user', content: txt });
-      addMessage(txt, 'user');
-      input.value = '';
-      const typing = addTyping();
+    // 10. CoinGecko
+    async function fetchCoinGecko(){
+      try {
+        const res=await fetch(
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1'
+        );
+        const js=await res.json();
+        return js.map(c=>`${c.symbol.toUpperCase()}: $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)`).join('\n');
+      } catch { return 'нет данных CoinGecko'; }
+    }
 
-      const [cmc, gecko, api, cn, gn, fc] = await Promise.all([
+    // 11. CoinAPI
+    async function fetchCoinAPI(symbols=['BTC','ETH','XRP','LTC','BCH']){
+      try {
+        const rates = await Promise.all(symbols.map(async s=>{
+          const res=await fetch(`https://rest.coinapi.io/v1/exchangerate/${s}/USD`,{ headers:{ 'X-CoinAPI-Key':COINAPI_KEY } });
+          const js=await res.json();
+          return `${s}: $${js.rate.toFixed(2)}`;
+        }));
+        return rates.join('\n');
+      } catch { return 'нет данных CoinAPI'; }
+    }
+
+    // 12. GNews крипто-новости
+    async function fetchGNews(){
+      try {
+        const res=await fetch(
+          `https://gnews.io/api/v4/search?q=cryptocurrency&lang=${lang}&max=5&token=${GNEWS_API_KEY}`
+        );
+        const js=await res.json();
+        return (js.articles||[]).map(a=>`• ${a.title}`).join('\n');
+      } catch { return 'нет новостей GNews'; }
+    }
+
+    // 13. NewsAPI общие новости
+    async function fetchGeneralNews(){
+      try {
+        const res=await fetch(
+          `https://newsapi.org/v2/top-headlines?language=${lang}&pageSize=5&apiKey=${NEWSAPI_KEY}`
+        );
+        const js=await res.json();
+        return (js.articles||[]).map(a=>`• ${a.title}`).join('\n');
+      } catch { return 'нет данных NewsAPI'; }
+    }
+
+    // 14. Прогноз BTC
+    async function fetchForecast(){
+      try {
+        const res=await fetch(
+          'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7'
+        );
+        const js=await res.json();
+        const arr=js.prices.map((p,i)=>({x:i,y:p[1]}));
+        const n=arr.length;
+        const sumX=arr.reduce((s,p)=>s+p.x,0), sumY=arr.reduce((s,p)=>s+p.y,0),
+              sumXY=arr.reduce((s,p)=>s+p.x*p.y,0), sumXX=arr.reduce((s,p)=>s+p.x*p.x,0);
+        const m=(n*sumXY - sumX*sumY)/(n*sumXX - sumX*sumX),
+              b=(sumY - m*sumX)/n;
+        return '$'+(b + m*n).toFixed(2);
+      } catch { return 'нет прогноза'; }
+    }
+
+    // 15. Обработка отправки
+    sendBtn.onclick=async()=>{
+      const txt=input.value.trim(); if(!txt) return;
+      if(!messages.length) messages.push(getSystemMessage());
+      messages.push({role:'user',content:txt});
+      addMessage(txt,'user'); input.value='';
+      const typing=addTyping();
+
+      const [cmc, cg, api, gnews, gnewsAll, forecast] = await Promise.all([
         fetchCMC(), fetchCoinGecko(), fetchCoinAPI(),
-        fetchCryptoNews(), fetchGeneralNews(), fetchForecast()
+        fetchGNews(), fetchGeneralNews(), fetchForecast()
       ]);
 
-      const snapshot = {
-        role: 'system',
+      const snapshot={
+        role:'system',
         content:
 `--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---
-CMC:
-${cmc}
+CMC топ-5:
+${cmc.txt}
 
-Gecko:
-${gecko}
+Рекомендации:
+${cmc.rec}
+
+CoinGecko:
+${cg}
 
 CoinAPI:
 ${api}
 
-Крипто-новости:
-${cn}
+Крипто-новости (GNews):
+${gnews}
 
-Общие новости:
-${gn}
+Общие новости (NewsAPI):
+${gnewsAll}
 
 Прогноз BTC:
-${fc}
+${forecast}
 --------------------------------`
       };
 
-      const payload = {
-        model: 'gpt-4',
-        messages: [ messages[0], snapshot, ...messages.slice(1) ],
-        temperature: 0.7
-      };
+      const payload={ model:'gpt-4', messages:[messages[0],snapshot,...messages.slice(1)], temperature:0.7 };
 
-      const data = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type':'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
-
-      typing.remove();
-      const reply = data.choices[0].message.content;
-      addMessage(reply, 'bot');
-      messages.push({ role: 'assistant', content: reply });
-      saveHistory();
+      try{
+        const resp=await fetch(OPENAI_ENDPOINT,{
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${OPENAI_API_KEY}` },
+          body:JSON.stringify(payload)
+        });
+        const data=await resp.json();
+        const reply=data.choices[0].message.content;
+        typing.remove();
+        addMessage(reply,'bot');
+        messages.push({role:'assistant',content:reply});
+        saveHistory();
+      } catch {
+        typing.remove();
+        addMessage('Внутренняя ошибка, попробуйте позже.','bot');
+      }
     };
   </script>
 </body>
