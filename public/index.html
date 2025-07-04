@@ -110,7 +110,7 @@
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
     .message.typing { font-style:italic; color:#666; }
-    .message a { color:#3366bb; text-decoration:underline; word-break:break-all; }
+    .message a { color:#206ad7; text-decoration:underline; font-weight:bold;}
     .message .neurona-title {
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
@@ -119,6 +119,9 @@
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
     #send:hover { background:#666; }
+    ul, ol { padding-left: 23px; margin: 6px 0; }
+    li { margin-bottom: 2px; }
+    p { margin: 5px 0; }
     @media(max-width:600px){
       body{padding:0;}
       .top-bar{height:38px;}
@@ -171,7 +174,7 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (нейросеть)
+    // --- Фон-анимация (оставляй как есть)
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -211,6 +214,11 @@
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
     msgsContainer.addEventListener('click', ()=> input.blur());
+
+    // --- предотвращаем "пропадание" содержимого после клика по ссылке
+    msgsContainer.addEventListener('click', function(e){
+      if(e.target.tagName === 'A') e.stopPropagation();
+    }, true);
 
     // i18n
     const i18n = {
@@ -268,6 +276,7 @@ ${mood} Сегодня ${today}.
 - Новости всегда ссылайся прямой ссылкой на оригинальную статью, а не только сайт, всегда указывай дату и источник.
 - Если спрашивают про развитие — всегда пиши, что ты учишься, развиваешься, постоянно совершенствуешься.
 - Всегда отвечай по-разному, избегай шаблонов, используй разные стили, добавляй эмодзи по ситуации.
+- Структурируй текст: если есть пункты — выделяй их в списки; важные слова делай жирными; для длинных ответов делай абзацы. Не используй Markdown-звёздочки, делай это HTML-форматированием. Ссылки выделяй цветом и подчёркнутым жирным.
 ${memoryText}
 `
       };
@@ -286,7 +295,7 @@ ${memoryText}
         const res = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(q)}`);
         const js  = await res.json();
         if(js.found){
-          return `${js.name} (${js.symbol.toUpperCase()}): $${js.price} <a href="${js.url}" target="_blank">CoinGecko</a>`;
+          return `<b>${js.name} (${js.symbol.toUpperCase()})</b>: <b>$${js.price}</b> <a href="${js.url}" target="_blank">CoinGecko</a>`;
         } else {
           return '';
         }
@@ -295,7 +304,6 @@ ${memoryText}
       }
     }
 
-    // fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -307,47 +315,66 @@ ${memoryText}
           url:`https://coinmarketcap.com/currencies/${c.slug}/`
         }));
         return {
-          txt: list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
-          rec: list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>')
+          txt: list.map(c=>`<b>${c.s}</b>: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
+          rec: list.map(c=>`<b>${c.s}</b>: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>')
         };
       } catch {
         return { txt:'нет данных CMC', rec:'' };
       }
     }
 
-    // fetchLatestNews
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT);
         const js  = await res.json();
-        return js.articles.map(a=>`<a href="${a.url}" target="_blank">${a.title}</a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
+        return js.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
       } catch {
         return 'нет новостей';
       }
     }
 
-    // TradingView уровни поддержки/сопротивления
     async function fetchTView(symbol){
       try {
         const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
         const js = await res.json();
         if(js && js.support && js.resistance && js.url)
-          return `TradingView анализ для ${symbol}:<br>Поддержка: <b>${js.support}</b><br>Сопротивление: <b>${js.resistance}</b> <a href="${js.url}" target="_blank">TradingView</a>`;
+          return `<b>TradingView анализ для ${symbol}</b>:<br><ul><li>Поддержка: <b>${js.support}</b></li><li>Сопротивление: <b>${js.resistance}</b></li></ul><a href="${js.url}" target="_blank"><b>TradingView</b></a>`;
         return '';
       } catch {
         return '';
       }
     }
 
-    // --- Typewriter эффект для бота
+    // --- Форматирование HTML-ответа
+    function formatBotMessage(text) {
+      // Переводит буллеты и абзацы в HTML (очистка от звёздочек)
+      text = text.replace(/\n\s*[\-\•]\s*/g, '</p><ul><li>')
+                 .replace(/\n\s*\d+\.\s*/g, '</p><ol><li>')
+                 .replace(/\n{2,}/g, '</p><p>')
+                 .replace(/<\/ul><li>/g, '<li>')
+                 .replace(/<\/ol><li>/g, '<li>')
+                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // на всякий случай убрать markdown
+                 .replace(/\*/g, '') // убрать все одиночные звёздочки
+                 .replace(/<p><\/p>/g, '')
+                 .replace(/<\/li>(?!<\/ul>)/g, '</li>')
+                 .replace(/<\/li><\/li>/g, '</li>');
+      // Абзацы
+      if (!/^<p>/.test(text)) text = '<p>' + text;
+      text = text.replace(/(<br\s*\/?>)+/g, '</p><p>');
+      text = text.replace(/<\/ul>\s*<ul>/g, '');
+      return text;
+    }
+
+    // --- Typewriter эффект для бота (HTML форматирование)
     function typeWriterEffect(text, who, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
       msgsContainer.appendChild(d);
       let i = 0;
+      let formatted = formatBotMessage(text);
       function type() {
-        if (i <= text.length) {
-          d.innerHTML = text.slice(0, i).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+        if (i <= formatted.length) {
+          d.innerHTML = formatted.slice(0, i);
           scrollChatToBottom();
           i++;
           setTimeout(type, 8 + Math.random() * 22);
@@ -383,7 +410,6 @@ ${memoryText}
       }, 10);
     }
 
-    // --- Отправка
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -394,7 +420,6 @@ ${memoryText}
 
       const typing = addTyping();
 
-      // Любая крипта через CoinGecko
       let cg = '';
       const match = txt.match(/[A-Za-z0-9\.\-\_ ]{2,15}/g);
       if (match) cg = await fetchCoinGeckoPrice(match[0]);
@@ -403,15 +428,15 @@ ${memoryText}
       const snapshot = {
         role:'system',
         content:
-`--- ДАННЫЕ НА ${new Date().toLocaleTimeString()} ---
-${cg ? "Актуальная цена: " + cg : ""}
-CMC топ-5:
+`<b>ДАННЫЕ НА ${new Date().toLocaleTimeString()}:</b><br>
+${cg ? "<p>" + cg + "</p>" : ""}
+<p>CMC топ-5:</p>
 ${cmc.txt}
 
-Рекомендации:
+<p>Рекомендации:</p>
 ${cmc.rec}
 
-Актуальные новости:
+<p>Актуальные новости:</p>
 ${latestNews}
 -------------------------------`
       };
