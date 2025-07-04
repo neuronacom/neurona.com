@@ -18,14 +18,13 @@
       position:fixed; top:0; left:0;
       width:100vw; height:100vh;
       z-index:0;
-      opacity:1; /* всегда видно во время загрузки! */
-      transition:opacity 1.4s;
       pointer-events:none;
       background:transparent;
+      opacity:1;
+      transition:opacity 1.5s cubic-bezier(.16,1.03,.37,1.02);
     }
     body.loaded #bg {
-      opacity:0.19; /* после загрузки тусклее */
-      transition:opacity 1.4s;
+      opacity:0.23;
     }
     .top-bar {
       width:100vw; position:fixed; top:0; left:0; z-index:10;
@@ -164,40 +163,76 @@
     </div>
   </div>
   <script>
-    // --- Canvas-анимация нейросети, четкие черные линии, всегда работает ---
+    // Canvas-анимация нейросети: четкие черные линии, разная видимость во время/после загрузки
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
-    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    let animationSettings = {
+      lineWidth: 2.8,
+      lineOpacity: 0.89,
+      pointRadius: 4.8,
+      pointOpacity: 0.48
+    };
+    function resize() {
+      W=canvas.width=innerWidth; H=canvas.height=innerHeight;
+    }
     window.addEventListener('resize', resize);
-    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7 })); }
-    function draw(){
+    function init() {
+      nodes = Array.from({length:30}).map(_=>({
+        x:Math.random()*W,
+        y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.8,
+        vy:(Math.random()-0.5)*0.8
+      }));
+    }
+    function draw() {
       ctx.clearRect(0,0,W,H);
       ctx.lineCap='round'; ctx.lineJoin='round';
-      nodes.forEach((a,i)=>{
-        nodes.slice(i+1).forEach(b=>{
+      for(let i=0;i<nodes.length;i++){
+        for(let j=i+1;j<nodes.length;j++){
+          const a=nodes[i], b=nodes[j];
           const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
           if(d<200){
-            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.72})`;
-            ctx.lineWidth=2.15;
+            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*animationSettings.lineOpacity})`;
+            ctx.lineWidth=animationSettings.lineWidth;
             ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
           }
-        });
-      });
+        }
+      }
       nodes.forEach(n=>{
         n.x+=n.vx; n.y+=n.vy;
         if(n.x<0||n.x>W) n.vx*=-1;
         if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(0,0,0,0.29)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,4.2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=`rgba(0,0,0,${animationSettings.pointOpacity})`;
+        ctx.beginPath(); ctx.arc(n.x,n.y,animationSettings.pointRadius,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
+    // Делаем линии и точки заметнее во время загрузки:
+    function setBgAnimationLoading(isLoading) {
+      if(isLoading){
+        animationSettings.lineWidth = 2.8;
+        animationSettings.lineOpacity = 0.89;
+        animationSettings.pointRadius = 4.8;
+        animationSettings.pointOpacity = 0.48;
+        canvas.style.opacity = "1";
+      }else{
+        animationSettings.lineWidth = 1.75;
+        animationSettings.lineOpacity = 0.29;
+        animationSettings.pointRadius = 3.5;
+        animationSettings.pointOpacity = 0.19;
+        canvas.style.opacity = "0.23";
+      }
+    }
+
+    setBgAnimationLoading(true); // при старте
+
     // UI
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
-          msgsContainer = document.getElementById('messages');
+          msgsContainer = document.getElementById('messages'),
+          appBlock = document.getElementById('app');
     msgsContainer.addEventListener('click', ()=> input.blur());
 
     // i18n
@@ -211,7 +246,21 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Прелоадер и плавное появление canvas/чата ---
+    // Прелоадер, плавное появление, правильная центровка
+    function fixChatPosition(){
+      setTimeout(()=>{
+        let appH = appBlock.offsetHeight;
+        let space = window.innerHeight-appH;
+        if(window.innerWidth<=600){
+          appBlock.style.marginTop = (space>60?space/2:60)+'px';
+        }else{
+          appBlock.style.marginTop = '126px';
+        }
+      },40);
+    }
+    window.addEventListener('resize', fixChatPosition);
+    input.addEventListener('blur', fixChatPosition);
+
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
@@ -220,8 +269,10 @@
           document.body.classList.add('loaded');
           document.getElementById('loader').style.display='none';
           document.getElementById('top-bar').classList.remove('hide');
+          setBgAnimationLoading(false);
           loadHistory();
           scrollChatToBottom();
+          fixChatPosition();
         }, 1400);
       }, 8000);
     });
@@ -277,22 +328,11 @@
       }, 10);
     }
 
-    // Автоцентрирование окна на мобильном при изменении высоты (после клавиатуры)
-    function adjustChatPosition() {
-      setTimeout(()=>{
-        document.getElementById('app').style.marginTop =
-          (window.innerWidth <= 600) ?
-          ((window.innerHeight - document.getElementById('app').offsetHeight) / 2 + 20) + 'px'
-          : '126px';
-      }, 90);
-    }
-    window.addEventListener('resize', ()=>{
-      adjustChatPosition();
-    });
-    input.addEventListener('blur', ()=>{
-      adjustChatPosition();
+    // Центровка всегда после сообщения
+    function afterMessageUi(){
       scrollChatToBottom();
-    });
+      fixChatPosition();
+    }
 
     // Эндпоинты
     const CMC_ENDPOINT    = '/api/cmc';
@@ -371,14 +411,19 @@ ${cg}
         addMessage(reply,'bot');
         messages.push({ role:'assistant', content:reply });
         saveHistory();
-        scrollChatToBottom();
-        adjustChatPosition();
+        afterMessageUi();
       } catch {
         typing.remove();
         addMessage('Внутренняя ошибка, попробуйте позже.','bot');
-        scrollChatToBottom();
+        afterMessageUi();
       }
     };
+
+    // Корректная центровка при каждом вводе
+    input.addEventListener('focus', fixChatPosition);
+    input.addEventListener('input', fixChatPosition);
+    document.addEventListener('visibilitychange', fixChatPosition);
+
   </script>
 </body>
 </html>
