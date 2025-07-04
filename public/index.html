@@ -10,25 +10,28 @@
     body {
       background:#fff; color:#000; height:100vh; overflow:hidden;
       -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
-      /* For Safari: enforce light theme */
       background-color:#fff !important; color:#000 !important;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
-      z-index:0; opacity:0.8; transition:opacity 1s;
+      z-index:0; opacity:0.98; /* почти полностью видим */
+      transition:opacity 1s;
       pointer-events:none;
     }
-    body.loaded #bg { opacity:0.22; }
+    body.loaded #bg { opacity:0.27; }
 
     /* --- TOP BAR --- */
     .top-bar {
       width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
-      background:transparent; height:56px; padding:0; pointer-events:none;
-      transition:opacity .3s;
+      background:transparent; height:56px; padding:0;
+      pointer-events:none; transition:opacity .3s;
     }
-    .top-bar-content { display:flex; align-items:center; height:56px; pointer-events:all; }
-    .top-logo { width:36px; height:auto; margin-left:18px; margin-right:8px; }
+    .top-bar-content {
+      display:flex; align-items:center; height:56px; pointer-events:all;
+      margin-left:18px;
+    }
+    .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
       color:#000; user-select:none;
@@ -36,63 +39,52 @@
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
-      width:36px; height:29px; margin-right:18px;
-      cursor:pointer; pointer-events:all;
-      gap:3.2px;
+      width:36px; height:29px; margin-right:18px; /* больше отступ справа */
+      cursor:pointer; pointer-events:all; gap:3.2px;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
-      background:#000; border-radius:4px; margin:0;
-      transition:background .2s;
+      background:#000; border-radius:4px; margin:0; transition:background .2s;
     }
     .top-burger span:last-child { margin-bottom:0; }
-
     .top-bar.hide { opacity:0; pointer-events:none; }
 
     #loader {
-      position:fixed; inset:0;
-      background:rgba(255,255,255,0.97);
+      position:fixed; inset:0; background:rgba(255,255,255,0.97);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
-      /* анимация и на лого */
     }
     .loader-content {
       display:flex; align-items:center; justify-content:center;
       animation:fade 8s ease-in-out infinite;
     }
     .loader-logo { width:110px; margin-right:18px; }
-    .loader-text {
-      display:flex; flex-direction:column; align-items:center;
-      line-height:1.01;
-    }
+    .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
-      font-size:5.3rem;
-      font-weight:bold;
-      letter-spacing:.14em;
-      color:#000;
+      font-size:5.3rem; font-weight:bold; letter-spacing:.14em; color:#000;
       text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
-      line-height:0.98;
-      text-transform:uppercase;
+      line-height:0.98; text-transform:uppercase;
     }
     .loader-subtitle {
-      font-size:1.38rem;
-      letter-spacing:.06em; color:#222; margin-top:5px;
-      line-height:1.09;
-      font-weight:500;
+      font-size:1.38rem; letter-spacing:.06em; color:#222; margin-top:5px;
+      line-height:1.09; font-weight:500;
     }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
     #app {
       position:relative; display:flex; flex-direction:column;
-      width:100%; max-width:600px; height:calc(100vh - 110px);
-      margin:93px auto 0 auto; padding:0 10px 10px;
+      width:100%; max-width:480px; min-width:310px;
+      height:calc(100vh - 110px);
+      margin:126px auto 0 auto; /* сильнее вниз */
+      padding:0 18px 10px 18px;
       z-index:1; opacity:0; transition:opacity 1s;
     }
     body.loaded #app { opacity:1; }
 
     .chat-container {
-      flex:1; background:rgba(255,255,255,0.93); border-radius:10px; border:1px solid #ccc;
-      box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden;
+      flex:1; background:rgba(255,255,255,0.93); border-radius:14px; border:1px solid #ccc;
+      box-shadow:0 4px 14px rgba(0,0,0,0.09); display:flex; flex-direction:column; overflow:hidden;
+      max-width:100%;
     }
     #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
     .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
@@ -101,13 +93,8 @@
     .message.typing { font-style:italic; color:#666; }
     .message a { color:#3366bb; text-decoration:underline; word-break:break-all; }
     .message .neurona-title {
-      font-weight:bold;
-      font-size:2.05rem;
-      letter-spacing:.10em;
-      display:block;
-      text-align:center;
-      margin: 0 0 8px 0;
-      text-transform:uppercase;
+      font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
+      text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
 
     .input-area { display:flex; padding:10px; background:#fff; }
@@ -117,12 +104,12 @@
 
     @media(max-width:600px){
       .top-bar{height:38px;}
-      .top-bar-content{height:38px;}
-      .top-logo{width:22px; margin-left:7px; margin-right:7px;}
+      .top-bar-content{height:38px; margin-left:7px;}
+      .top-logo{width:22px; margin-right:7px;}
       .top-title{font-size:1.03rem;}
-      .top-burger{width:27px; height:18px; margin-right:5px;}
+      .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { margin-top:45px; }
+      #app { margin-top:60px; min-width:0; padding:0 4px 7px 4px; }
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
@@ -136,7 +123,6 @@
 </head>
 <body>
   <canvas id="bg"></canvas>
-
   <!-- TOP BAR -->
   <div class="top-bar" id="top-bar">
     <div class="top-bar-content">
@@ -167,21 +153,26 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (нейросеть) — работает всегда ---
+    // --- Фон-анимация (нейросеть) — более яркая/чёткая
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5 })); }
+    function init(){
+      nodes = Array.from({length:33}).map(_=>({
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6
+      }));
+    }
     function draw(){
       ctx.clearRect(0,0,W,H);
       ctx.lineCap='round'; ctx.lineJoin='round';
       nodes.forEach((a,i)=>{
         nodes.slice(i+1).forEach(b=>{
           const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
-          if(d<200){
-            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200})`;
-            ctx.lineWidth=1.3;
+          if(d<240){
+            ctx.strokeStyle=`rgba(0,0,0,${Math.min(0.46,(240-d)/170)})`;
+            ctx.lineWidth=2.1; // Ярче и толще
             ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
           }
         });
@@ -190,8 +181,8 @@
         n.x+=n.vx; n.y+=n.vy;
         if(n.x<0||n.x>W) n.vx*=-1;
         if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(0,0,0,1)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,3.7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(0,0,0,0.95)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,4.4,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
