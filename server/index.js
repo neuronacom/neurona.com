@@ -21,7 +21,25 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// Новый endpoint: TradingView simple parser (support/resistance)
+// Новости с CryptoPanic (рабочие ссылки, дата, источник)
+app.get('/api/news', async (req, res) => {
+  try {
+    // Внимание: auth_token=demo (для теста, замени на свой токен если нужно)
+    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,SOL,BNB,TON`;
+    const r = await fetch(url);
+    const js = await r.json();
+    const articles = js.results.slice(0, 5).map(n => ({
+      title: n.title,
+      url: n.url,
+      time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
+      source: n.domain || 'news'
+    }));
+    res.json({articles});
+  } catch (e) {
+    res.json({ articles: [] });
+  }
+});
+
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol||'BTC').toUpperCase();
