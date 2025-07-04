@@ -220,7 +220,6 @@
           msgsContainer = document.getElementById('messages');
     msgsContainer.addEventListener('click', ()=> input.blur());
 
-    // предотвращаем "пропадание" после клика по ссылке
     msgsContainer.addEventListener('click', function(e){
       if(e.target.tagName === 'A') e.stopPropagation();
     }, true);
@@ -260,7 +259,6 @@
       scrollChatToBottom();
     }
 
-    // --- Новый системный промпт ---
     function getSystemMessage(){
       const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
       const moods = ["😃","😉","🤓","🤖","💡","📊","🧐","🫡","📈","👋","🧠","🔥","😌","🤝","📢","✨"];
@@ -294,19 +292,24 @@ ${memoryText}
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // CoinGecko price (любая крипта)
-    async function fetchCoinGeckoPrice(q){
-      try {
-        const res = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(q)}`);
-        const js  = await res.json();
-        if(js.found){
-          return `<b>${js.name} (${js.symbol.toUpperCase()})</b>: <b>$${js.price}</b> <a href="${js.url}" target="_blank">CoinGecko</a>`;
-        } else {
-          return '';
-        }
-      } catch {
-        return '';
+    // Поиск тикеров и получение цен с CoinGecko (мгновенно)
+    async function fetchAllCoinGeckoPrices(text){
+      const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
+      // Не дублируем и не ищем слишком короткие
+      const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
+      if (!unique.length) return '';
+      let results = [];
+      for (let t of unique) {
+        try {
+          const res = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`);
+          const js = await res.json();
+          if(js.found){
+            results.push(`<b>${js.name} (${js.symbol.toUpperCase()})</b>: <b>$${js.price}</b> <a href="${js.url}" target="_blank">CoinGecko</a>`);
+          }
+        } catch{}
       }
+      if (results.length) return '<ul><li>' + results.join('</li><li>') + '</li></ul>';
+      return '';
     }
 
     async function fetchCMC(){
@@ -350,13 +353,10 @@ ${memoryText}
       }
     }
 
-    // --- Новый форматер ответов: ровная нумерация списков (markdown -> ol) ---
+    // --- Форматер ответа ---
     function formatBotMessage(text) {
-      // Markdown-ссылки [текст](ссылка) => <a href="ссылка" ...>текст</a>
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
-      // Markdown bold **текст** -> <b>текст</b>
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
-      // --- Фикс нумерованных списков, даже если все пункты "1."
       text = text.replace(/((?:^\d+\.\s.*\n?)+)/gm, block => {
         let items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ol>';
@@ -366,7 +366,6 @@ ${memoryText}
         out += '</ol>';
         return out;
       });
-      // Буллет-списки (-, •) в <ul>
       text = text.replace(/((?:^[-•]\s.+\n?)+)/gm, block => {
         let items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ul>';
@@ -376,7 +375,6 @@ ${memoryText}
         out += '</ul>';
         return out;
       });
-      // Переводы строк в абзацы <p>
       text = text.replace(/\n{2,}/g, '</p><p>');
       text = text.replace(/\n/g, '<br>');
       if (!/^<p>/.test(text)) text = '<p>' + text;
@@ -441,22 +439,19 @@ ${memoryText}
 
       const typing = addTyping();
 
-      let cg = '';
-      const match = txt.match(/[A-Za-z0-9\.\-\_ ]{2,15}/g);
-      if (match) cg = await fetchCoinGeckoPrice(match[0]);
+      // Получаем цены по каждому тикеру в сообщении
+      let cgPrices = await fetchAllCoinGeckoPrices(txt);
 
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
       const snapshot = {
         role:'system',
         content:
 `<b>ДАННЫЕ НА ${new Date().toLocaleTimeString()}:</b><br>
-${cg ? "<p>" + cg + "</p>" : ""}
+${cgPrices ? "<p>Актуальные цены:</p>" + cgPrices : ""}
 <p>CMC топ-5:</p>
 ${cmc.txt}
-
 <p>Рекомендации:</p>
 ${cmc.rec}
-
 <p>Актуальные новости:</p>
 ${latestNews}
 -------------------------------`
