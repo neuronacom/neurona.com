@@ -40,6 +40,7 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
+// Single page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
