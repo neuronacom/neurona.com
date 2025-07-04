@@ -444,13 +444,13 @@ ${memoryText}
       }, 10);
     }
 
+    // --- ОТПРАВКА СООБЩЕНИЯ (главное изменение)
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
-      if(!messages.length) messages.push(getSystemMessage());
-      messages.push({ role:'user', content:txt });
       addMessage(txt,'user');
       input.value='';
+      messages.push({ role:'user', content:txt });
 
       const typing = addTyping();
 
@@ -469,9 +469,10 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
+      // ⚡ НЕ СОХРАНЯЕМ SNAPSHOT в messages!
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(), snapshot, ...messages.slice(1)],
+        messages:[getSystemMessage(), snapshot, ...messages],
         temperature:0.88,
         user:"neurona-user"
       };
