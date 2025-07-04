@@ -444,7 +444,7 @@ ${memoryText}
       }, 10);
     }
 
-    // --- ОТПРАВКА СООБЩЕНИЯ (главное изменение)
+    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -469,7 +469,7 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // ⚡ НЕ СОХРАНЯЕМ SNAPSHOT в messages!
+      // Только для запроса — в messages НЕ КЛАДЁМ!
       const payload = {
         model:'gpt-4o',
         messages:[getSystemMessage(), snapshot, ...messages],
