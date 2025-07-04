@@ -18,13 +18,13 @@
       position:fixed; top:0; left:0;
       width:100vw; height:100vh;
       z-index:0;
-      opacity:0.82;
+      opacity:1; /* всегда видно во время загрузки! */
       transition:opacity 1.4s;
       pointer-events:none;
       background:transparent;
     }
     body.loaded #bg {
-      opacity:0.19;
+      opacity:0.19; /* после загрузки тусклее */
       transition:opacity 1.4s;
     }
     .top-bar {
@@ -164,12 +164,12 @@
     </div>
   </div>
   <script>
-    // --- Canvas-анимация нейросети, черные линии, плавная смена прозрачности ---
+    // --- Canvas-анимация нейросети, четкие черные линии, всегда работает ---
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5 })); }
+    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7 })); }
     function draw(){
       ctx.clearRect(0,0,W,H);
       ctx.lineCap='round'; ctx.lineJoin='round';
@@ -177,8 +177,8 @@
         nodes.slice(i+1).forEach(b=>{
           const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
           if(d<200){
-            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.38})`;
-            ctx.lineWidth=1.35;
+            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.72})`;
+            ctx.lineWidth=2.15;
             ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
           }
         });
@@ -187,8 +187,8 @@
         n.x+=n.vx; n.y+=n.vy;
         if(n.x<0||n.x>W) n.vx*=-1;
         if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(0,0,0,0.17)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(0,0,0,0.29)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,4.2,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
