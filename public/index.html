@@ -1,3 +1,4 @@
+<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -8,9 +9,10 @@
     /* (ваши стили без изменений) */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button { font-family:Arial,sans-serif; }
-    body { background:#fff; color:#000; height:100vh; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; }
+    body { background:#fff; color:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; }
     #bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.8; transition:opacity 1s ease; }
     body.loaded #bg { opacity:0.2; }
+
     #loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; z-index:1001; flex-direction:column; }
     .loader-content { display:flex; align-items:center; animation:fade 8s ease-in-out infinite; }
     .loader-logo { width:100px; margin-right:12px; }
@@ -18,21 +20,62 @@
     .loader-title { font-size:4rem; letter-spacing:.1em; color:#000; }
     .loader-subtitle { font-size:1.5rem; letter-spacing:.05em; color:#000; margin-top:4px; }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
-    #app { position:relative; display:flex; flex-direction:column; width:100%; max-width:600px; height:100%; padding:20px 10px 10px; z-index:1; opacity:0; transition:opacity 1s ease; }
+
+    /* сделал окно чуть уже сверху и снизу */
+    #app {
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      width:100%;
+      max-width:600px;
+      height:calc(100vh - 120px);
+      margin:60px auto;
+      padding:20px 10px 10px;
+      z-index:1;
+      opacity:0;
+      transition:opacity 1s ease;
+    }
     body.loaded #app { opacity:1; }
-    .header-lang { display:flex; justify-content:center; align-items:center; margin-bottom:10px; }
+
+    /* новый header */
+    .header-lang {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .header-left { display:flex; align-items:center; }
+    .header-logo-small { width:24px; height:auto; margin-right:8px; }
+    .header-title { font-weight:bold; font-size:1.5rem; color:#000; }
+    .burger-icon {
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      width:20px;
+      height:15px;
+      cursor:pointer;
+    }
+    .burger-icon span {
+      display:block;
+      height:2px;
+      background:#000;
+      border-radius:1px;
+    }
+
     .chat-container { flex:1; background:rgba(255,255,255,0.9); border-radius:8px; border:1px solid #ccc; box-shadow:0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; overflow:hidden; }
     #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
     .message { margin:5px 0; line-height:1.4; max-width:80%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
     .message.typing { font-style:italic; color:#666; }
+
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
     #send:hover { background:#666; }
+
     @media(max-width:600px){
-      #app { padding:15px 5px 5px; }
+      #app { padding:15px 5px 5px; height:calc(100vh - 80px); margin:40px auto; }
       .chat-container { width:90%; margin:0 auto; }
       .loader-logo { width:80px; margin-right:8px; }
       .loader-title { font-size:3rem; }
@@ -55,7 +98,15 @@
   </div>
 
   <div id="app">
-    <div class="header-lang"><div class="header">Neurona 1.0</div></div>
+    <div class="header-lang">
+      <div class="header-left">
+        <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="header-logo-small" alt="logo"/>
+        <div class="header-title">Neurona</div>
+      </div>
+      <div class="burger-icon">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
     <div class="chat-container">
       <div id="messages"></div>
       <div class="input-area">
@@ -71,10 +122,7 @@
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init(){ nodes = Array.from({length:30}).map(_=>({
-      x:Math.random()*W, y:Math.random()*H,
-      vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5
-    })); }
+    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5 })); }
     function draw(){
       ctx.clearRect(0,0,W,H);
       ctx.lineCap='round'; ctx.lineJoin='round';
@@ -140,6 +188,9 @@
 `Ты — Neurona 1.0, лицензированный AI-продукт.
 Сегодня ${today}.
 Отвечай на языке пользователя.
+Используй самую продвинутую модель OpenAI.
+Отвечай максимально быстро.
+Запоминай историю и обучайся непрерывно.
 Предоставляй:
 — последние крипто-новости;
 — цены топ-5 монет;
@@ -170,25 +221,22 @@
     const CMC_ENDPOINT    = '/api/cmc';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // 9. fetchCMC через наш прокси
+    // 9. fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
         const js  = await res.json();
-        const list = js.data.map(c=>({
-          s:c.symbol,
-          p:c.quote.USD.price,
-          ch:c.quote.USD.percent_change_24h
-        }));
-        const txt = list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%)`).join('\n');
-        const rec = list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%)`).join('\n');
-        return { txt, rec };
+        const list = js.data.map(c=>({ s:c.symbol, p:c.quote.USD.price, ch:c.quote.USD.percent_change_24h }));
+        return {
+          txt: list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%)`).join('\n'),
+          rec: list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%)`).join('\n')
+        };
       } catch {
         return { txt:'нет данных CMC', rec:'' };
       }
     }
 
-    // 10. CoinGecko (без ключей)
+    // 10. CoinGecko
     async function fetchCoinGecko(){
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1');
@@ -199,9 +247,7 @@
       }
     }
 
-    // остальные fetch… можете тоже проксировать или оставить как есть
-
-    // 14. обработка отправки
+    // 14. отправка
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -211,7 +257,6 @@
       input.value='';
 
       const typing = addTyping();
-
       const [cmc, cg] = await Promise.all([ fetchCMC(), fetchCoinGecko() ]);
 
       const snapshot = {
@@ -230,7 +275,7 @@ ${cg}
 --------------------------------`
       };
 
-      const payload = { model:'gpt-4', messages:[messages[0], snapshot, ...messages.slice(1)], temperature:0.7 };
+      const payload = { model:'gpt-4o', messages:[messages[0], snapshot, ...messages.slice(1)], temperature:0.7 };
 
       try {
         const resp = await fetch(OPENAI_ENDPOINT, {
