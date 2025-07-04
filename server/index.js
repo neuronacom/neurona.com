@@ -7,6 +7,7 @@ const app     = express();
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
+// CMC Топ-5 (как было)
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -21,11 +22,10 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// Новости с CryptoPanic (рабочие ссылки, дата, источник)
+// Новости CryptoPanic (заголовок — прямая ссылка!)
 app.get('/api/news', async (req, res) => {
   try {
-    // Внимание: auth_token=demo (для теста, замени на свой токен если нужно)
-    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,SOL,BNB,TON`;
+    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true`;
     const r = await fetch(url);
     const js = await r.json();
     const articles = js.results.slice(0, 5).map(n => ({
@@ -40,6 +40,30 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
+// CoinGecko API (любой тикер/имя!)
+app.get('/api/coingecko', async (req, res) => {
+  try {
+    const query = (req.query.q || '').trim().toLowerCase();
+    if(!query) return res.json({found:false});
+    const cg = await fetch('https://api.coingecko.com/api/v3/coins/list').then(r=>r.json());
+    let coin = cg.find(c=>c.symbol.toLowerCase()===query) ||
+               cg.find(c=>c.id.toLowerCase()===query) ||
+               cg.find(c=>c.name.toLowerCase()===query);
+    if(!coin) return res.json({found:false});
+    const market = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`).then(r=>r.json());
+    res.json({
+      found:true,
+      name:coin.name,
+      symbol:coin.symbol,
+      price: market[coin.id]?.usd || '0',
+      url: `https://www.coingecko.com/en/coins/${coin.id}`
+    });
+  } catch {
+    res.json({found:false});
+  }
+});
+
+// TradingView уровни
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol||'BTC').toUpperCase();
@@ -53,6 +77,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
+// OpenAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -71,6 +96,7 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
+// SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
