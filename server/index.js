@@ -5,11 +5,9 @@ const fetch   = require('node-fetch');
 const path    = require('path');
 const app     = express();
 
-// раздача фронтенда
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
-// прокси CoinMarketCap
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -24,7 +22,6 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// прокси OpenAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -43,7 +40,6 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-// fallback для роутинга
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
