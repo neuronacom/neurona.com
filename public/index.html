@@ -14,15 +14,18 @@
       background-color:#fff !important; color:#000 !important;
       transition:background .2s;
     }
-    /* SVG фон — нейросеть */
-    #neuro-bg {
+    #bg {
       position:fixed; top:0; left:0;
       width:100vw; height:100vh;
       z-index:0;
+      opacity:0.82;
+      transition:opacity 1.4s;
       pointer-events:none;
-      opacity:0.27;
-      transition:opacity .7s;
-      display:block;
+      background:transparent;
+    }
+    body.loaded #bg {
+      opacity:0.19;
+      transition:opacity 1.4s;
     }
     .top-bar {
       width:100vw; position:fixed; top:0; left:0; z-index:10;
@@ -131,8 +134,7 @@
   </style>
 </head>
 <body>
-  <!-- SVG-анимация нейросети -->
-  <svg id="neuro-bg"></svg>
+  <canvas id="bg"></canvas>
   <!-- TOP BAR -->
   <div class="top-bar" id="top-bar">
     <div class="top-bar-content">
@@ -162,45 +164,35 @@
     </div>
   </div>
   <script>
-    // SVG-анимация нейросети
-    function genNeuroSVG(w, h, nodes = 21, lines = 2) {
-      let points = [];
-      for(let i=0;i<nodes;i++) {
-        points.push({
-          x: Math.round(Math.random()*w),
-          y: Math.round(Math.random()*h)
+    // --- Canvas-анимация нейросети, черные линии, плавная смена прозрачности ---
+    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+    let W, H, nodes;
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    window.addEventListener('resize', resize);
+    function init(){ nodes = Array.from({length:30}).map(_=>({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5 })); }
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      nodes.forEach((a,i)=>{
+        nodes.slice(i+1).forEach(b=>{
+          const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+          if(d<200){
+            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*0.38})`;
+            ctx.lineWidth=1.35;
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+          }
         });
-      }
-      let svg = '';
-      // Соединяем несколько линий
-      for(let l=0;l<lines;l++){
-        let idx = [...Array(nodes).keys()].sort(()=>Math.random()-0.5);
-        svg += '<polyline points="';
-        for(let i=0;i<nodes;i++) svg += `${points[idx[i]].x},${points[idx[i]].y} `;
-        svg += `" fill="none" stroke="#222" stroke-width="1.2" opacity="0.18"/>`;
-      }
-      // Больше соединений (слой 2)
-      for(let l=0;l<lines+2;l++){
-        let a = Math.floor(Math.random()*nodes), b = Math.floor(Math.random()*nodes);
-        if(a!==b)
-          svg += `<line x1="${points[a].x}" y1="${points[a].y}" x2="${points[b].x}" y2="${points[b].y}" stroke="#222" stroke-width="1.8" opacity="0.12"/>`;
-      }
-      // Ноды (круги)
-      for(let i=0;i<nodes;i++) {
-        svg += `<circle cx="${points[i].x}" cy="${points[i].y}" r="6" fill="#000" opacity="0.08"/>`;
-      }
-      return svg;
+      });
+      nodes.forEach(n=>{
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        ctx.fillStyle='rgba(0,0,0,0.17)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,Math.PI*2); ctx.fill();
+      });
+      requestAnimationFrame(draw);
     }
-    function animateNeuroNet() {
-      let svg = document.getElementById('neuro-bg');
-      let w = window.innerWidth, h = window.innerHeight;
-      svg.setAttribute('width', w);
-      svg.setAttribute('height', h);
-      svg.innerHTML = genNeuroSVG(w, h, 22, 3);
-    }
-    animateNeuroNet();
-    window.addEventListener('resize', animateNeuroNet);
-    setInterval(animateNeuroNet, 2500);
+    resize(); init(); draw();
 
     // UI
     const input = document.getElementById('input'),
@@ -219,7 +211,7 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Прелоадер без бликов и плавный переход ---
+    // --- Прелоадер и плавное появление canvas/чата ---
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
