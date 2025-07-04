@@ -15,17 +15,14 @@
       transition:background .2s;
     }
     #bg {
-      position:fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      z-index:0;
+      position:fixed; top:0; left:0; width:100vw; height:100vh;
+      z-index:0; opacity:0.98;
+      transition:opacity 1s;
       pointer-events:none;
-      background:transparent;
-      opacity:1;
-      transition:opacity 1.5s cubic-bezier(.16,1.03,.37,1.02);
     }
-    body.loaded #bg {
-      opacity:0.23;
-    }
+    body.loaded #bg { opacity:0.27; }
+
+    /* --- TOP BAR --- */
     .top-bar {
       width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
@@ -84,13 +81,10 @@
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
     #app {
-      position:fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%,-50%);
-      display:flex; flex-direction:column;
+      position:relative; display:flex; flex-direction:column;
       width:100%; max-width:390px; min-width:270px;
       height:calc(100vh - 110px);
+      margin:126px auto 0 auto;
       padding:0 18px 10px 18px;
       z-index:1; opacity:0; transition:opacity 1.2s;
       will-change: opacity, margin-top;
@@ -112,10 +106,12 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
+
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
     #send:hover { background:#666; }
+
     @media(max-width:600px){
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
@@ -123,7 +119,7 @@
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { max-width:100vw; min-width:0; padding:0 4px 7px 4px; height:auto; }
+      #app { margin-top:60px; min-width:0; padding:0 4px 7px 4px; }
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
@@ -166,75 +162,46 @@
     </div>
   </div>
   <script>
-    // Canvas-анимация нейросети: четкие черные линии, разная видимость во время/после загрузки
+    // --- Фон-анимация (нейросеть) — более яркая/чёткая
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
-    let animationSettings = {
-      lineWidth: 2.8,
-      lineOpacity: 0.89,
-      pointRadius: 4.8,
-      pointOpacity: 0.48
-    };
-    function resize() {
-      W=canvas.width=innerWidth; H=canvas.height=innerHeight;
-    }
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
     window.addEventListener('resize', resize);
-    function init() {
-      nodes = Array.from({length:30}).map(_=>({
-        x:Math.random()*W,
-        y:Math.random()*H,
-        vx:(Math.random()-0.5)*0.8,
-        vy:(Math.random()-0.5)*0.8
+    function init(){
+      nodes = Array.from({length:33}).map(_=>({
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6
       }));
     }
-    function draw() {
+    function draw(){
       ctx.clearRect(0,0,W,H);
       ctx.lineCap='round'; ctx.lineJoin='round';
-      for(let i=0;i<nodes.length;i++){
-        for(let j=i+1;j<nodes.length;j++){
-          const a=nodes[i], b=nodes[j];
+      nodes.forEach((a,i)=>{
+        nodes.slice(i+1).forEach(b=>{
           const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
-          if(d<200){
-            ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200*animationSettings.lineOpacity})`;
-            ctx.lineWidth=animationSettings.lineWidth;
+          if(d<240){
+            ctx.strokeStyle=`rgba(0,0,0,${Math.min(0.46,(240-d)/170)})`;
+            ctx.lineWidth=2.1;
             ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
           }
-        }
-      }
+        });
+      });
       nodes.forEach(n=>{
         n.x+=n.vx; n.y+=n.vy;
         if(n.x<0||n.x>W) n.vx*=-1;
         if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle=`rgba(0,0,0,${animationSettings.pointOpacity})`;
-        ctx.beginPath(); ctx.arc(n.x,n.y,animationSettings.pointRadius,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(0,0,0,0.95)';
+        ctx.beginPath(); ctx.arc(n.x,n.y,4.4,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // Делаем линии и точки заметнее во время загрузки:
-    function setBgAnimationLoading(isLoading) {
-      if(isLoading){
-        animationSettings.lineWidth = 2.8;
-        animationSettings.lineOpacity = 0.89;
-        animationSettings.pointRadius = 4.8;
-        animationSettings.pointOpacity = 0.48;
-        canvas.style.opacity = "1";
-      }else{
-        animationSettings.lineWidth = 1.75;
-        animationSettings.lineOpacity = 0.29;
-        animationSettings.pointRadius = 3.5;
-        animationSettings.pointOpacity = 0.19;
-        canvas.style.opacity = "0.23";
-      }
-    }
-
-    setBgAnimationLoading(true); // при старте
-
     // UI
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
+    msgsContainer.addEventListener('click', ()=> input.blur());
 
     // i18n
     const i18n = {
@@ -247,20 +214,7 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // Прелоадер, плавное появление, правильная центровка
-    function centerApp(){
-      // Центрируем по вертикали на всех устройствах (и после появления/закрытия клавиатуры)
-      const app = document.getElementById('app');
-      let h = app.offsetHeight;
-      let vh = window.innerHeight;
-      // смещаем чуть выше центра, чтобы поля были всегда видимы
-      let top = Math.max((vh - h) / 2, 10);
-      app.style.top = top + 'px';
-      app.style.left = '50%';
-      app.style.transform = 'translate(-50%,0)';
-    }
-    window.addEventListener('resize', centerApp);
-    window.addEventListener('orientationchange', centerApp);
+    // --- Прелоадер без бликов и плавный переход ---
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
@@ -269,15 +223,11 @@
           document.body.classList.add('loaded');
           document.getElementById('loader').style.display='none';
           document.getElementById('top-bar').classList.remove('hide');
-          setBgAnimationLoading(false);
           loadHistory();
           scrollChatToBottom();
-          centerApp();
         }, 1400);
       }, 8000);
     });
-    input.addEventListener('blur', centerApp);
-    input.addEventListener('focus', centerApp);
 
     // История (локально)
     let messages = [];
@@ -286,7 +236,6 @@
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
       if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role)); }
       scrollChatToBottom();
-      centerApp();
     }
 
     // Системное сообщение
@@ -315,7 +264,6 @@
       d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
       msgsContainer.appendChild(d);
       scrollChatToBottom();
-      centerApp();
     }
     function addTyping(){
       const d = document.createElement('div');
@@ -323,22 +271,34 @@
       d.textContent = '…';
       msgsContainer.appendChild(d);
       scrollChatToBottom();
-      centerApp();
       return d;
     }
 
     function scrollChatToBottom(){
       setTimeout(()=>{
         msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
-        centerApp();
       }, 10);
     }
 
-    // Центровка всегда после сообщения
-    function afterMessageUi(){
-      scrollChatToBottom();
-      centerApp();
+    // Автоцентрирование окна на мобильном при изменении высоты (после клавиатуры)
+    let prevInnerHeight = window.innerHeight;
+    function adjustChatPosition() {
+      setTimeout(()=>{
+        // Можно добавить кастомное автоцентрирование, но чаще всего margin-top auto хватает
+        document.getElementById('app').style.marginTop =
+          (window.innerWidth <= 600) ?
+          ((window.innerHeight - document.getElementById('app').offsetHeight) / 2 + 20) + 'px'
+          : '126px';
+      }, 90);
     }
+    window.addEventListener('resize', ()=>{
+      adjustChatPosition();
+      prevInnerHeight = window.innerHeight;
+    });
+    input.addEventListener('blur', ()=>{
+      adjustChatPosition();
+      scrollChatToBottom();
+    });
 
     // Эндпоинты
     const CMC_ENDPOINT    = '/api/cmc';
@@ -417,19 +377,14 @@ ${cg}
         addMessage(reply,'bot');
         messages.push({ role:'assistant', content:reply });
         saveHistory();
-        afterMessageUi();
+        scrollChatToBottom();
+        adjustChatPosition();
       } catch {
         typing.remove();
         addMessage('Внутренняя ошибка, попробуйте позже.','bot');
-        afterMessageUi();
+        scrollChatToBottom();
       }
     };
-
-    // Корректная центровка при каждом вводе
-    input.addEventListener('focus', centerApp);
-    input.addEventListener('input', centerApp);
-    document.addEventListener('visibilitychange', centerApp);
-
   </script>
 </body>
 </html>
