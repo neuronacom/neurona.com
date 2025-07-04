@@ -350,25 +350,31 @@ ${memoryText}
       }
     }
 
-    // --- Новый форматер ответов: делает ровные списки и абзацы, заменяет markdown-ссылки на красивые ---
+    // --- Новый форматер ответов: ровная нумерация списков (markdown -> ol) ---
     function formatBotMessage(text) {
       // Markdown-ссылки [текст](ссылка) => <a href="ссылка" ...>текст</a>
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       // Markdown bold **текст** -> <b>текст</b>
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
-      // Упорядоченные списки 1., 2., ... в <ol>
-      text = text.replace(/((?:^\d+\..+\n?)+)/gm, (block) => {
-        let items = block.trim().split(/\n/).filter(Boolean).map(str =>
-          '<li>' + str.replace(/^\d+\.\s?/, '').trim() + '</li>'
-        ).join('');
-        return '<ol>' + items + '</ol>';
+      // --- Фикс нумерованных списков, даже если все пункты "1."
+      text = text.replace(/((?:^\d+\.\s.*\n?)+)/gm, block => {
+        let items = block.trim().split(/\n/).filter(Boolean);
+        let out = '<ol>';
+        for(let i=0; i<items.length; ++i){
+          out += '<li>' + items[i].replace(/^\d+\.\s?/, '').trim() + '</li>';
+        }
+        out += '</ol>';
+        return out;
       });
       // Буллет-списки (-, •) в <ul>
-      text = text.replace(/((?:^[-•]\s.+\n?)+)/gm, (block) => {
-        let items = block.trim().split(/\n/).filter(Boolean).map(str =>
-          '<li>' + str.replace(/^[-•]\s?/, '').trim() + '</li>'
-        ).join('');
-        return '<ul>' + items + '</ul>';
+      text = text.replace(/((?:^[-•]\s.+\n?)+)/gm, block => {
+        let items = block.trim().split(/\n/).filter(Boolean);
+        let out = '<ul>';
+        for(let i=0; i<items.length; ++i){
+          out += '<li>' + items[i].replace(/^[-•]\s?/, '').trim() + '</li>';
+        }
+        out += '</ul>';
+        return out;
       });
       // Переводы строк в абзацы <p>
       text = text.replace(/\n{2,}/g, '</p><p>');
