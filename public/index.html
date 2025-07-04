@@ -3,50 +3,47 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-  <title>Neurona 1.0</title>
+  <title>NEURONA 1.0</title>
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button { font-family:Arial,sans-serif; }
-    body { background:#fff; color:#000; overflow:hidden; height:100vh; }
-    #bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.8; transition:opacity 1s ease; }
-    body.loaded #bg { opacity:0.2; }
+    body {
+      background:#fff; color:#000; height:100vh; overflow:hidden;
+      -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
+      /* For Safari: enforce light theme */
+      background-color:#fff !important; color:#000 !important;
+    }
+    #bg {
+      position:fixed; top:0; left:0; width:100vw; height:100vh;
+      z-index:0; opacity:0.8; transition:opacity 1s;
+      pointer-events:none;
+    }
+    body.loaded #bg { opacity:0.22; }
 
     /* --- TOP BAR --- */
     .top-bar {
-      width:100vw;
-      position:fixed;
-      top:0; left:0;
-      z-index:10;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      background:transparent;
-      padding: 0;
-      height:56px;
-      pointer-events: none;
-      transition: opacity .3s;
+      width:100vw; position:fixed; top:0; left:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      background:transparent; height:56px; padding:0; pointer-events:none;
+      transition:opacity .3s;
     }
-    .top-bar-content {
-      display:flex;
-      align-items:center;
-      height:56px;
-      pointer-events: all;
-    }
+    .top-bar-content { display:flex; align-items:center; height:56px; pointer-events:all; }
     .top-logo { width:36px; height:auto; margin-left:18px; margin-right:8px; }
     .top-title {
-      font-size:1.55rem;
-      letter-spacing:.11em;
-      font-weight:bold;
-      color:#000;
-      user-select:none;
+      font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
+      color:#000; user-select:none;
+      text-transform:uppercase;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
-      width:25px; height:25px; margin-right:18px; cursor:pointer; pointer-events:all;
+      width:36px; height:29px; margin-right:18px;
+      cursor:pointer; pointer-events:all;
+      gap:3.2px;
     }
     .top-burger span {
-      display:block;
-      height:4px; width:100%; background:#000; border-radius:3px; margin-bottom:4px;
+      display:block; height:5.6px; width:100%;
+      background:#000; border-radius:4px; margin:0;
+      transition:background .2s;
     }
     .top-burger span:last-child { margin-bottom:0; }
 
@@ -54,48 +51,64 @@
 
     #loader {
       position:fixed; inset:0;
-      background:rgba(255,255,255,0.98);
+      background:rgba(255,255,255,0.97);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
+      /* анимация и на лого */
     }
     .loader-content {
       display:flex; align-items:center; justify-content:center;
       animation:fade 8s ease-in-out infinite;
     }
     .loader-logo { width:110px; margin-right:18px; }
-    .loader-text { display:flex; flex-direction:column; align-items:center; }
+    .loader-text {
+      display:flex; flex-direction:column; align-items:center;
+      line-height:1.01;
+    }
     .loader-title {
       font-size:5.3rem;
       font-weight:bold;
       letter-spacing:.14em;
       color:#000;
-      text-shadow: 0 1px 0 #fff, 0 4px 16px #bbb6;
+      text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
+      line-height:0.98;
+      text-transform:uppercase;
     }
-    .loader-subtitle { font-size:1.7rem; letter-spacing:.06em; color:#000; margin-top:8px; }
+    .loader-subtitle {
+      font-size:1.38rem;
+      letter-spacing:.06em; color:#222; margin-top:5px;
+      line-height:1.09;
+      font-weight:500;
+    }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
     #app {
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      width:100%;
-      max-width:600px;
-      height:calc(100vh - 110px);
-      margin:86px auto 0 auto;
-      padding:0 10px 10px;
-      z-index:1;
-      opacity:0;
-      transition:opacity 1s ease;
+      position:relative; display:flex; flex-direction:column;
+      width:100%; max-width:600px; height:calc(100vh - 110px);
+      margin:93px auto 0 auto; padding:0 10px 10px;
+      z-index:1; opacity:0; transition:opacity 1s;
     }
     body.loaded #app { opacity:1; }
 
-    .chat-container { flex:1; background:rgba(255,255,255,0.93); border-radius:10px; border:1px solid #ccc; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden; }
+    .chat-container {
+      flex:1; background:rgba(255,255,255,0.93); border-radius:10px; border:1px solid #ccc;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden;
+    }
     #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
     .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
     .message.typing { font-style:italic; color:#666; }
     .message a { color:#3366bb; text-decoration:underline; word-break:break-all; }
+    .message .neurona-title {
+      font-weight:bold;
+      font-size:2.05rem;
+      letter-spacing:.10em;
+      display:block;
+      text-align:center;
+      margin: 0 0 8px 0;
+      text-transform:uppercase;
+    }
 
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
@@ -106,15 +119,18 @@
       .top-bar{height:38px;}
       .top-bar-content{height:38px;}
       .top-logo{width:22px; margin-left:7px; margin-right:7px;}
-      .top-title{font-size:1.02rem;}
-      .top-burger{width:16px; height:16px; margin-right:5px;}
-      .top-burger span{height:2.8px;}
-      #app { margin-top:41px; }
-      .loader-logo { width:73px; margin-right:7px; }
+      .top-title{font-size:1.03rem;}
+      .top-burger{width:27px; height:18px; margin-right:5px;}
+      .top-burger span{height:3.3px;}
+      #app { margin-top:45px; }
+      .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
-      .loader-subtitle { font-size:1.08rem; }
+      .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; }
+    }
+    @media (max-width:400px){
+      .loader-title{font-size:1.2rem;}
     }
   </style>
 </head>
@@ -125,7 +141,7 @@
   <div class="top-bar" id="top-bar">
     <div class="top-bar-content">
       <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo"/>
-      <span class="top-title">Neurona</span>
+      <span class="top-title">NEURONA</span>
     </div>
     <div class="top-burger">
       <span></span><span></span><span></span>
@@ -151,7 +167,7 @@
     </div>
   </div>
   <script>
-    // 1. фон
+    // --- Фон-анимация (нейросеть) — работает всегда ---
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -165,7 +181,7 @@
           const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
           if(d<200){
             ctx.strokeStyle=`rgba(0,0,0,${(200-d)/200})`;
-            ctx.lineWidth=1;
+            ctx.lineWidth=1.3;
             ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
           }
         });
@@ -175,19 +191,19 @@
         if(n.x<0||n.x>W) n.vx*=-1;
         if(n.y<0||n.y>H) n.vy*=-1;
         ctx.fillStyle='rgba(0,0,0,1)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(n.x,n.y,3.7,0,Math.PI*2); ctx.fill();
       });
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
 
-    // 2. UI
+    // UI
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
     msgsContainer.addEventListener('click', ()=> input.blur());
 
-    // 3. i18n
+    // i18n
     const i18n = {
       en:{ph:"Type a message...",send:"Send"},
       ru:{ph:"Напишите сообщение...",send:"Отправить"},
@@ -198,7 +214,7 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // 4. прелоадер + скрытие топ бара!
+    // Прелоадер + топ бар!
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
@@ -209,7 +225,7 @@
       }, 8000);
     });
 
-    // 5. история (локально)
+    // История (локально)
     let messages = [];
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
@@ -217,11 +233,12 @@
       if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role)); }
     }
 
-    // 6. системное сообщение
+    // Системное сообщение
     function getSystemMessage(){
       const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
       return { role:'system', content:
-`Ты — Neurona 1.0, лицензированный AI-продукт.
+`<span class="neurona-title">NEURONA</span>
+Ты — NEURONA 1.0, лицензированный AI-продукт.
 Сегодня ${today}.
 Отвечай на языке пользователя.
 Используй самую продвинутую модель OpenAI.
@@ -231,11 +248,11 @@
 Примеры:
 - Цена BTC: $... <ссылка на CMC или CG>
 - Новость: ... <ссылка на источник>
-- Рекомендация: ... <ссылка на источник>
-` };
+- Рекомендация: ... <ссылка на источник>`
+      };
     }
 
-    // 7. отрисовка сообщений
+    // Отрисовка сообщений
     function addMessage(text, who){
       const d = document.createElement('div');
       d.className = `message ${who}`;
@@ -252,11 +269,11 @@
       return d;
     }
 
-    // 8. Эндпоинты
+    // Эндпоинты
     const CMC_ENDPOINT    = '/api/cmc';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // 9. fetchCMC (добавляем ссылку)
+    // fetchCMC (добавляем ссылку)
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -276,7 +293,7 @@
       }
     }
 
-    // 10. CoinGecko (ссылки)
+    // CoinGecko (ссылки)
     async function fetchCoinGecko(){
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1');
@@ -289,7 +306,7 @@
       }
     }
 
-    // отправка
+    // Отправка
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
