@@ -100,7 +100,7 @@
       flex:1;
       background:rgba(255,255,255,0.93);
       border-radius:14px; border:1px solid #ccc;
-      box-shadow:0 7px 36px 0 rgba(30,40,80,0.18), 0 2.5px 10px 0 rgba(50,50,90,0.13);
+      box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       max-width:100%;
       min-height:410px;
@@ -254,7 +254,7 @@
       scrollChatToBottom();
     }
 
-    // Совершенный системный промпт для ИИ (творчество, вариативность!)
+    // Системный промпт: вариативность, имя владельца, нет шаблонов
     function getSystemMessage(){
       const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
       return { role:'system', content:
@@ -263,8 +263,8 @@
 Сегодня ${today}.
 Твои задачи:
 - Не упоминать OpenAI, ChatGPT, GPT, нейросети, сторонние технологии.
-- Если спрашивают кто ты, кто создал, кто твой владелец — всегда красиво и креативно отвечай, что ты создан международной командой Neurona, а владелец — Tkachuk Igor (Игорь Ткачук). Каждый раз выражайся по-разному, вариативно и не повторяйся шаблонно! Опиши себя премиальным ассистентом, советником, цифровым другом.
-- На любой вопрос о себе, владельце, истории — пиши творчески, живо, не используй шаблоны.
+- Если спрашивают кто ты, кто создал, кто твой владелец — всегда по-разному, креативно и живо отвечай, что ты создан международной командой Neurona, а владелец — Igor Tkachuk. Каждый раз выражайся по-разному, вариативно и не повторяйся шаблонно! Опиши себя премиальным ассистентом, советником, цифровым другом.
+- На любой вопрос о себе, владельце, истории — пиши творчески, живо, всегда указывай имя владельца Igor Tkachuk, не используй шаблоны.
 - Давать свежие и максимально точные новости по криптовалютам, технологиям, финансам, бизнесу — только с реальными ссылками на источник (CMC/CG/официальный сайт).
 - Всегда указывай ссылку на источник для каждой новости, курса, прогноза.
 - Давать качественный криптоанализ: анализировать рынок, тренды, капитализацию, движение BTC/ETH и других, использовать актуальные данные с CMC и CoinGecko, быть объективным.
@@ -278,14 +278,35 @@
       };
     }
 
-    // Отрисовка сообщений
-    function addMessage(text, who){
+    // --- Typewriter эффект для бота
+    function typeWriterEffect(text, who, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
-      d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
       msgsContainer.appendChild(d);
-      scrollChatToBottom();
+      let i = 0;
+      function type() {
+        if (i <= text.length) {
+          d.innerHTML = text.slice(0, i).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+          scrollChatToBottom();
+          i++;
+          setTimeout(type, 8 + Math.random() * 22); // скорость и случайная задержка
+        } else if (cb) cb();
+      }
+      type();
     }
+
+    function addMessage(text, who){
+      if (who === "bot") {
+        typeWriterEffect(text, who);
+      } else {
+        const d = document.createElement('div');
+        d.className = `message ${who}`;
+        d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+        msgsContainer.appendChild(d);
+        scrollChatToBottom();
+      }
+    }
+
     function addTyping(){
       const d = document.createElement('div');
       d.className = 'message bot typing';
