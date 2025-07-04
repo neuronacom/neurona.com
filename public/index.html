@@ -1,4 +1,3 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,13 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Neurona 1.0</title>
   <style>
-    /* (ваши стили без изменений) */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button { font-family:Arial,sans-serif; }
     body { background:#fff; color:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; }
     #bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.8; transition:opacity 1s ease; }
     body.loaded #bg { opacity:0.2; }
-
     #loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; z-index:1001; flex-direction:column; }
     .loader-content { display:flex; align-items:center; animation:fade 8s ease-in-out infinite; }
     .loader-logo { width:100px; margin-right:12px; }
@@ -21,53 +18,74 @@
     .loader-subtitle { font-size:1.5rem; letter-spacing:.05em; color:#000; margin-top:4px; }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
-    /* сделал окно чуть уже сверху и снизу */
+    /* HEADER */
+    .header-lang {
+      width:100%;
+      display:flex;
+      justify-content:flex-end;
+      align-items:flex-start;
+      position:absolute;
+      top:0; left:0;
+      padding:15px 15px 0 0;
+      z-index:5;
+    }
+    .header-box {
+      display:flex;
+      align-items:center;
+      margin-right:40px;
+    }
+    .header-logo-small { width:26px; height:auto; margin-right:7px; margin-top:0; }
+    .header-title {
+      font-weight:bold;
+      font-size:1.45rem;
+      color:#000;
+      letter-spacing:.03em;
+      margin-top:0;
+    }
+    .burger-icon {
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      width:28px;
+      height:22px;
+      margin-left:15px;
+      margin-top:0;
+      cursor:pointer;
+      align-items:center;
+    }
+    .burger-icon span {
+      display:block;
+      height:4px;
+      width:100%;
+      background:#000;
+      border-radius:2px;
+      margin-bottom:4px;
+    }
+    .burger-icon span:last-child { margin-bottom:0; }
+
     #app {
       position:relative;
       display:flex;
       flex-direction:column;
       width:100%;
       max-width:600px;
-      height:calc(100vh - 120px);
-      margin:60px auto;
-      padding:20px 10px 10px;
+      height:calc(100vh - 130px);
+      margin-top:80px;
+      margin-bottom:50px;
+      padding:10px 10px 10px;
       z-index:1;
       opacity:0;
       transition:opacity 1s ease;
     }
     body.loaded #app { opacity:1; }
 
-    /* новый header */
-    .header-lang {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-    }
-    .header-left { display:flex; align-items:center; }
-    .header-logo-small { width:24px; height:auto; margin-right:8px; }
-    .header-title { font-weight:bold; font-size:1.5rem; color:#000; }
-    .burger-icon {
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      width:20px;
-      height:15px;
-      cursor:pointer;
-    }
-    .burger-icon span {
-      display:block;
-      height:2px;
-      background:#000;
-      border-radius:1px;
-    }
-
-    .chat-container { flex:1; background:rgba(255,255,255,0.9); border-radius:8px; border:1px solid #ccc; box-shadow:0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; overflow:hidden; }
+    .chat-container { flex:1; background:rgba(255,255,255,0.93); border-radius:10px; border:1px solid #ccc; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden; }
     #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
-    .message { margin:5px 0; line-height:1.4; max-width:80%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
+    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
     .message.typing { font-style:italic; color:#666; }
+    .message a { color:#3366bb; text-decoration:underline; word-break:break-all; }
 
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
@@ -75,13 +93,19 @@
     #send:hover { background:#666; }
 
     @media(max-width:600px){
-      #app { padding:15px 5px 5px; height:calc(100vh - 80px); margin:40px auto; }
-      .chat-container { width:90%; margin:0 auto; }
+      #app { padding:10px 2px 2px; height:calc(100vh - 80px); margin-top:55px; }
+      .chat-container { width:96%; margin:0 auto; }
       .loader-logo { width:80px; margin-right:8px; }
-      .loader-title { font-size:3rem; }
-      .loader-subtitle { font-size:1.2rem; }
-      #input { font-size:.9rem; height:40px; }
-      #send { font-size:.9rem; padding:0 12px; }
+      .loader-title { font-size:2.1rem; }
+      .loader-subtitle { font-size:1.1rem; }
+      #input { font-size:.89rem; height:38px; }
+      #send { font-size:.89rem; padding:0 10px; }
+      .header-lang { padding:7px 4px 0 0; }
+      .header-title { font-size:1.1rem; }
+      .burger-icon { width:22px; height:16px; margin-left:10px; }
+      .burger-icon span { height:3px; }
+      .header-logo-small { width:19px; margin-right:4px; }
+      .header-box { margin-right:15px; }
     }
   </style>
 </head>
@@ -96,10 +120,9 @@
       </div>
     </div>
   </div>
-
   <div id="app">
     <div class="header-lang">
-      <div class="header-left">
+      <div class="header-box">
         <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="header-logo-small" alt="logo"/>
         <div class="header-title">Neurona</div>
       </div>
@@ -115,7 +138,6 @@
       </div>
     </div>
   </div>
-
   <script>
     // 1. фон
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
@@ -173,7 +195,7 @@
       }, 8000);
     });
 
-    // 5. история
+    // 5. история (локально)
     let messages = [];
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
@@ -192,19 +214,20 @@
 Отвечай максимально быстро.
 Запоминай историю и обучайся непрерывно.
 Предоставляй:
-— последние крипто-новости;
-— цены топ-5 монет;
+— последние крипто-новости (ссылку на источник обязательно!);
+— цены топ-5 монет (с ссылкой на CMC/CG);
 — прогноз цены Bitcoin на завтра;
 — рекомендации LONG/SHORT;
 — общие новости.
-Без ссылок на сайты.` };
+` };
     }
 
     // 7. отрисовка сообщений
     function addMessage(text, who){
       const d = document.createElement('div');
       d.className = `message ${who}`;
-      d.textContent = text;
+      // автоматически преобразовывать ссылки в тексте
+      d.innerHTML = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
       msgsContainer.appendChild(d);
       msgsContainer.scrollTop = msgsContainer.scrollHeight;
     }
@@ -221,33 +244,41 @@
     const CMC_ENDPOINT    = '/api/cmc';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // 9. fetchCMC
+    // 9. fetchCMC (добавляем ссылку)
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
         const js  = await res.json();
-        const list = js.data.map(c=>({ s:c.symbol, p:c.quote.USD.price, ch:c.quote.USD.percent_change_24h }));
+        const url = 'https://coinmarketcap.com/';
+        const list = js.data.map(c=>({
+          s:c.symbol,
+          p:c.quote.USD.price,
+          ch:c.quote.USD.percent_change_24h,
+          url:`https://coinmarketcap.com/currencies/${c.slug}/`
+        }));
         return {
-          txt: list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%)`).join('\n'),
-          rec: list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%)`).join('\n')
+          txt: list.map(c=>`${c.s}: $${c.p.toFixed(2)} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
+          rec: list.map(c=>`${c.s}: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>')
         };
       } catch {
         return { txt:'нет данных CMC', rec:'' };
       }
     }
 
-    // 10. CoinGecko
+    // 10. CoinGecko (ссылки)
     async function fetchCoinGecko(){
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1');
         const js  = await res.json();
-        return js.map(c=>`${c.symbol.toUpperCase()}: $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%)`).join('\n');
+        return js.map(c=>{
+          return `${c.symbol.toUpperCase()}: $${c.current_price.toLocaleString()} (${c.price_change_percentage_24h.toFixed(2)}%) <a href="https://www.coingecko.com/en/coins/${c.id}" target="_blank">CG</a>`;
+        }).join('<br>');
       } catch {
         return 'нет данных CoinGecko';
       }
     }
 
-    // 14. отправка
+    // отправка
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -258,7 +289,6 @@
 
       const typing = addTyping();
       const [cmc, cg] = await Promise.all([ fetchCMC(), fetchCoinGecko() ]);
-
       const snapshot = {
         role:'system',
         content:
@@ -272,9 +302,8 @@ ${cmc.rec}
 CoinGecko:
 ${cg}
 
---------------------------------`
+-------------------------------`
       };
-
       const payload = { model:'gpt-4o', messages:[messages[0], snapshot, ...messages.slice(1)], temperature:0.7 };
 
       try {
