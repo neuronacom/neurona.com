@@ -22,6 +22,7 @@
     }
     body.loaded #bg { opacity:0.27; }
 
+    /* --- TOP BAR --- */
     .top-bar {
       width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
@@ -35,7 +36,8 @@
     .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
-      color:#000; user-select:none; text-transform:uppercase;
+      color:#000; user-select:none;
+      text-transform:uppercase;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
@@ -81,12 +83,11 @@
     #app {
       position:relative; display:flex; flex-direction:column;
       width:100%; max-width:390px; min-width:270px;
-      margin:130px auto 0 auto; /* БЫЛО: 86px, стало 130px */
+      height:calc(100vh - 110px);
+      margin:126px auto 0 auto;
       padding:0 18px 10px 18px;
       z-index:1; opacity:0; transition:opacity 1.2s;
-      will-change: opacity;
-      max-height:calc(100vh - 110px);
-      height:auto;
+      will-change: opacity, margin-top;
     }
     body.loaded #app { opacity:1; }
 
@@ -94,13 +95,8 @@
       flex:1; background:rgba(255,255,255,0.93); border-radius:14px; border:1px solid #ccc;
       box-shadow:0 4px 14px rgba(0,0,0,0.09); display:flex; flex-direction:column; overflow:hidden;
       max-width:100%;
-      max-height:calc(100vh - 160px);
-      height:100%;
     }
-    #messages {
-      flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
-      min-height:0;
-    }
+    #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
     .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
@@ -123,12 +119,7 @@
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { 
-        margin-top:88px;  /* БЫЛО: 52px, стало 88px — на мобильных! */
-        min-width:0; padding:0 4px 7px 4px; 
-        max-height:calc(100vh - 60px);
-      }
-      .chat-container { max-height:calc(100vh - 90px);}
+      #app { margin-top:60px; min-width:0; padding:0 4px 7px 4px; }
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
@@ -289,6 +280,26 @@
       }, 10);
     }
 
+    // Автоцентрирование окна на мобильном при изменении высоты (после клавиатуры)
+    let prevInnerHeight = window.innerHeight;
+    function adjustChatPosition() {
+      setTimeout(()=>{
+        // Можно добавить кастомное автоцентрирование, но чаще всего margin-top auto хватает
+        document.getElementById('app').style.marginTop =
+          (window.innerWidth <= 600) ?
+          ((window.innerHeight - document.getElementById('app').offsetHeight) / 2 + 20) + 'px'
+          : '126px';
+      }, 90);
+    }
+    window.addEventListener('resize', ()=>{
+      adjustChatPosition();
+      prevInnerHeight = window.innerHeight;
+    });
+    input.addEventListener('blur', ()=>{
+      adjustChatPosition();
+      scrollChatToBottom();
+    });
+
     // Эндпоинты
     const CMC_ENDPOINT    = '/api/cmc';
     const OPENAI_ENDPOINT = '/api/openai';
@@ -367,6 +378,7 @@ ${cg}
         messages.push({ role:'assistant', content:reply });
         saveHistory();
         scrollChatToBottom();
+        adjustChatPosition();
       } catch {
         typing.remove();
         addMessage('Внутренняя ошибка, попробуйте позже.','bot');
