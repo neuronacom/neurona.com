@@ -7,7 +7,7 @@ const app     = express();
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
-// CMC
+// CMC — Топ-5
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -47,7 +47,27 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// CoinGecko — всегда свежая цена
+// GNews — резервный источник новостей
+app.get('/api/gnews', async (req, res) => {
+  try {
+    const q = encodeURIComponent(req.query.q || 'crypto');
+    const url = `https://gnews.io/api/v4/search?q=${q}&token=${process.env.GNEWS_API_KEY}&lang=en&max=5`;
+    const r = await fetch(url);
+    const js = await r.json();
+    if (!js.articles) return res.json({ articles: [] });
+    const articles = js.articles.map(a => ({
+      title: a.title,
+      url: a.url,
+      time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
+      source: a.source?.name || 'gnews'
+    }));
+    res.json({ articles });
+  } catch {
+    res.json({ articles: [] });
+  }
+});
+
+// CoinGecko — точная цена
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -70,7 +90,25 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
-// TradingView
+// BINANCE — моментальная цена на тикер
+app.get('/api/binance', async (req, res) => {
+  try {
+    let symbol = (req.query.q||'').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!symbol) return res.json({found:false});
+    if (!symbol.endsWith('USDT')) symbol = symbol + 'USDT';
+    const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+    const js = await r.json();
+    if(js && js.price){
+      res.json({found:true, symbol, price:js.price});
+    } else {
+      res.json({found:false});
+    }
+  } catch {
+    res.json({found:false});
+  }
+});
+
+// TradingView — поддержка/сопротивление
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol||'BTC').toUpperCase();
@@ -84,7 +122,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OpenAI
+// OpenAI (твой ключ в переменной окружения)
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
