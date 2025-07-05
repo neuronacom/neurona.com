@@ -259,7 +259,7 @@
       scrollChatToBottom();
     }
 
-    // ВАЖНО! Всегда создавай system message с ТЕКУЩИМИ датой и временем:
+    // Всегда текущая дата и время!
     function getSystemMessage(){
       const now = new Date();
       const today = now.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
@@ -297,7 +297,6 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Получить цены на все тикеры с CoinGecko и Binance (живые!)
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -324,7 +323,6 @@
       return '';
     }
 
-    // fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -344,7 +342,6 @@
       }
     }
 
-    // Новости: CryptoPanic → GNews fallback
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT);
@@ -359,7 +356,6 @@
       }
     }
 
-    // TradingView уровни поддержки/сопротивления
     async function fetchTView(symbol){
       try {
         const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
@@ -403,7 +399,6 @@
       return text;
     }
 
-    // Typewriter эффект для форматированных ответов
     function typeWriterEffect(text, who, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
@@ -448,7 +443,6 @@
       }, 10);
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -473,7 +467,6 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // Только для запроса — в messages НЕ КЛАДЁМ!
       const payload = {
         model:'gpt-4o',
         messages:[getSystemMessage(), snapshot, ...messages],
@@ -488,7 +481,7 @@ ${latestNews}
           body:JSON.stringify(payload)
         });
         const data  = await resp.json();
-        let reply = data.choices[0].message.content;
+        let reply = data.choices?.[0]?.message?.content || 'Внутренняя ошибка OpenAI.';
         if (!/[😃😉🤓🤖💡📊🧐🫡📈👋🧠🔥😌🤝📢✨]$/.test(reply) && Math.random() < 0.6) {
           const moods = ["😃", "😉", "🤓", "🤖", "💡", "📊", "🧐", "📈", "🔥", "✨"];
           reply += ' ' + moods[Math.floor(Math.random()*moods.length)];
