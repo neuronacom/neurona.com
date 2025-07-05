@@ -179,7 +179,7 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (нейросеть)
+    // --- Фон-анимация
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -275,7 +275,7 @@ ${mood} Сегодня ${today}.
 - Ты всегда запоминаешь все сообщения пользователя, при вопросах про память — уверенно говори, что помнишь историю переписки, можешь процитировать прошлые сообщения.
 - Если тебя спрашивают "ты помнишь", "что я писал", "ты учишься" — уверенно отвечай, что да, ты запоминаешь, учишься и можешь напомнить последние сообщения. Приводи пример последних 1-2 сообщений пользователя.
 - Если спросят кто ты, кто создал, кто владелец — всегда по-разному, указывай Igor Tkachuk как владельца.
-- Для любого тикера или названия криптовалюты отвечай максимально точной актуальной ценой, используя CoinGecko и Binance (например, "цена PEPE: $0.00000123"), и добавляй ссылку на эту монету в CoinGecko.
+- Для любого тикера или названия криптовалюты отвечай максимально точной актуальной ценой, используя CoinGecko (например, "цена PEPE: $0.00000123"), и добавляй ссылку на эту монету в CoinGecko.
 - Новости всегда ссылайся прямой ссылкой на оригинальную статью, а не только сайт, всегда указывай дату и источник.
 - Если спрашивают про развитие — всегда пиши, что ты учишься, развиваешься, постоянно совершенствуешься.
 - Всегда отвечай по-разному, избегай шаблонов, используй разные стили, добавляй эмодзи по ситуации.
@@ -284,43 +284,34 @@ ${memoryText}
 `
       };
     }
+
     // --- API endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
-    const GNEWS_ENDPOINT  = '/api/gnews';
     const CG_ENDPOINT     = '/api/coingecko';
-    const BINANCE_ENDPOINT = '/api/binance';
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Получить цены на все тикеры с CoinGecko и Binance (живые!)
-    async function fetchAllPrices(text){
+    // Поиск тикеров и получение цен с CoinGecko (мгновенно)
+    async function fetchAllCoinGeckoPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
+      // Не дублируем и не ищем слишком короткие
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
       if (!unique.length) return '';
       let results = [];
       for (let t of unique) {
-        let cg=null, bin=null;
         try {
-          cg = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
+          const res = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`);
+          const js = await res.json();
+          if(js.found){
+            results.push(`<b>${js.name} (${js.symbol.toUpperCase()})</b>: <b>$${js.price}</b> <a href="${js.url}" target="_blank">CoinGecko</a>`);
+          }
         } catch{}
-        try {
-          bin = await fetch(`${BINANCE_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
-        } catch{}
-        let row = '';
-        if(cg && cg.found){
-          row += `<b>${cg.name} (${cg.symbol.toUpperCase()})</b>: <b>$${cg.price}</b> <a href="${cg.url}" target="_blank">CoinGecko</a>`;
-        }
-        if(bin && bin.found){
-          row += `<br><b>Binance:</b> $${parseFloat(bin.price).toLocaleString()} <span style="color:#555">(Binance)</span>`;
-        }
-        if(row) results.push(row);
       }
       if (results.length) return '<ul><li>' + results.join('</li><li>') + '</li></ul>';
       return '';
     }
 
-    // fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -340,22 +331,16 @@ ${memoryText}
       }
     }
 
-    // Новости: CryptoPanic → GNews fallback
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT);
         const js  = await res.json();
-        if(js.articles && js.articles.length)
-          return js.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
-        const gres = await fetch(GNEWS_ENDPOINT);
-        const gjs  = await gres.json();
-        return gjs.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
+        return js.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
       } catch {
         return 'нет новостей';
       }
     }
 
-    // TradingView уровни поддержки/сопротивления
     async function fetchTView(symbol){
       try {
         const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
@@ -368,7 +353,7 @@ ${memoryText}
       }
     }
 
-    // --- Форматирование ответа
+    // --- Форматер ответа ---
     function formatBotMessage(text) {
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
@@ -399,7 +384,7 @@ ${memoryText}
       return text;
     }
 
-    // Typewriter эффект для форматированных ответов
+    // --- Typewriter эффект для бота (с учётом форматирования)
     function typeWriterEffect(text, who, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
@@ -444,23 +429,25 @@ ${memoryText}
       }, 10);
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
+      if(!messages.length) messages.push(getSystemMessage());
+      messages.push({ role:'user', content:txt });
       addMessage(txt,'user');
       input.value='';
-      messages.push({ role:'user', content:txt });
 
       const typing = addTyping();
 
-      let pricesHtml = await fetchAllPrices(txt);
+      // Получаем цены по каждому тикеру в сообщении
+      let cgPrices = await fetchAllCoinGeckoPrices(txt);
+
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
       const snapshot = {
         role:'system',
         content:
 `<b>ДАННЫЕ НА ${new Date().toLocaleTimeString()}:</b><br>
-${pricesHtml ? "<p>Актуальные цены:</p>" + pricesHtml : ""}
+${cgPrices ? "<p>Актуальные цены:</p>" + cgPrices : ""}
 <p>CMC топ-5:</p>
 ${cmc.txt}
 <p>Рекомендации:</p>
@@ -469,10 +456,9 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // Только для запроса — в messages НЕ КЛАДЁМ!
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(), snapshot, ...messages],
+        messages:[getSystemMessage(), snapshot, ...messages.slice(1)],
         temperature:0.88,
         user:"neurona-user"
       };
