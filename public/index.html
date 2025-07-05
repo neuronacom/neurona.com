@@ -105,25 +105,62 @@
       height: auto;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
     }
-    #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
-    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; position:relative; }
-    .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
-    .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
-    .message.typing { font-style:italic; color:#666; }
-    .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
-    .message .neurona-title {
-      font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
-      text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
+    #messages {
+      flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
+      gap:7px;
+    }
+    .message {
+      display: flex;
+      flex-direction: column;
+      align-self: flex-start;
+      position:relative;
+      background:#e0e0e0;
+      margin: 2px 0;
+      padding:10px 15px 22px 12px;
+      max-width:83%; min-width:70px;
+      border-radius:12px 12px 12px 0;
+      box-shadow:0 1.5px 5px #ccc3;
+      word-break:break-word;
+      line-height:1.48;
+      font-size:1rem;
+      color:#111;
+      transition:background .17s;
+    }
+    .message.user {
+      align-self:flex-end;
+      background:#f0f0f0;
+      border-radius:12px 12px 0 12px;
+      color:#222;
+    }
+    .message.bot  { align-self:flex-start; }
+    .message.typing {
+      font-style:italic; color:#666;
+      background: #ebebeb;
+      min-width:60px;
+    }
+    .msg-content {
+      width: 100%;
+      padding-bottom: 3px;
     }
     .msg-time {
       position:absolute;
-      bottom:5px;
-      right:14px;
-      font-size:0.85em;
+      right:12px;
+      bottom:6px;
+      font-size:0.89em;
       color:#888;
-      opacity:0.85;
+      opacity:0.93;
+      background:rgba(255,255,255,0.88);
+      padding:1px 7px 1px 5px;
+      border-radius: 10px;
+      z-index:10;
       user-select:none;
       font-family:Arial,sans-serif;
+      pointer-events: none;
+      box-shadow: 0 0.5px 1.7px #ddd5;
+    }
+    .neurona-title {
+      font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
+      text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
@@ -228,11 +265,6 @@
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
-    msgsContainer.addEventListener('click', ()=> input.blur());
-
-    msgsContainer.addEventListener('click', function(e){
-      if(e.target.tagName === 'A') e.stopPropagation();
-    }, true);
 
     // i18n
     const i18n = {
@@ -331,7 +363,6 @@ ${memoryText}
       return '';
     }
 
-    // fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -351,7 +382,6 @@ ${memoryText}
       }
     }
 
-    // Новости: CryptoPanic → GNews fallback
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT);
@@ -363,19 +393,6 @@ ${memoryText}
         return gjs.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
       } catch {
         return 'нет новостей';
-      }
-    }
-
-    // TradingView уровни поддержки/сопротивления
-    async function fetchTView(symbol){
-      try {
-        const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
-        const js = await res.json();
-        if(js && js.support && js.resistance && js.url)
-          return `<b>TradingView анализ для ${symbol}</b>:<br><ul><li>Поддержка: <b>${js.support}</b></li><li>Сопротивление: <b>${js.resistance}</b></li></ul><a href="${js.url}" target="_blank"><b>TradingView</b></a>`;
-        return '';
-      } catch {
-        return '';
       }
     }
 
@@ -410,35 +427,26 @@ ${memoryText}
       return text;
     }
 
-    // Typewriter эффект для форматированных ответов
-    function typeWriterEffect(text, who, time, cb) {
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      msgsContainer.appendChild(d);
-      let i = 0;
-      let formatted = formatBotMessage(text);
-      function type() {
-        if (i <= formatted.length) {
-          d.innerHTML = formatted.slice(0, i) + `<span class="msg-time">${time}</span>`;
-          scrollChatToBottom();
-          i++;
-          setTimeout(type, 6 + Math.random() * 18);
-        } else if (cb) cb();
-      }
-      type();
-    }
-
     function addMessage(text, who, time){
       if (!time) time = new Date().toLocaleTimeString().slice(0,5);
+      const msg = document.createElement('div');
+      msg.className = `message ${who}`;
+      const content = document.createElement('div');
+      content.className = 'msg-content';
       if (who === "bot") {
-        typeWriterEffect(text, who, time);
+        content.innerHTML = formatBotMessage(text);
+      } else if (who === "user") {
+        content.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
       } else {
-        const d = document.createElement('div');
-        d.className = `message ${who}`;
-        d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') + `<span class="msg-time">${time}</span>`;
-        msgsContainer.appendChild(d);
-        scrollChatToBottom();
+        content.textContent = text;
       }
+      msg.appendChild(content);
+      const timeEl = document.createElement('span');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = time;
+      msg.appendChild(timeEl);
+      msgsContainer.appendChild(msg);
+      scrollChatToBottom(true);
     }
 
     function addTyping(){
@@ -450,13 +458,43 @@ ${memoryText}
       return d;
     }
 
-    function scrollChatToBottom(){
+    // Typewriter эффект для форматированных ответов
+    function typeWriterEffect(text, who, time, cb) {
+      const msg = document.createElement('div');
+      msg.className = `message ${who}`;
+      const content = document.createElement('div');
+      content.className = 'msg-content';
+      msg.appendChild(content);
+      const timeEl = document.createElement('span');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = time;
+      msg.appendChild(timeEl);
+      msgsContainer.appendChild(msg);
+
+      let i = 0;
+      let formatted = formatBotMessage(text);
+      function type() {
+        if (i <= formatted.length) {
+          content.innerHTML = formatted.slice(0, i);
+          scrollChatToBottom(true);
+          i++;
+          setTimeout(type, 6 + Math.random() * 18);
+        } else if (cb) cb();
+      }
+      type();
+    }
+
+    function scrollChatToBottom(smooth){
       setTimeout(()=>{
-        msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
+        if(smooth && 'scrollTo' in msgsContainer){
+          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
+        } else {
+          msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
+        }
       }, 10);
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
+    // === ОСНОВНОЙ sendBtn.onclick ===
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -504,7 +542,7 @@ ${latestNews}
         }
         typing.remove();
         const botTime = new Date().toLocaleTimeString().slice(0,5);
-        addMessage(reply,'bot',botTime);
+        typeWriterEffect(reply,'bot',botTime);
         messages.push({ role:'assistant', content:reply, time: botTime });
         saveHistory();
         scrollChatToBottom();
