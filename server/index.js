@@ -7,7 +7,7 @@ const app     = express();
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
-// CMC — Топ-5
+// CoinMarketCap — Топ-5
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -21,7 +21,7 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// CryptoPanic — только свежие новости
+// CryptoPanic — свежие новости
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -140,7 +140,7 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-// SPA
+// Single Page App
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
