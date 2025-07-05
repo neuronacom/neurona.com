@@ -1,10 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
+const cors = require('cors');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 7000; // ms
+const TIMEOUT = 7000;
+
+// Разрешить CORS со всех доменов (или укажи свой origin)
+app.use(cors({
+  origin: '*',    // или укажи конкретные адреса, например: ['https://neuronacom.github.io','https://neurona-c10ed5c2befb.herokuapp.com']
+  credentials: false
+}));
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.json());
 
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
@@ -15,10 +25,6 @@ async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   ]);
 }
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(express.json());
-
-// CoinMarketCap — топ-5
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetchTimeout(
@@ -32,7 +38,6 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// GNews
 app.get('/api/gnews', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -52,7 +57,6 @@ app.get('/api/gnews', async (req, res) => {
   }
 });
 
-// NewsAPI (можно добавлять параллельно, если нужен второй источник)
 app.get('/api/newsapi', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -72,7 +76,6 @@ app.get('/api/newsapi', async (req, res) => {
   }
 });
 
-// CryptoPanic (демо токен — можно заменить)
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -98,7 +101,6 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// CoinGecko (по символу)
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -123,7 +125,6 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
-// Binance (по символу)
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -141,7 +142,6 @@ app.get('/api/binance', async (req, res) => {
   }
 });
 
-// Coindesk (BTC/USD)
 app.get('/api/coindesk', async (req, res) => {
   try {
     const r = await fetchTimeout(`https://api.coindesk.com/v1/bpi/currentprice/BTC.json`);
@@ -156,7 +156,6 @@ app.get('/api/coindesk', async (req, res) => {
   }
 });
 
-// TradingView levels
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -170,7 +169,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OpenAI
+// OpenAI endpoint (лучше показывает ошибку если что)
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
@@ -182,13 +181,18 @@ app.post('/api/openai', async (req, res) => {
       body: JSON.stringify(req.body)
     }, 30000);
     const js = await r.json();
+    if (js.error) {
+      return res.status(500).json({ error: js.error.message || 'OpenAI error' });
+    }
     res.json(js);
   } catch (e) {
-    res.status(500).json({ error: 'OpenAI error' });
+    res.status(500).json({ error: (e && e.message) || 'OpenAI error' });
   }
 });
 
-// Любые другие роуты
+app.get('/api/ping', (req, res) => res.json({pong:true}));
+
+// Всё остальное — на фронт
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
