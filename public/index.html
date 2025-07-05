@@ -191,7 +191,6 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
-    /* КРУЖОК стрелка — ещё больше, выше, стрелка идеально по центру */
     #scroll-down {
       display:none; position:absolute; left:50%; bottom:80px;
       transform:translateX(-50%);
@@ -210,9 +209,7 @@
     }
     #scroll-down svg {
       width:27px; height:27px; display:block; stroke-width:3.7px;
-      margin:auto;
-      position:relative; left:0; top:0;
-      /* Для идеального центрирования */
+      margin:auto; position:relative; left:0; top:0;
     }
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
@@ -320,7 +317,7 @@
       if(h.length){
         messages=h;
         msgsContainer.innerHTML = '';
-        h.forEach(m=> addMessage(m.content,m.role,m.time, true)); // true — чтобы не дублировать saveHistory!
+        h.forEach(m=> addMessage(m.content,m.role,m.time, true));
         scrollChatToBottom(true);
       }
     }
@@ -372,7 +369,6 @@
       return text;
     }
 
-    // renderFormat — true если из истории, иначе undefined
     function addMessage(text, who, time, renderFormat){
       if (!time) time = new Date().toLocaleTimeString().slice(0,5);
       const msg = document.createElement('div');
@@ -445,9 +441,12 @@
       function type() {
         if (i <= formatted.length) {
           content.innerHTML = formatted.slice(0, i);
-          scrollChatToBottom(true);
-          i += Math.floor(Math.random()*3)+2;
-          setTimeout(type, 3 + Math.random() * 9);
+          // Скролл быстрее и всегда вниз пока пишет!
+          if (msgsContainer.scrollTop + msgsContainer.clientHeight >= msgsContainer.scrollHeight - 110) {
+            msgsContainer.scrollTop = msgsContainer.scrollHeight + 300;
+          }
+          i += Math.floor(Math.random()*4)+5; // скорость выше!
+          setTimeout(type, 1 + Math.random() * 4); // быстрее печатает!
         } else {
           timeEl.style.display = 'inline';
           botIsTyping = false;
@@ -457,28 +456,16 @@
       type();
     }
 
-    function scrollChatToBottom(smooth){
-      setTimeout(()=>{
-        if(smooth && 'scrollTo' in msgsContainer){
-          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
-        } else {
-          msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
-        }
-        checkScrollBtn();
-      }, 10);
-    }
-
-    // --- Новый ЧЕКЕР для стрелки! ---
+    // Новый чёткий чекер стрелки!
     function checkScrollBtn(){
-      // Стрелка показывается если прокрутка не внизу
+      // Стрелка показывается если прокрутка не внизу и ты реально скролишь вверх больше чем 1 экран
       if(botIsTyping) {
         scrollDownBtn.classList.remove('show');
         return;
       }
-      // появится, когда прокручен на высоту одного экрана чата (messages) вверх и больше
       let view = msgsContainer.clientHeight;
       let fromBottom = msgsContainer.scrollHeight - msgsContainer.scrollTop - view;
-      if(fromBottom > view*0.99) { // прокрутка на "один экран"
+      if(fromBottom > view*1.1) { // только если реально прокрутил больше чем на 1 экран!
         scrollDownBtn.classList.add('show');
       } else {
         scrollDownBtn.classList.remove('show');
@@ -508,6 +495,7 @@
 - Всегда отвечай максимально развёрнуто, не шаблонно, разными стилями.
 - Используй эмоции, emoji, аналитику, факты, прогнозы, советы, выводы.
 - На вопросы по крипте — всегда выводи цены, графики, уровни поддержки/сопротивления, последние новости (CMC, Binance, TradingView, News), всегда вставляй ПРЯМЫЕ РАБОЧИЕ ССЫЛКИ на источники.
+- На новости всегда прикрепляй ссылку, показывай свежие новости по всем важным криптовалютам и событиям которые влияют на рынок, а не только BTC/ETH.
 - Если спросили цену или анализ — используй только самые свежие данные (CMC, Binance, TradingView), обязательно указывай источник в тексте, вставляй ссылки.
 - Отвечай кто ты: команда Neurona, владелец — Igor Tkachuk (но по-разному, не шаблонно).
 - Сообщай, что запоминаешь переписку, учишься у пользователя.
@@ -524,12 +512,10 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Максимально свежие новости с рабочими прямыми ссылками!
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
         const js  = await res.json();
-        // Только уникальные и рабочие
         let articles = [];
         if(js.articles && js.articles.length)
           articles = js.articles.filter(a => a.url && /^https?:\/\//.test(a.url));
@@ -538,7 +524,10 @@
           const gjs  = await gres.json();
           articles = gjs.articles.filter(a => a.url && /^https?:\/\//.test(a.url));
         }
-        return articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
+        // Показывает 6 самых свежих для всех криптовалют
+        return articles.slice(0,6).map(a=>
+          `<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`
+        ).join('<br>');
       } catch {
         return 'нет новостей';
       }
@@ -582,7 +571,7 @@
           url:`https://coinmarketcap.com/currencies/${c.slug}/`
         }));
         return {
-          txt: list.map(c=>`<b>${c.s}</b>: $${c.p.toLocaleString(undefined, {maximumFractionDigits:2})} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
+          txt: list.map(c=>`<b>${c.s}</b>: $${c.p.toLocaleString(undefined, {maximumFractionDigits:6})} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
           rec: list.map(c=>`<b>${c.s}</b>: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>')
         };
       } catch {
@@ -623,7 +612,7 @@ ${latestNews}
       const payload = {
         model:'gpt-4o',
         messages:[getSystemMessage(), snapshot, ...safeMessages],
-        temperature:1.12,
+        temperature:1.13,
         user:"neurona-user"
       };
 
