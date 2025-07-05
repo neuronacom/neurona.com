@@ -43,15 +43,14 @@
       display: flex;
       flex-direction: column;
       width:100%; max-width:390px; min-width:270px;
-      min-height: 350px;
-      max-height: 78vh;
-      height: 70vh;   /* <= СТАЛ МЕНЬШЕ */
+      min-height: 400px;
+      max-height: 88vh;
+      height: 82vh;   /* еще длиннее и выше */
       z-index:1; opacity:0;
       background: none;
       margin: 0;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
-      /* Сместим всё ниже от шапки */
-      margin-top: 74px; /* отступ ниже бургера и логотипа */
+      margin-top: 40px; /* поднят выше */
     }
     body.shown #bg { opacity:0.27; }
     body.shown #app { opacity:1; }
@@ -122,8 +121,8 @@
       width:100%;
       height: 100%;
       max-width:100%;
-      min-height: 260px;
-      max-height: 76vh;
+      min-height: 320px;
+      max-height: 86vh;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
       position:relative;
     }
@@ -131,8 +130,8 @@
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
       gap:7px; scroll-behavior: smooth;
       overscroll-behavior: contain;
-      min-height: 160px;
-      max-height: 52vh;
+      min-height: 200px;
+      max-height: 68vh;
     }
     .message {
       display: flex;
@@ -187,19 +186,6 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
-    .input-label {
-      display: block;
-      width: 100%;
-      padding: 0 0 6px 0;
-      text-align: left;
-      font-size: 1.08rem;
-      color: #333;
-      letter-spacing: .01em;
-      font-weight: 500;
-      background: transparent;
-      margin: 0 0 0 0;
-      user-select: none;
-    }
     .input-area { display:flex; padding:10px; background:#fff; align-items: flex-end; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send {
@@ -227,7 +213,7 @@
     p { margin: 7px 0; }
     /* КРУЖОК стрелка — поднята выше! */
     #scroll-down {
-      display:none; position:absolute; left:50%; bottom:123px; /* было 86px, стало выше */
+      display:none; position:absolute; left:50%; bottom:123px; /* выше поля ввода */
       transform:translateX(-50%);
       background:#fff; color:#222;
       border-radius:50%; box-shadow:0 3px 14px #0001;
@@ -254,9 +240,9 @@
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { min-width:0; padding:0 4px 7px 4px; max-height:90vh; height:72vh; margin-top:54px; }
-      .chat-container { min-height:180px; max-height: 82vh; }
-      #messages { min-height:110px; max-height: 52vh;}
+      #app { min-width:0; padding:0 4px 7px 4px; max-height:96vh; height:86vh; margin-top:26px; }
+      .chat-container { min-height:180px; max-height: 90vh; }
+      #messages { min-height:110px; max-height: 73vh;}
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
@@ -265,7 +251,6 @@
       #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:110px;}
       #scroll-down svg { width:20px; height:20px; }
       #loader { min-height:280px; }
-      .input-label { font-size: 0.98rem; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -305,7 +290,6 @@
       <button id="scroll-down" title="Вниз к новому">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <label class="input-label" for="input">Напишите сообщение</label>
       <div class="input-area">
         <textarea id="input" placeholder="Напишите сообщение..."></textarea>
         <button id="send">Отправить</button>
@@ -378,7 +362,7 @@
           loadHistory();
           setTimeout(()=>scrollChatToBottom(true), 300);
         }, 1000);
-      }, 4000); // ускорено! (было 6000)
+      }, 4000);
     });
 
     function formatBotMessage(text) {
@@ -463,7 +447,7 @@
     function scrollChatToBottom(smooth){
       setTimeout(()=>{
         if(smooth && 'scrollTo' in msgsContainer){
-          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 250, behavior: "auto" }); // скорость увеличена
+          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 250, behavior: "auto" });
         } else {
           msgsContainer.scrollTop = msgsContainer.scrollHeight + 150;
         }
@@ -574,7 +558,6 @@
     }
 
     async function fetchLatestNews(){
-      // Cryptopanic + GNews с фильтром по дате
       let news = [];
       try {
         const res = await fetch(NEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
@@ -600,7 +583,6 @@
           })));
         }
       } catch{}
-      // Уникальные по title
       const titles = new Set();
       news = news.filter(a=>{
         if(titles.has(a.title)) return false;
