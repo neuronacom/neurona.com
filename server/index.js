@@ -6,18 +6,12 @@ const app = express();
 
 const TIMEOUT = 7000; // миллисекунд на каждый внешний запрос
 
-async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
-  return Promise.race([
-    fetch(url, options),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), timeout)
-    ),
-  ]);
-}
+// ВАЖНО: увеличиваем лимит размера JSON тела!
+app.use(express.json({ limit: '1mb' }));
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(express.json());
 
+// CoinMarketCap API (Топ-5)
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetchTimeout(
@@ -31,6 +25,16 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
+async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), timeout)
+    ),
+  ]);
+}
+
+// Крипто-новости (Cryptopanic)
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -56,6 +60,7 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
+// GNews backup
 app.get('/api/gnews', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -75,6 +80,7 @@ app.get('/api/gnews', async (req, res) => {
   }
 });
 
+// CoinGecko
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -99,6 +105,7 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
+// Binance price
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -116,6 +123,7 @@ app.get('/api/binance', async (req, res) => {
   }
 });
 
+// TradingView simple support/resistance (опционально)
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -129,6 +137,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
+// OPENAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
@@ -140,6 +149,10 @@ app.post('/api/openai', async (req, res) => {
       body: JSON.stringify(req.body)
     }, 30000);
     const js = await r.json();
+    // Если ошибка авторизации — отправляем правильный статус и сообщение!
+    if(js.error && js.error.message){
+      return res.status(500).json({ error: js.error.message });
+    }
     res.json(js);
   } catch (e) {
     res.status(500).json({ error: 'OpenAI error' });
