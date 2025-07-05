@@ -72,17 +72,24 @@ app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
     if(!query) return res.json({found:false});
-    const cg = await fetch('https://api.coingecko.com/api/v3/coins/list').then(r=>r.json());
-    let coin = cg.find(c=>c.symbol.toLowerCase()===query) ||
-               cg.find(c=>c.id.toLowerCase()===query) ||
-               cg.find(c=>c.name.toLowerCase()===query);
-    if(!coin) return res.json({found:false});
-    const market = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`).then(r=>r.json());
+    let url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${encodeURIComponent(query)}&order=market_cap_desc&per_page=1&page=1`;
+    let cg = await fetch(url).then(r=>r.json());
+    if(!cg.length){
+      const coinList = await fetch('https://api.coingecko.com/api/v3/coins/list').then(r=>r.json());
+      let coin = coinList.find(c=>c.symbol.toLowerCase()===query) ||
+                 coinList.find(c=>c.id.toLowerCase()===query) ||
+                 coinList.find(c=>c.name.toLowerCase()===query);
+      if(!coin) return res.json({found:false});
+      const cg2 = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coin.id}&order=market_cap_desc&per_page=1&page=1`).then(r=>r.json());
+      if(!cg2.length) return res.json({found:false});
+      cg = cg2;
+    }
+    const coin = cg[0];
     res.json({
       found:true,
       name:coin.name,
       symbol:coin.symbol,
-      price: market[coin.id]?.usd || '0',
+      price: coin.current_price,
       url: `https://www.coingecko.com/en/coins/${coin.id}`
     });
   } catch {
@@ -122,7 +129,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OpenAI (твой ключ в переменной окружения)
+// OpenAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
