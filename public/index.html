@@ -13,14 +13,16 @@
   <meta name="apple-mobile-web-app-title" content="NEURONA 1.0">
   <link rel="apple-touch-icon" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
+  <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png" imagesrcset="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
     }
     html, body { height:100%; background:#fff; color:#000; }
+    html { min-height: 100vh; }
     body {
-      height:100vh; min-height:100vh; overflow:hidden;
+      min-height:100vh; min-width:100vw; overflow:hidden;
       -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
       background-color:#fff !important; color:#000 !important;
       transition:background .2s;
@@ -28,6 +30,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      width: 100vw;
+      height: 100vh;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
@@ -39,13 +43,15 @@
       display: flex;
       flex-direction: column;
       width:100%; max-width:390px; min-width:270px;
-      min-height: 410px;
-      max-height: 86vh;
-      height: auto;
+      min-height: 350px;
+      max-height: 78vh;
+      height: 70vh;   /* <= СТАЛ МЕНЬШЕ */
       z-index:1; opacity:0;
       background: none;
       margin: 0;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
+      /* Сместим всё ниже от шапки */
+      margin-top: 74px; /* отступ ниже бургера и логотипа */
     }
     body.shown #bg { opacity:0.27; }
     body.shown #app { opacity:1; }
@@ -83,6 +89,8 @@
       opacity:1;
       transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
       pointer-events:auto;
+      width: 100vw;
+      height: 100vh;
     }
     #loader.hide {
       opacity:0; pointer-events:none;
@@ -91,8 +99,9 @@
     .loader-content {
       display:flex; align-items:center; justify-content:center;
       animation:fade 8s ease-in-out infinite;
+      min-height:140px; min-width:270px;
     }
-    .loader-logo { width:110px; margin-right:18px; }
+    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; }
     .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
       font-size:5.3rem; font-weight:bold; letter-spacing:.14em; color:#000;
@@ -110,10 +119,11 @@
       border-radius:14px; border:1px solid #ccc;
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
+      width:100%;
+      height: 100%;
       max-width:100%;
-      min-height:410px;
-      max-height: 82vh;
-      height: auto;
+      min-height: 260px;
+      max-height: 76vh;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
       position:relative;
     }
@@ -121,6 +131,8 @@
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
       gap:7px; scroll-behavior: smooth;
       overscroll-behavior: contain;
+      min-height: 160px;
+      max-height: 52vh;
     }
     .message {
       display: flex;
@@ -175,6 +187,19 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
+    .input-label {
+      display: block;
+      width: 100%;
+      padding: 0 0 6px 0;
+      text-align: left;
+      font-size: 1.08rem;
+      color: #333;
+      letter-spacing: .01em;
+      font-weight: 500;
+      background: transparent;
+      margin: 0 0 0 0;
+      user-select: none;
+    }
     .input-area { display:flex; padding:10px; background:#fff; align-items: flex-end; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send {
@@ -200,9 +225,9 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
-    /* КРУЖОК стрелка — еще больше и чуть выше! */
+    /* КРУЖОК стрелка — поднята выше! */
     #scroll-down {
-      display:none; position:absolute; left:50%; bottom:86px; /* было 64px */
+      display:none; position:absolute; left:50%; bottom:123px; /* было 86px, стало выше */
       transform:translateX(-50%);
       background:#fff; color:#222;
       border-radius:50%; box-shadow:0 3px 14px #0001;
@@ -222,25 +247,35 @@
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
     @media(max-width:600px){
+      html, body { min-width:100vw; min-height:100vh; }
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
       .top-logo{width:22px; margin-right:7px;}
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { min-width:0; padding:0 4px 7px 4px; }
+      #app { min-width:0; padding:0 4px 7px 4px; max-height:90vh; height:72vh; margin-top:54px; }
+      .chat-container { min-height:180px; max-height: 82vh; }
+      #messages { min-height:110px; max-height: 52vh;}
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
-      .chat-container { min-height:300px; }
-      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:68px;}
+      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:110px;}
       #scroll-down svg { width:20px; height:20px; }
+      #loader { min-height:280px; }
+      .input-label { font-size: 0.98rem; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
       #app{max-width:97vw;}
+      .chat-container{min-height:100px;}
+    }
+    @media (max-height:450px){
+      #app{min-height:100px; height:60vh;}
+      .chat-container{min-height:60px;}
+      #messages{min-height:35px;}
     }
   </style>
 </head>
@@ -257,7 +292,7 @@
   </div>
   <div id="loader">
     <div class="loader-content">
-      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo"/>
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo" onload="this.style.opacity=1;" style="opacity:0;transition:opacity .4s;"/>
       <div class="loader-text">
         <div class="loader-title">NEURONA</div>
         <div class="loader-subtitle">PERSONAL AI ASSISTANT</div>
@@ -270,6 +305,7 @@
       <button id="scroll-down" title="Вниз к новому">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
+      <label class="input-label" for="input">Напишите сообщение</label>
       <div class="input-area">
         <textarea id="input" placeholder="Напишите сообщение..."></textarea>
         <button id="send">Отправить</button>
@@ -342,7 +378,7 @@
           loadHistory();
           setTimeout(()=>scrollChatToBottom(true), 300);
         }, 1000);
-      }, 6000);
+      }, 4000); // ускорено! (было 6000)
     });
 
     function formatBotMessage(text) {
