@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 7000; // миллисекунд на каждый внешний запрос
+const TIMEOUT = 7000; // ms per request
 
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
