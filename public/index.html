@@ -272,8 +272,12 @@
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role,m.time)); }
-      scrollChatToBottom();
+      if(h.length){
+        messages=h;
+        msgsContainer.innerHTML = '';
+        h.forEach(m=> addMessage(m.content,m.role,m.time));
+        scrollChatToBottom();
+      }
     }
 
     document.body.style.opacity = "1";
@@ -293,25 +297,28 @@
 
     // --- Форматирование ответа
     function formatBotMessage(text) {
+      // Исправленная нумерация ol (не сбивается даже если вложенный список)
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
-      text = text.replace(/((?:^\d+\.\s.*\n?)+)/gm, block => {
-        let items = block.trim().split(/\n/).filter(Boolean);
+      // Обычные пункты
+      text = text.replace(/(^|\n)((?:\d+\.\s.*\n?)+)/gm, (m, p1, block) => {
+        const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ol>';
         for(let i=0; i<items.length; ++i){
-          out += '<li>' + items[i].replace(/^\d+\.\s?/, '').trim() + '</li>';
+          out += `<li>${items[i].replace(/^\d+\.\s?/, '')}</li>`;
         }
         out += '</ol>';
-        return out;
+        return p1 + out;
       });
-      text = text.replace(/((?:^[-•]\s.+\n?)+)/gm, block => {
-        let items = block.trim().split(/\n/).filter(Boolean);
+      // - пункты
+      text = text.replace(/(^|\n)((?:^[-•]\s.+\n?)+)/gm, (m, p1, block) => {
+        const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ul>';
         for(let i=0; i<items.length; ++i){
           out += '<li>' + items[i].replace(/^[-•]\s?/, '').trim() + '</li>';
         }
         out += '</ul>';
-        return out;
+        return p1 + out;
       });
       text = text.replace(/\n{2,}/g, '</p><p>');
       text = text.replace(/\n/g, '<br>');
@@ -341,11 +348,8 @@
       timeEl.textContent = time;
       msg.appendChild(timeEl);
       msgsContainer.appendChild(msg);
-      // Скрываем время, показываем только после печати сообщения
       timeEl.style.display = 'none';
-      setTimeout(()=>{
-        timeEl.style.display = 'inline';
-      }, 500);
+      setTimeout(()=>{ timeEl.style.display = 'inline'; }, 500);
       scrollChatToBottom(true);
     }
 
@@ -358,7 +362,6 @@
       return d;
     }
 
-    // Typewriter эффект: время появляется только после полного вывода
     function typeWriterEffect(text, who, time, cb) {
       const msg = document.createElement('div');
       msg.className = `message ${who}`;
@@ -370,7 +373,6 @@
       timeEl.textContent = time;
       msg.appendChild(timeEl);
       msgsContainer.appendChild(msg);
-
       let i = 0;
       let formatted = formatBotMessage(text);
       timeEl.style.display = 'none';
@@ -398,7 +400,6 @@
       }, 10);
     }
 
-    // i18n (можно добавить языки)
     const i18n = {
       en:{ph:"Type a message...",send:"Send"},
       ru:{ph:"Напишите сообщение...",send:"Отправить"},
@@ -409,12 +410,9 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // Генерация системного сообщения БЕЗ инструкций для ИИ!
+    // --- Системное сообщение (для AI), не показывается пользователю!
     function getSystemMessage(){
-      return {
-        role: 'system',
-        content: ''
-      };
+      return { role: 'system', content: '' };
     }
 
     // --- API endpoints ---
@@ -426,7 +424,6 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Получить цены на все тикеры с CoinGecko и Binance (живые!)
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -435,10 +432,10 @@
       for (let t of unique) {
         let cg=null, bin=null;
         try {
-          cg = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
+          cg = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}&t=${Date.now()}`).then(r=>r.json());
         } catch{}
         try {
-          bin = await fetch(`${BINANCE_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
+          bin = await fetch(`${BINANCE_ENDPOINT}?q=${encodeURIComponent(t)}&t=${Date.now()}`).then(r=>r.json());
         } catch{}
         let row = '';
         if(cg && cg.found){
@@ -496,7 +493,7 @@
 
       const typing = addTyping();
 
-      // === ВСЕ данные тянем в реальном времени! ===
+      // ВСЁ подтягивается каждый раз с API в реальном времени
       let pricesHtml = await fetchAllPrices(txt);
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
       const snapshot = {
@@ -512,7 +509,6 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // Только для запроса — в messages НЕ КЛАДЁМ!
       const payload = {
         model:'gpt-4o',
         messages:[getSystemMessage(), snapshot, ...messages],
