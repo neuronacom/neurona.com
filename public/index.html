@@ -19,22 +19,19 @@
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
     }
-    html, body {
-      width:100vw; height:100vh; min-height:100vh; min-width:100vw;
-      background:#fff; color:#000;
-      -webkit-font-smoothing:antialiased;
-      -webkit-text-size-adjust:none;
-      overflow:hidden;
-    }
+    html, body { height:100%; background:#fff; color:#000; }
+    html { min-height: 100vh; }
     body {
-      width:100vw; height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center; justify-content:center;
+      min-height:100vh; min-width:100vw; overflow:hidden;
+      -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
       background-color:#fff !important; color:#000 !important;
       transition:background .2s;
-      position:relative;
-      overflow:hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
@@ -43,13 +40,17 @@
       pointer-events:none;
     }
     #app {
+      display: flex;
+      flex-direction: column;
       width:100%; max-width:390px; min-width:270px;
-      height:75vh;
+      min-height: 400px;
+      max-height: 88vh;
+      height: 82vh;   /* еще длиннее и выше */
       z-index:1; opacity:0;
       background: none;
-      display: flex; flex-direction: column; justify-content: flex-end; align-items:center;
-      pointer-events: all;
+      margin: 0;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
+      margin-top: 40px; /* поднят выше */
     }
     body.shown #bg { opacity:0.27; }
     body.shown #app { opacity:1; }
@@ -112,24 +113,25 @@
     }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
     .chat-container {
+      flex:1;
       background:rgba(255,255,255,0.93);
       border-radius:14px; border:1px solid #ccc;
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
-      width:100%; max-width:390px; min-width:270px;
-      min-height:340px;
-      max-height:100%;
-      height:100%;
+      width:100%;
+      height: 100%;
+      max-width:100%;
+      min-height: 320px;
+      max-height: 86vh;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
       position:relative;
-      margin:0 auto 0 auto;
     }
     #messages {
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
       gap:7px; scroll-behavior: smooth;
       overscroll-behavior: contain;
-      min-height: 100px;
-      max-height: calc(75vh - 120px);
+      min-height: 200px;
+      max-height: 68vh;
     }
     .message {
       display: flex;
@@ -209,8 +211,9 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
+    /* КРУЖОК стрелка — поднята выше! */
     #scroll-down {
-      display:none; position:absolute; left:50%; bottom:93px;
+      display:none; position:absolute; left:50%; bottom:123px; /* выше поля ввода */
       transform:translateX(-50%);
       background:#fff; color:#222;
       border-radius:50%; box-shadow:0 3px 14px #0001;
@@ -237,25 +240,25 @@
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { max-width:100vw; min-width:0; padding:0 0 7px 0; height:78vh;}
-      .chat-container { min-width:0; max-width:100vw; min-height:140px; height:100%;}
-      #messages { min-height:60px; max-height:calc(78vh - 110px);}
+      #app { min-width:0; padding:0 4px 7px 4px; max-height:96vh; height:86vh; margin-top:26px; }
+      .chat-container { min-height:180px; max-height: 90vh; }
+      #messages { min-height:110px; max-height: 73vh;}
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
-      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:82px;}
+      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:110px;}
       #scroll-down svg { width:20px; height:20px; }
       #loader { min-height:280px; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
       #app{max-width:97vw;}
-      .chat-container{min-height:80px;}
+      .chat-container{min-height:100px;}
     }
     @media (max-height:450px){
-      #app{min-height:100px; height:54vh;}
+      #app{min-height:100px; height:60vh;}
       .chat-container{min-height:60px;}
       #messages{min-height:35px;}
     }
@@ -440,17 +443,19 @@
       return d;
     }
 
+    // --- Функция с быстрым и плавным автоскроллом! ---
     function scrollChatToBottom(smooth){
       setTimeout(()=>{
         if(smooth && 'scrollTo' in msgsContainer){
-          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "auto" });
+          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 250, behavior: "auto" });
         } else {
-          msgsContainer.scrollTop = msgsContainer.scrollHeight;
+          msgsContainer.scrollTop = msgsContainer.scrollHeight + 150;
         }
         checkScrollBtn();
       }, 2);
     }
 
+    // --- Новый ЧЕКЕР для стрелки! ---
     function checkScrollBtn(){
       if(botIsTyping) {
         scrollDownBtn.classList.remove('show');
@@ -466,7 +471,7 @@
     }
     msgsContainer.addEventListener('scroll', checkScrollBtn);
     scrollDownBtn.onclick = ()=>{
-      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "auto" });
+      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "auto" });
       scrollDownBtn.classList.remove('show');
     };
 
@@ -498,7 +503,6 @@
       };
     }
 
-    // --- API Endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
     const GNEWS_ENDPOINT  = '/api/gnews';
@@ -678,7 +682,7 @@ ${latestNews}
         if (i <= formatted.length) {
           content.innerHTML = formatted.slice(0, i);
           scrollChatToBottom(true);
-          i += Math.floor(Math.random()*3)+3;
+          i += Math.floor(Math.random()*3)+3; // скорость еще быстрее
           setTimeout(type, 1 + Math.random() * 4);
         } else {
           timeEl.style.display = 'inline';
