@@ -241,6 +241,19 @@
     </div>
   </div>
   <script>
+    // ======= ОБЯЗАТЕЛЬНО: если открываешь с другого домена, подставь свой Heroku адрес
+    // Если всё на Heroku — можно оставить пустую строку ("")
+    const API_BASE = 'https://neurona-c10ed5c2befb.herokuapp.com';
+
+    const CMC_ENDPOINT    = API_BASE + '/api/cmc';
+    const NEWS_ENDPOINT   = API_BASE + '/api/news';
+    const GNEWS_ENDPOINT  = API_BASE + '/api/gnews';
+    const CG_ENDPOINT     = API_BASE + '/api/coingecko';
+    const BINANCE_ENDPOINT = API_BASE + '/api/binance';
+    const COINDESK_ENDPOINT = API_BASE + '/api/coindesk';
+    const TVIEW_ENDPOINT  = API_BASE + '/api/tview';
+    const OPENAI_ENDPOINT = API_BASE + '/api/openai';
+
     // --- Фон-анимация (нейросеть)
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
@@ -436,9 +449,7 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Системное сообщение для AI (не показывается юзеру!)
     function getSystemMessage(){
-      // НЕ шаблонно и не повторяйся — для креативных ответов!
       return {
         role: 'system', content: `
 Ты — NEURONA 1.0, премиальный AI-ассистент и аналитик.
@@ -452,17 +463,6 @@
       };
     }
 
-    // --- API endpoints ---
-    const CMC_ENDPOINT    = '/api/cmc';
-    const NEWS_ENDPOINT   = '/api/news';
-    const GNEWS_ENDPOINT  = '/api/gnews';
-    const CG_ENDPOINT     = '/api/coingecko';
-    const BINANCE_ENDPOINT = '/api/binance';
-    const COINDESK_ENDPOINT = '/api/coindesk';
-    const TVIEW_ENDPOINT  = '/api/tview';
-    const OPENAI_ENDPOINT = '/api/openai';
-
-    // Только самые свежие цены — всегда с timestamp!
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -577,7 +577,7 @@ ${latestNews}
         messages.push({ role:'assistant', content:reply, time: botTime });
         saveHistory();
         scrollChatToBottom(true);
-      } catch {
+      } catch (err) {
         typing.remove();
         addMessage(i18n[lang].internal,'bot', new Date().toLocaleTimeString().slice(0,5));
         scrollChatToBottom();
@@ -592,7 +592,6 @@ ${latestNews}
       }
     });
 
-    // После загрузки всегда вниз
     setTimeout(()=>{scrollChatToBottom(true)}, 500);
 
   </script>
