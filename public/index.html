@@ -108,6 +108,7 @@
     #messages {
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
       gap:7px;
+      scroll-behavior: smooth;
     }
     .message {
       display: flex;
@@ -176,6 +177,18 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
+    #scroll-down {
+      display:none; position:fixed; z-index:999;
+      bottom:86px; right:32px;
+      background:#222; color:#fff;
+      border-radius:50%; box-shadow:0 5px 25px #0002;
+      width:42px; height:42px; align-items:center; justify-content:center;
+      cursor:pointer; font-size:2.2rem; border:none; outline:none;
+      transition:.3s;
+      opacity:0.75;
+    }
+    #scroll-down.show { display:flex; }
+    #scroll-down:hover { opacity:1; background:#444; }
     @media(max-width:600px){
       body{padding:0;}
       .top-bar{height:38px;}
@@ -191,6 +204,7 @@
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; }
       .chat-container { min-height:300px; }
+      #scroll-down { width:36px; height:36px; font-size:1.55rem; right:8px; bottom:70px;}
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -221,6 +235,7 @@
   <div id="app">
     <div class="chat-container">
       <div id="messages"></div>
+      <button id="scroll-down" title="Вниз к новому"><span>&#8595;</span></button>
       <div class="input-area">
         <textarea id="input" placeholder="Напишите сообщение..."></textarea>
         <button id="send">Отправить</button>
@@ -265,7 +280,8 @@
 
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
-          msgsContainer = document.getElementById('messages');
+          msgsContainer = document.getElementById('messages'),
+          scrollDownBtn = document.getElementById('scroll-down');
 
     // История (локально)
     let messages = [];
@@ -276,7 +292,7 @@
         messages=h;
         msgsContainer.innerHTML = '';
         h.forEach(m=> addMessage(m.content,m.role,m.time));
-        scrollChatToBottom();
+        scrollChatToBottom(true);
       }
     }
 
@@ -290,7 +306,7 @@
           document.getElementById('loader').style.display='none';
           document.getElementById('top-bar').classList.remove('hide');
           loadHistory();
-          scrollChatToBottom();
+          setTimeout(()=>scrollChatToBottom(true), 300);
         }, 1000);
       }, 6000);
     });
@@ -400,6 +416,20 @@
       }, 10);
     }
 
+    // Плавающая стрелка вниз
+    function checkScrollBtn(){
+      if(msgsContainer.scrollHeight - msgsContainer.clientHeight - msgsContainer.scrollTop > 100){
+        scrollDownBtn.classList.add('show');
+      } else {
+        scrollDownBtn.classList.remove('show');
+      }
+    }
+    msgsContainer.addEventListener('scroll', checkScrollBtn);
+    scrollDownBtn.onclick = ()=>{
+      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
+      scrollDownBtn.classList.remove('show');
+    }
+
     const i18n = {
       en:{ph:"Type a message...",send:"Send"},
       ru:{ph:"Напишите сообщение...",send:"Отправить"},
@@ -412,6 +442,7 @@
 
     // --- Системное сообщение (для AI), не показывается пользователю!
     function getSystemMessage(){
+      // Только живая дата! Без лишних инструкций, для точности.
       return { role: 'system', content: '' };
     }
 
@@ -424,6 +455,7 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
+    // Только самые свежие цены — всегда с timestamp
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -499,7 +531,7 @@
       const snapshot = {
         role:'system',
         content:
-`<b>ДАННЫЕ НА ${new Date().toLocaleTimeString().slice(0,5)}:</b><br>
+`<b>ДАННЫЕ НА ${new Date().toLocaleTimeString().slice(0,5)}, ${new Date().toLocaleDateString()}:</b><br>
 ${pricesHtml ? "<p>Актуальные цены:</p>" + pricesHtml : ""}
 <p>CMC топ-5:</p>
 ${cmc.txt}
@@ -529,13 +561,21 @@ ${latestNews}
         typeWriterEffect(reply,'bot',botTime);
         messages.push({ role:'assistant', content:reply, time: botTime });
         saveHistory();
-        scrollChatToBottom();
+        scrollChatToBottom(true);
       } catch {
         typing.remove();
         addMessage('Внутренняя ошибка, попробуйте позже.','bot', new Date().toLocaleTimeString().slice(0,5));
         scrollChatToBottom();
       }
     };
+
+    // ENTER для отправки
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
   </script>
 </body>
 </html>
