@@ -67,23 +67,43 @@ app.get('/api/gnews', async (req, res) => {
   }
 });
 
-// CoinGecko — точная цена
+// CoinGecko — самая точная свежая цена + описание монеты (без кеша!)
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
     if(!query) return res.json({found:false});
-    const cg = await fetch('https://api.coingecko.com/api/v3/coins/list').then(r=>r.json());
+    // 1. Сначала ищем среди популярных монет (markets)
+    let cg = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&symbols=${query}`).then(r=>r.json());
     let coin = cg.find(c=>c.symbol.toLowerCase()===query) ||
                cg.find(c=>c.id.toLowerCase()===query) ||
                cg.find(c=>c.name.toLowerCase()===query);
+
+    // 2. Если не нашли — ищем по списку монет
+    if (!coin) {
+      const list = await fetch('https://api.coingecko.com/api/v3/coins/list').then(r=>r.json());
+      let found = list.find(c=>c.symbol.toLowerCase()===query) ||
+                  list.find(c=>c.id.toLowerCase()===query) ||
+                  list.find(c=>c.name.toLowerCase()===query);
+      if(found){
+        cg = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${found.id}`).then(r=>r.json());
+        coin = cg[0];
+      }
+    }
     if(!coin) return res.json({found:false});
-    const market = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`).then(r=>r.json());
+
+    // 3. Получаем описание монеты (для расширенного анализа)
+    let details = {};
+    try {
+      details = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}`).then(r=>r.json());
+    } catch(e){}
+
     res.json({
       found:true,
       name:coin.name,
       symbol:coin.symbol,
-      price: market[coin.id]?.usd || '0',
-      url: `https://www.coingecko.com/en/coins/${coin.id}`
+      price: coin.current_price,
+      url: `https://www.coingecko.com/en/coins/${coin.id}`,
+      description: details.description?.en || ""
     });
   } catch {
     res.json({found:false});
@@ -140,7 +160,7 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-// SPA
+// SPA — для React/Tilda single page app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname,'..','public','index.html'));
 });
