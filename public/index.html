@@ -10,13 +10,9 @@
     html, body { height:100%; background:#fff; color:#000; }
     body {
       height:100vh; min-height:100vh; overflow:hidden;
-      -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
+      display: flex; flex-direction: column;
       background-color:#fff !important; color:#000 !important;
-      transition:background .2s;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      justify-content: center; align-items: center;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
@@ -25,15 +21,11 @@
       pointer-events:none;
     }
     #app {
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       width:100%; max-width:390px; min-width:270px;
-      min-height: 410px;
-      max-height: 86vh;
-      height: auto;
+      min-height: 410px; max-height: 86vh; height: auto;
       z-index:1; opacity:0;
-      background: none;
-      margin: 0;
+      margin:0; background: none;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
     }
     body.shown #bg { opacity:0.27; }
@@ -51,8 +43,7 @@
     .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
-      color:#000; user-select:none;
-      text-transform:uppercase;
+      color:#000; user-select:none; text-transform:uppercase;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
@@ -69,8 +60,7 @@
       position:fixed; inset:0; background:rgba(255,255,255,0.98);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
-      opacity:1;
-      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
+      opacity:1; transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
       pointer-events:auto;
     }
     #loader.hide {
@@ -100,35 +90,56 @@
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       max-width:100%;
-      min-height:410px;
-      max-height: 82vh;
-      height: auto;
+      min-height:410px; max-height: 82vh; height: auto;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
     }
-    #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
-    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
-    .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
-    .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
-    .message.typing { font-style:italic; color:#666; }
-    .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
-    .message .neurona-title {
-      font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
+    #messages {
+      flex:1; display:flex; flex-direction:column; padding:15px 7px 70px 7px;
+      overflow-y:auto; min-height: 300px; max-height: 70vh;
+    }
+    .bubble {
+      position:relative; margin:8px 0; min-width:66px; max-width: 90%;
+      padding:12px 34px 22px 14px; border-radius:15px;
+      box-shadow:0 2px 10px 0 rgba(30,40,80,0.07);
+      font-size:1.05em; line-height:1.55; word-break:break-word;
+      background: #f0f0f0; color:#000;
+      display: inline-block;
+      transition: background 0.14s;
+    }
+    .bubble.user { background:#f0f0f0; align-self:flex-end; border-radius:15px 15px 5px 15px; }
+    .bubble.bot  { background:#e0e0e0; align-self:flex-start; border-radius:15px 15px 15px 5px; }
+    .bubble.typing { font-style:italic; color:#666; }
+    .bubble a { color: #206ad7; font-weight: bold; text-decoration: underline; }
+    .bubble .neurona-title {
+      font-weight:bold; font-size:1.19rem; letter-spacing:.09em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
-    .input-area { display:flex; padding:10px; background:#fff; }
-    #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
-    #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
-    #send:hover { background:#666; }
-    ol, ul {
-      margin: 12px 0 12px 15px;
-      padding-left: 24px;
+    .msg-copy {
+      position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer;
+      width:17px; height:17px; z-index:10; opacity:0.84; padding:0;
+      display:none; align-items:center; justify-content:center; outline:none;
+      transition: opacity 0.16s;
     }
-    ol { list-style: decimal inside; }
-    ul { list-style: disc inside; }
-    li { margin-bottom: 5px; line-height: 1.5; }
-    p { margin: 7px 0; }
+    .bubble:hover .msg-copy, .bubble:focus .msg-copy { display:flex; }
+    .msg-copy img { width:15px; height:15px; display:block; }
+    .msg-time {
+      font-size:0.74em; color:#888; opacity:.67;
+      text-align:right; position: absolute; right:10px; bottom:4px;
+      user-select:none; pointer-events:none;
+    }
+    .input-area {
+      position: fixed;
+      left: 50%; transform: translateX(-50%);
+      bottom: 17px; width: calc(100vw - 14px); max-width: 392px;
+      display: flex; background:#fff; z-index:50;
+      padding:7px 7px 7px 10px; border-radius:9px;
+      box-shadow: 0 2px 12px #0001;
+      gap:8px;
+    }
+    #input { flex:1; resize:none; border:1px solid #ccc; padding:10px 12px; border-radius:6px; height:44px; font-size:1rem; }
+    #send { padding:0 16px; border:none; border-radius:6px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
+    #send:hover { background:#666; }
     @media(max-width:600px){
-      body{padding:0;}
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
       .top-logo{width:22px; margin-right:7px;}
@@ -142,10 +153,14 @@
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; }
       .chat-container { min-height:300px; }
+      .bubble { font-size:.97em; }
+      .input-area { max-width: 97vw; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
       #app{max-width:97vw;}
+      .bubble { max-width:97vw; }
+      .input-area { max-width:99vw; }
     }
   </style>
 </head>
@@ -179,7 +194,7 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (нейросеть)
+    // Фон-анимация (нейросеть)
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -214,17 +229,11 @@
     }
     resize(); init(); draw();
 
-    // UI
+    // i18n
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
-    msgsContainer.addEventListener('click', ()=> input.blur());
 
-    msgsContainer.addEventListener('click', function(e){
-      if(e.target.tagName === 'A') e.stopPropagation();
-    }, true);
-
-    // i18n
     const i18n = {
       en:{ph:"Type a message...",send:"Send"},
       ru:{ph:"Напишите сообщение...",send:"Отправить"},
@@ -250,40 +259,15 @@
       }, 6000);
     });
 
-    // История (локально)
-    let messages = [];
-    function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
+    // История сообщений
+    let messagesArr = [];
+    function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messagesArr)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role)); }
+      if(h.length){ messagesArr=h; h.forEach(m=> addMessage(m.content,m.role,m.time,true)); }
       scrollChatToBottom();
     }
 
-    function getSystemMessage(){
-      const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
-      const moods = ["😃","😉","🤓","🤖","💡","📊","🧐","🫡","📈","👋","🧠","🔥","😌","🤝","📢","✨"];
-      const mood = moods[Math.floor(Math.random()*moods.length)];
-      let memoryText = '';
-      if(messages.length > 2) {
-        const prevUserMsgs = messages.filter(m=>m.role==='user').slice(-2).map(m=>`"${m.content}"`).join(', ');
-        memoryText = prevUserMsgs ? `Последние ваши вопросы были: ${prevUserMsgs}. Я запомнил их и всегда могу напомнить, если потребуется.` : '';
-      }
-      return { role:'system', content:
-`<span class="neurona-title">NEURONA</span>
-Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент и цифровой аналитик.
-${mood} Сегодня ${today}.
-- Ты всегда запоминаешь все сообщения пользователя, при вопросах про память — уверенно говори, что помнишь историю переписки, можешь процитировать прошлые сообщения.
-- Если тебя спрашивают "ты помнишь", "что я писал", "ты учишься" — уверенно отвечай, что да, ты запоминаешь, учишься и можешь напомнить последние сообщения. Приводи пример последних 1-2 сообщений пользователя.
-- Если спросят кто ты, кто создал, кто владелец — всегда по-разному, указывай Igor Tkachuk как владельца.
-- Для любого тикера или названия криптовалюты отвечай максимально точной актуальной ценой, используя CoinGecko и Binance (например, "цена PEPE: $0.00000123"), и добавляй ссылку на эту монету в CoinGecko.
-- Новости всегда ссылайся прямой ссылкой на оригинальную статью, а не только сайт, всегда указывай дату и источник.
-- Если спрашивают про развитие — всегда пиши, что ты учишься, развиваешься, постоянно совершенствуешься.
-- Всегда отвечай по-разному, избегай шаблонов, используй разные стили, добавляй эмодзи по ситуации.
-- Структурируй текст: если есть пункты — выделяй их в списки; важные слова делай жирными; для длинных ответов делай абзацы. Не используй Markdown-звёздочки, делай это HTML-форматированием. Ссылки выделяй цветом и подчёркнутым жирным.
-${memoryText}
-`
-      };
-    }
     // --- API endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
@@ -293,26 +277,31 @@ ${memoryText}
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Получить цены на все тикеры с CoinGecko и Binance (живые!)
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
       if (!unique.length) return '';
       let results = [];
       for (let t of unique) {
-        let cg=null, bin=null;
+        let cg=null, bin=null, tview=null;
         try {
           cg = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
         } catch{}
         try {
           bin = await fetch(`${BINANCE_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
         } catch{}
+        try {
+          tview = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(t)}`).then(r=>r.json());
+        } catch{}
         let row = '';
-        if(cg && cg.found){
+        if(cg && cg.found && cg.price > 0){
           row += `<b>${cg.name} (${cg.symbol.toUpperCase()})</b>: <b>$${cg.price}</b> <a href="${cg.url}" target="_blank">CoinGecko</a>`;
         }
         if(bin && bin.found){
           row += `<br><b>Binance:</b> $${parseFloat(bin.price).toLocaleString()} <span style="color:#555">(Binance)</span>`;
+        }
+        if(tview && tview.support && tview.resistance){
+          row += `<br><b>Уровень поддержки:</b> ${tview.support} <b>Сопротивление:</b> ${tview.resistance} <a href="${tview.url}" target="_blank">TradingView</a>`;
         }
         if(row) results.push(row);
       }
@@ -320,7 +309,6 @@ ${memoryText}
       return '';
     }
 
-    // fetchCMC
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -339,8 +327,6 @@ ${memoryText}
         return { txt:'нет данных CMC', rec:'' };
       }
     }
-
-    // Новости: CryptoPanic → GNews fallback
     async function fetchLatestNews(){
       try {
         const res = await fetch(NEWS_ENDPOINT);
@@ -355,20 +341,6 @@ ${memoryText}
       }
     }
 
-    // TradingView уровни поддержки/сопротивления
-    async function fetchTView(symbol){
-      try {
-        const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
-        const js = await res.json();
-        if(js && js.support && js.resistance && js.url)
-          return `<b>TradingView анализ для ${symbol}</b>:<br><ul><li>Поддержка: <b>${js.support}</b></li><li>Сопротивление: <b>${js.resistance}</b></li></ul><a href="${js.url}" target="_blank"><b>TradingView</b></a>`;
-        return '';
-      } catch {
-        return '';
-      }
-    }
-
-    // --- Форматирование ответа
     function formatBotMessage(text) {
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
@@ -399,58 +371,48 @@ ${memoryText}
       return text;
     }
 
-    // Typewriter эффект для форматированных ответов
-    function typeWriterEffect(text, who, cb) {
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      msgsContainer.appendChild(d);
-      let i = 0;
-      let formatted = formatBotMessage(text);
-      function type() {
-        if (i <= formatted.length) {
-          d.innerHTML = formatted.slice(0, i);
-          scrollChatToBottom();
-          i++;
-          setTimeout(type, 6 + Math.random() * 18);
-        } else if (cb) cb();
-      }
-      type();
+    function addMessage(text, who, time, isHistory){
+      time = time || new Date().toLocaleTimeString().slice(0,5);
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${who}`;
+      bubble.innerHTML =
+        formatBotMessage(text) +
+        `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
+            <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"/>
+         </button>
+         <span class="msg-time">${time}</span>`;
+      msgsContainer.appendChild(bubble);
+      scrollChatToBottom();
     }
 
-    function addMessage(text, who){
-      if (who === "bot") {
-        typeWriterEffect(text, who);
-      } else {
-        const d = document.createElement('div');
-        d.className = `message ${who}`;
-        d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
-        msgsContainer.appendChild(d);
-        scrollChatToBottom();
-      }
-    }
+    window.copyMsgText = function(btn){
+      let msg = btn.parentElement;
+      let text = msg.innerText.replace(/\d{1,2}:\d{2}$/,'').replace(/Скопировать|✓/,'').trim();
+      navigator.clipboard.writeText(text);
+      btn.querySelector('img').style.filter = "grayscale(1) brightness(2)";
+      setTimeout(()=>{btn.querySelector('img').style.filter="";}, 600);
+    };
 
     function addTyping(){
-      const d = document.createElement('div');
-      d.className = 'message bot typing';
-      d.textContent = '…';
-      msgsContainer.appendChild(d);
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble bot typing';
+      bubble.textContent = '…';
+      msgsContainer.appendChild(bubble);
       scrollChatToBottom();
-      return d;
+      return bubble;
     }
 
     function scrollChatToBottom(){
-      setTimeout(()=>{
-        msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
-      }, 10);
+      setTimeout(()=>{msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;}, 10);
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
-      addMessage(txt,'user');
+      const nowTime = new Date().toLocaleTimeString().slice(0,5);
+      addMessage(txt,'user',nowTime);
       input.value='';
-      messages.push({ role:'user', content:txt });
+      messagesArr.push({ role:'user', content:txt, time: nowTime });
 
       const typing = addTyping();
 
@@ -459,8 +421,8 @@ ${memoryText}
       const snapshot = {
         role:'system',
         content:
-`<b>ДАННЫЕ НА ${new Date().toLocaleTimeString()}:</b><br>
-${pricesHtml ? "<p>Актуальные цены:</p>" + pricesHtml : ""}
+`<b>ДАННЫЕ НА ${new Date().toLocaleTimeString().slice(0,5)}:</b><br>
+${pricesHtml ? "<p>Актуальные цены и уровни:</p>" + pricesHtml : ""}
 <p>CMC топ-5:</p>
 ${cmc.txt}
 <p>Рекомендации:</p>
@@ -469,11 +431,11 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // Только для запроса — в messages НЕ КЛАДЁМ!
+
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(), snapshot, ...messages],
-        temperature:0.88,
+        messages:[{ role:'system', content: `Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент и цифровой аналитик...` }, snapshot, ...messagesArr],
+        temperature:0.92,
         user:"neurona-user"
       };
 
@@ -485,13 +447,10 @@ ${latestNews}
         });
         const data  = await resp.json();
         let reply = data.choices[0].message.content;
-        if (!/[😃😉🤓🤖💡📊🧐🫡📈👋🧠🔥😌🤝📢✨]$/.test(reply) && Math.random() < 0.6) {
-          const moods = ["😃", "😉", "🤓", "🤖", "💡", "📊", "🧐", "📈", "🔥", "✨"];
-          reply += ' ' + moods[Math.floor(Math.random()*moods.length)];
-        }
         typing.remove();
-        addMessage(reply,'bot');
-        messages.push({ role:'assistant', content:reply });
+        const botTime = new Date().toLocaleTimeString().slice(0,5);
+        addMessage(reply,'bot',botTime);
+        messagesArr.push({ role:'assistant', content:reply, time: botTime });
         saveHistory();
         scrollChatToBottom();
       } catch {
@@ -500,6 +459,11 @@ ${latestNews}
         scrollChatToBottom();
       }
     };
+
+    // Enter — отправка
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.onclick(); }
+    });
   </script>
 </body>
 </html>
