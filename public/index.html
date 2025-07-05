@@ -92,68 +92,54 @@
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
     }
     #messages { 
-      flex:1; display:flex; flex-direction:column; padding:15px; 
-      overflow-y:auto; 
-      min-height: 300px;
+      flex:1; display:flex; flex-direction:column; 
+      padding:15px; overflow-y:auto; min-height: 300px;
       max-height: 65vh;
     }
     .message { 
-      margin:12px 0; 
-      line-height:1.45; 
-      max-width:95%; 
-      word-wrap:break-word; 
-      padding:14px 14px 22px 14px; 
-      border-radius:14px; 
-      color:#000; 
-      position:relative; 
-      background:#f8f8f8; 
-      min-height:44px;
-      transition: box-shadow .14s;
-      box-shadow: 0 1.2px 5.5px 0 rgba(50,60,100,0.07);
+      position:relative;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 24px;
+      min-height: 56px;
+      box-sizing: border-box;
     }
-    .message.user { align-self:flex-end; background:#f0f0f0; border-radius:16px 16px 0 16px; }
-    .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:16px 16px 16px 0; }
-    .message .msg-time { 
-      font-size:0.77em; 
-      color:#888; 
+    .bubble {
+      position:relative;
+      padding:16px 34px 22px 16px;
+      border-radius:18px;
+      background: #f8f8f8;
+      font-size:1.09em;
+      line-height:1.55;
+      word-break:break-word;
+      width: fit-content;
+      max-width: 100%;
+      min-width: 60px;
+      box-sizing: border-box;
+      box-shadow:0 2px 18px 0 rgba(30,40,80,0.12), 0 2.5px 10px 0 rgba(50,50,90,0.07);
+    }
+    .message.user .bubble { background:#f0f0f0; align-self: flex-end; border-radius:18px 18px 4px 18px; }
+    .message.bot  .bubble { background:#e0e0e0; align-self: flex-start; border-radius:18px 18px 18px 4px; }
+    .msg-copy {
+      position:absolute; top:8px; right:8px; background:none; border:none; cursor:pointer;
+      width:18px; height:18px; z-index:10; opacity:0.81; padding:0;
+      display:none; align-items:center; justify-content:center; outline:none;
+      transition: opacity 0.18s;
+    }
+    .bubble:hover .msg-copy, .bubble:focus .msg-copy { display:flex; }
+    .msg-copy img { width:16px; height:16px; display:block; }
+    .msg-time {
+      font-size:0.75em; color:#888; opacity:.67;
+      text-align:right; margin-top:3px;
+      position: relative;
       display:block;
-      text-align:right;
-      margin-top:8px;
       margin-right:2px;
-      opacity:0.67;
-      font-family:Arial,sans-serif;
-      font-weight:400;
-      letter-spacing: 0.03em;
-      line-height:1.1;
+      margin-bottom:-5px;
+      user-select:none;
       pointer-events:none;
     }
-    .msg-copy {
-      position:absolute; top:10px; right:7px; background:none; border:none; cursor:pointer;
-      width:18px; height:18px; z-index:10; opacity:0.81; padding:0;
-      display:none; align-items:center; justify-content:center;
-      outline: none;
-      transition: opacity 0.2s;
-    }
-    .msg-copy img {
-      width:16px; height:16px; display:block; filter:drop-shadow(0 0 1.5px #fff8);
-    }
-    .message.show-copy .msg-copy { display:flex; }
-    .msg-copy:hover { opacity:1; filter: drop-shadow(0 0 1.5px #0005);}
-    .message.typing { font-style:italic; color:#666; }
-    .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
-    .message .neurona-title {
-      font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
-      text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
-    }
-    .input-area { display:flex; padding:10px; background:#fff; }
-    #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
-    #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
-    #send:hover { background:#666; }
-    ol, ul { margin: 12px 0 12px 15px; padding-left: 24px; }
-    ol { list-style: decimal inside; }
-    ul { list-style: disc inside; }
-    li { margin-bottom: 5px; line-height: 1.5; }
-    p { margin: 7px 0; }
     @media(max-width:600px){
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
@@ -207,7 +193,7 @@
     </div>
   </div>
   <script>
-    // Анимация-фон
+    // Фон-анимация (нейросеть)
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -242,7 +228,7 @@
     }
     resize(); init(); draw();
 
-    // UI & messages
+    // UI и messages
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
@@ -323,6 +309,7 @@
       return '';
     }
 
+    // fetchCMC, fetchLatestNews — без изменений
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -386,28 +373,35 @@
       return text;
     }
 
-    // Typewriter эффект + иконка появляется после анимации!
+    // Typewriter эффект для форматированных ответов
     function typeWriterEffect(text, who, time, isHistory, cb) {
-      const d = document.createElement('div');
-      d.className = `message ${who}`;
-      msgsContainer.appendChild(d);
+      const msg = document.createElement('div');
+      msg.className = `message ${who}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
       let i = 0;
       let formatted = formatBotMessage(text);
+
       function type() {
         if (i <= formatted.length) {
-          d.innerHTML = formatted.slice(0, i) + `<span class="msg-time">${(time||new Date().toLocaleTimeString().slice(0,5))}</span>`;
+          bubble.innerHTML = 
+            formatted.slice(0, i) +
+            `<span class="msg-time">${(time||new Date().toLocaleTimeString().slice(0,5))}</span>`;
           scrollChatToBottom();
           i += isHistory ? formatted.length : 1;
-          if (!isHistory) setTimeout(type, 6 + Math.random() * 12);
+          if (!isHistory) setTimeout(type, 7 + Math.random() * 14);
         } else {
-          d.classList.add('show-copy');
-          d.insertAdjacentHTML("afterbegin",
-            `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
-              <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy">
-            </button>`);
-          if(cb) cb();
+          // После вывода текста — только тогда появляется кнопка копирования
+          bubble.innerHTML += `
+            <button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
+              <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"/>
+            </button>`;
+          bubble.querySelector('.msg-copy').style.display = 'flex';
+          if (cb) cb();
         }
       }
+      msg.appendChild(bubble);
+      msgsContainer.appendChild(msg);
       type();
     }
 
@@ -416,54 +410,48 @@
       if (who === "bot") {
         typeWriterEffect(text, who, time, isHistory);
       } else {
-        const d = document.createElement('div');
-        d.className = `message ${who} show-copy`;
-        d.innerHTML =
-          `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
-            <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy">
-          </button>` +
+        const msg = document.createElement('div');
+        msg.className = `message ${who}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML =
           text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') +
-          `<span class="msg-time">${time}</span>`;
-        msgsContainer.appendChild(d);
+          `<span class="msg-time">${time}</span>
+          <button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
+            <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"/>
+          </button>`;
+        msg.appendChild(bubble);
+        msgsContainer.appendChild(msg);
         scrollChatToBottom();
       }
     }
 
     function addTyping(){
-      const d = document.createElement('div');
-      d.className = 'message bot typing';
-      d.textContent = '…';
-      msgsContainer.appendChild(d);
+      const msg = document.createElement('div');
+      msg.className = 'message bot typing';
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = '…';
+      msg.appendChild(bubble);
+      msgsContainer.appendChild(msg);
       scrollChatToBottom();
-      return d;
+      return msg;
     }
 
     function scrollChatToBottom(){
       setTimeout(()=>{
-        msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 100, behavior: 'smooth' });
+        msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 200, behavior: 'smooth' });
       }, 8);
     }
 
     // Копирование текста сообщения
     window.copyMsgText = function(btn){
-      let parent = btn.closest('.message');
-      let text = parent.innerText.replace(/\d{1,2}:\d{2}$/,'').replace(/Скопировать|✓/,'').trim();
+      let bubble = btn.closest('.bubble');
+      let text = bubble.innerText.replace(/\d{1,2}:\d{2}$/,'').replace(/Скопировать|✓/,'').trim();
       navigator.clipboard.writeText(text);
       btn.querySelector('img').style.filter = "grayscale(1) brightness(2)";
       setTimeout(()=>{btn.querySelector('img').style.filter="";}, 600);
     };
-
-    // ГЛАВНОЕ — вставка цен в system-подсказку (чтобы OpenAI не брал свои!)
-    function getSystemMessage(snapshot){
-      return {
-        role:'system',
-        content: 
-`<span class="neurona-title">NEURONA</span>
-Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент.
-${snapshot || ''}
-Всегда отвечай актуальной рыночной ценой по крипте, используя только данные, которые тебе переданы выше.`
-      };
-    }
 
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
@@ -477,7 +465,9 @@ ${snapshot || ''}
 
       let pricesHtml = await fetchAllPrices(txt);
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
-      const snapshot = 
+      const snapshot = {
+        role:'system',
+        content:
 `<b>ДАННЫЕ НА ${new Date().toLocaleTimeString().slice(0,5)}:</b><br>
 ${pricesHtml ? "<p>Актуальные цены и уровни:</p>" + pricesHtml : ""}
 <p>CMC топ-5:</p>
@@ -486,11 +476,12 @@ ${cmc.txt}
 ${cmc.rec}
 <p>Актуальные новости:</p>
 ${latestNews}
--------------------------------`;
+-------------------------------`
+      };
 
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(snapshot), ...messages],
+        messages:[{ role:'system', content: `Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент и цифровой аналитик...` }, snapshot, ...messages],
         temperature:0.92,
         user:"neurona-user"
       };
@@ -503,10 +494,6 @@ ${latestNews}
         });
         const data  = await resp.json();
         let reply = data.choices[0].message.content;
-        if (!/[😃😉🤓🤖💡📊🧐🫡📈👋🧠🔥😌🤝📢✨]$/.test(reply) && Math.random() < 0.6) {
-          const moods = ["😃", "😉", "🤓", "🤖", "💡", "📊", "🧐", "📈", "🔥", "✨"];
-          reply += ' ' + moods[Math.floor(Math.random()*moods.length)];
-        }
         typing.remove();
         const botTime = new Date().toLocaleTimeString().slice(0,5);
         addMessage(reply,'bot',botTime);
