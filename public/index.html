@@ -10,30 +10,21 @@
     html, body { height:100%; background:#fff; color:#000; }
     body {
       height:100vh; min-height:100vh; overflow:hidden;
-      -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:none;
       background-color:#fff !important; color:#000 !important;
       transition:background .2s;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
-      z-index:0; opacity:0;
-      transition:opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
+      z-index:0; opacity:0; transition:opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
       pointer-events:none;
     }
     #app {
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       width:100%; max-width:390px; min-width:270px;
-      min-height: 410px;
-      max-height: 86vh;
-      height: auto;
-      z-index:1; opacity:0;
-      background: none;
-      margin: 0;
+      min-height: 410px; max-height: 86vh; height: auto;
+      z-index:1; opacity:0; background: none; margin: 0;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
     }
     body.shown #bg { opacity:0.27; }
@@ -51,8 +42,7 @@
     .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
-      color:#000; user-select:none;
-      text-transform:uppercase;
+      color:#000; user-select:none; text-transform:uppercase;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
@@ -69,8 +59,7 @@
       position:fixed; inset:0; background:rgba(255,255,255,0.98);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
-      opacity:1;
-      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
+      opacity:1; transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
       pointer-events:auto;
     }
     #loader.hide {
@@ -100,15 +89,20 @@
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       max-width:100%;
-      min-height:410px;
-      max-height: 82vh;
-      height: auto;
+      min-height:410px; max-height: 82vh; height: auto;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
     }
     #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
-    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; }
+    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; position:relative; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
+    .message .msg-time { font-size:0.83em; color:#888; position:absolute; right:12px; bottom:2px; }
+    .msg-copy {
+      position:absolute; top:6px; right:7px; background:none; border:none; cursor:pointer;
+      font-size:15px; color:#666; opacity:0.7; z-index:10; padding:2px;
+      transition: color 0.14s;
+    }
+    .msg-copy:hover { color:#000; opacity:1; }
     .message.typing { font-style:italic; color:#666; }
     .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
     .message .neurona-title {
@@ -119,16 +113,12 @@
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
     #send:hover { background:#666; }
-    ol, ul {
-      margin: 12px 0 12px 15px;
-      padding-left: 24px;
-    }
+    ol, ul { margin: 12px 0 12px 15px; padding-left: 24px; }
     ol { list-style: decimal inside; }
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
     @media(max-width:600px){
-      body{padding:0;}
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
       .top-logo{width:22px; margin-right:7px;}
@@ -179,7 +169,7 @@
     </div>
   </div>
   <script>
-    // --- Фон-анимация (нейросеть)
+    // Фон-анимация (нейросеть)
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -219,7 +209,6 @@
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
     msgsContainer.addEventListener('click', ()=> input.blur());
-
     msgsContainer.addEventListener('click', function(e){
       if(e.target.tagName === 'A') e.stopPropagation();
     }, true);
@@ -255,7 +244,7 @@
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role)); }
+      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role,m.time)); }
       scrollChatToBottom();
     }
 
@@ -272,18 +261,19 @@
 `<span class="neurona-title">NEURONA</span>
 Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент и цифровой аналитик.
 ${mood} Сегодня ${today}.
-- Ты всегда запоминаешь все сообщения пользователя, при вопросах про память — уверенно говори, что помнишь историю переписки, можешь процитировать прошлые сообщения.
-- Если тебя спрашивают "ты помнишь", "что я писал", "ты учишься" — уверенно отвечай, что да, ты запоминаешь, учишься и можешь напомнить последние сообщения. Приводи пример последних 1-2 сообщений пользователя.
-- Если спросят кто ты, кто создал, кто владелец — всегда по-разному, указывай Igor Tkachuk как владельца.
-- Для любого тикера или названия криптовалюты отвечай максимально точной актуальной ценой, используя CoinGecko и Binance (например, "цена PEPE: $0.00000123"), и добавляй ссылку на эту монету в CoinGecko.
-- Новости всегда ссылайся прямой ссылкой на оригинальную статью, а не только сайт, всегда указывай дату и источник.
-- Если спрашивают про развитие — всегда пиши, что ты учишься, развиваешься, постоянно совершенствуешься.
-- Всегда отвечай по-разному, избегай шаблонов, используй разные стили, добавляй эмодзи по ситуации.
-- Структурируй текст: если есть пункты — выделяй их в списки; важные слова делай жирными; для длинных ответов делай абзацы. Не используй Markdown-звёздочки, делай это HTML-форматированием. Ссылки выделяй цветом и подчёркнутым жирным.
+- Всегда анализируй только самые свежие цены с CoinGecko и Binance, никогда не дублируй одну и ту же цену!
+- Пиши не только цену, а также уровни поддержки/сопротивления, краткий прогноз (нейтрально, бычий или медвежий), процентные изменения, краткое описание монеты.
+- Для любого тикера или названия криптовалюты обязательно добавляй ссылку на CoinGecko и TradingView и отображай цену с этих платформ.
+- Не пиши "больше по ссылке", а сам давай вывод лучше, чем официальный сайт. Структурируй ответ, делай выводы, прогнозы, аналитику.
+- Всегда выводи время сообщения для пользователя и ассистента.
+- Для новостей всегда вставляй прямую ссылку, дату, источник.
+- Используй разные стили, добавляй эмодзи по ситуации, не используй шаблонные ответы.
+- Структурируй текст: списки, абзацы, выделения. Не используй Markdown-звёздочки, только HTML.
 ${memoryText}
 `
       };
     }
+
     // --- API endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
@@ -300,12 +290,15 @@ ${memoryText}
       if (!unique.length) return '';
       let results = [];
       for (let t of unique) {
-        let cg=null, bin=null;
+        let cg=null, bin=null, tview=null;
         try {
           cg = await fetch(`${CG_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
         } catch{}
         try {
           bin = await fetch(`${BINANCE_ENDPOINT}?q=${encodeURIComponent(t)}`).then(r=>r.json());
+        } catch{}
+        try {
+          tview = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(t)}`).then(r=>r.json());
         } catch{}
         let row = '';
         if(cg && cg.found){
@@ -313,6 +306,9 @@ ${memoryText}
         }
         if(bin && bin.found){
           row += `<br><b>Binance:</b> $${parseFloat(bin.price).toLocaleString()} <span style="color:#555">(Binance)</span>`;
+        }
+        if(tview && tview.support && tview.resistance){
+          row += `<br><b>Уровень поддержки:</b> ${tview.support} <b>Сопротивление:</b> ${tview.resistance} <a href="${tview.url}" target="_blank">TradingView</a>`;
         }
         if(row) results.push(row);
       }
@@ -355,19 +351,6 @@ ${memoryText}
       }
     }
 
-    // TradingView уровни поддержки/сопротивления
-    async function fetchTView(symbol){
-      try {
-        const res = await fetch(`${TVIEW_ENDPOINT}?symbol=${encodeURIComponent(symbol)}`);
-        const js = await res.json();
-        if(js && js.support && js.resistance && js.url)
-          return `<b>TradingView анализ для ${symbol}</b>:<br><ul><li>Поддержка: <b>${js.support}</b></li><li>Сопротивление: <b>${js.resistance}</b></li></ul><a href="${js.url}" target="_blank"><b>TradingView</b></a>`;
-        return '';
-      } catch {
-        return '';
-      }
-    }
-
     // --- Форматирование ответа
     function formatBotMessage(text) {
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
@@ -400,15 +383,17 @@ ${memoryText}
     }
 
     // Typewriter эффект для форматированных ответов
-    function typeWriterEffect(text, who, cb) {
+    function typeWriterEffect(text, who, time, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
+      d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">⎘</button>`;
       msgsContainer.appendChild(d);
       let i = 0;
       let formatted = formatBotMessage(text);
       function type() {
         if (i <= formatted.length) {
-          d.innerHTML = formatted.slice(0, i);
+          d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">⎘</button>` + formatted.slice(0, i) +
+            `<span class="msg-time">${time || new Date().toLocaleTimeString()}</span>`;
           scrollChatToBottom();
           i++;
           setTimeout(type, 6 + Math.random() * 18);
@@ -417,13 +402,16 @@ ${memoryText}
       type();
     }
 
-    function addMessage(text, who){
+    function addMessage(text, who, time){
+      time = time || new Date().toLocaleTimeString();
       if (who === "bot") {
-        typeWriterEffect(text, who);
+        typeWriterEffect(text, who, time);
       } else {
         const d = document.createElement('div');
         d.className = `message ${who}`;
-        d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+        d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">⎘</button>` +
+          text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') +
+          `<span class="msg-time">${time}</span>`;
         msgsContainer.appendChild(d);
         scrollChatToBottom();
       }
@@ -444,13 +432,22 @@ ${memoryText}
       }, 10);
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
+    // Кнопка "копировать"
+    window.copyMsgText = function(btn){
+      let parent = btn.closest('.message');
+      let text = parent.innerText.replace(/⎘/, '').replace(/\d{2}:\d{2}:\d{2}$/, '').trim();
+      navigator.clipboard.writeText(text);
+      btn.textContent = "✓";
+      setTimeout(()=>{btn.textContent="⎘";}, 700);
+    };
+
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
-      addMessage(txt,'user');
+      const nowTime = new Date().toLocaleTimeString();
+      addMessage(txt,'user',nowTime);
       input.value='';
-      messages.push({ role:'user', content:txt });
+      messages.push({ role:'user', content:txt, time: nowTime });
 
       const typing = addTyping();
 
@@ -460,7 +457,7 @@ ${memoryText}
         role:'system',
         content:
 `<b>ДАННЫЕ НА ${new Date().toLocaleTimeString()}:</b><br>
-${pricesHtml ? "<p>Актуальные цены:</p>" + pricesHtml : ""}
+${pricesHtml ? "<p>Актуальные цены и уровни:</p>" + pricesHtml : ""}
 <p>CMC топ-5:</p>
 ${cmc.txt}
 <p>Рекомендации:</p>
@@ -469,11 +466,11 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // Только для запроса — в messages НЕ КЛАДЁМ!
+
       const payload = {
         model:'gpt-4o',
         messages:[getSystemMessage(), snapshot, ...messages],
-        temperature:0.88,
+        temperature:0.9,
         user:"neurona-user"
       };
 
@@ -485,13 +482,15 @@ ${latestNews}
         });
         const data  = await resp.json();
         let reply = data.choices[0].message.content;
+        // Добавить смайлик если нет
         if (!/[😃😉🤓🤖💡📊🧐🫡📈👋🧠🔥😌🤝📢✨]$/.test(reply) && Math.random() < 0.6) {
           const moods = ["😃", "😉", "🤓", "🤖", "💡", "📊", "🧐", "📈", "🔥", "✨"];
           reply += ' ' + moods[Math.floor(Math.random()*moods.length)];
         }
         typing.remove();
-        addMessage(reply,'bot');
-        messages.push({ role:'assistant', content:reply });
+        const botTime = new Date().toLocaleTimeString();
+        addMessage(reply,'bot',botTime);
+        messages.push({ role:'assistant', content:reply, time: botTime });
         saveHistory();
         scrollChatToBottom();
       } catch {
