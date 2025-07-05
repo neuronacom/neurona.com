@@ -4,9 +4,8 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 5000; // миллисекунд на каждый внешний запрос
+const TIMEOUT = 5000;
 
-// Универсальный fetch с таймаутом
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
     fetch(url, options),
@@ -19,7 +18,6 @@ async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
 
-// CMC — Топ-5 монет
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetchTimeout(
@@ -33,7 +31,6 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// CryptoPanic — только свежие новости
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -59,7 +56,6 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// GNews — резервный источник новостей
 app.get('/api/gnews', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -79,7 +75,6 @@ app.get('/api/gnews', async (req, res) => {
   }
 });
 
-// CoinGecko — точная цена по тикеру/имени
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -104,7 +99,6 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
-// BINANCE — моментальная цена на тикер
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -122,7 +116,6 @@ app.get('/api/binance', async (req, res) => {
   }
 });
 
-// TradingView — поддержка/сопротивление
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -136,7 +129,6 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OpenAI (твой ключ в переменной окружения)
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
@@ -146,7 +138,7 @@ app.post('/api/openai', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(req.body)
-    }, 30000); // 30 сек для OpenAI
+    }, 30000);
     const js = await r.json();
     res.json(js);
   } catch (e) {
@@ -154,7 +146,6 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-// SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
