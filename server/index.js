@@ -6,9 +6,7 @@ const app = express();
 
 const TIMEOUT = 7000; // миллисекунд на каждый внешний запрос
 
-// ВАЖНО: увеличиваем лимит размера JSON тела!
 app.use(express.json({ limit: '1mb' }));
-
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
@@ -149,7 +147,6 @@ app.post('/api/openai', async (req, res) => {
       body: JSON.stringify(req.body)
     }, 30000);
     const js = await r.json();
-    // Если ошибка авторизации — отправляем правильный статус и сообщение!
     if(js.error && js.error.message){
       return res.status(500).json({ error: js.error.message });
     }
