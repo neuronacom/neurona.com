@@ -682,7 +682,10 @@ ${latestNews}
     });
 
     setTimeout(()=>{scrollChatToBottom(true)}, 500);
-
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
   </script>
 </body>
 </html>
