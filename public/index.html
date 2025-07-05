@@ -105,38 +105,25 @@
       height: auto;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
     }
-    #messages {
-      flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
-      scroll-behavior: smooth;
-    }
-    .message { 
-      margin:6px 0 18px 0; line-height:1.45; max-width:83%; 
-      word-wrap:break-word; padding:8px 12px 22px 12px; 
-      border-radius:12px; color:#000; position:relative;
-      min-height:36px;
-      box-shadow: 0 2px 8px #eee;
-      background: #f4f4f4;
-      transition: background 0.2s;
-    }
+    #messages { flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto; }
+    .message { margin:5px 0; line-height:1.45; max-width:83%; word-wrap:break-word; padding:8px 12px; border-radius:12px; color:#000; position:relative; }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:12px 12px 0 12px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:12px 12px 12px 0; }
-    .message.typing { font-style:italic; color:#666; background: #f9f9f9; }
+    .message.typing { font-style:italic; color:#666; }
     .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
-    .neurona-title {
+    .message .neurona-title {
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
     .msg-time {
       position:absolute;
-      right:15px;
-      bottom:6px;
-      font-size:0.83em;
+      bottom:5px;
+      right:14px;
+      font-size:0.85em;
       color:#888;
-      opacity:0.89;
+      opacity:0.85;
       user-select:none;
       font-family:Arial,sans-serif;
-      pointer-events: none;
-      background: transparent;
     }
     .input-area { display:flex; padding:10px; background:#fff; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
@@ -268,18 +255,18 @@
           document.getElementById('loader').style.display='none';
           document.getElementById('top-bar').classList.remove('hide');
           loadHistory();
-          scrollChatToBottom(true);
+          scrollChatToBottom();
         }, 1000);
       }, 6000);
     });
 
-    // История (локально, только последние 20)
+    // История (локально)
     let messages = [];
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
-      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role,m.time,true)); }
-      scrollChatToBottom(true);
+      if(h.length){ messages=h; h.forEach(m=> addMessage(m.content,m.role,m.time)); }
+      scrollChatToBottom();
     }
 
     function getSystemMessage(){
@@ -431,31 +418,26 @@ ${memoryText}
       let i = 0;
       let formatted = formatBotMessage(text);
       function type() {
-        d.innerHTML = formatted.slice(0, i);
-        scrollChatToBottom(true);
-        if (i < formatted.length) {
+        if (i <= formatted.length) {
+          d.innerHTML = formatted.slice(0, i) + `<span class="msg-time">${time}</span>`;
+          scrollChatToBottom();
           i++;
-          setTimeout(type, 8 + Math.random() * 15);
-        } else {
-          // ПОСЛЕ окончания печати — показать время
-          d.innerHTML = formatted + `<span class="msg-time">${time}</span>`;
-          if (cb) cb();
-          scrollChatToBottom(true);
-        }
+          setTimeout(type, 6 + Math.random() * 18);
+        } else if (cb) cb();
       }
       type();
     }
 
-    function addMessage(text, who, time, fast) {
+    function addMessage(text, who, time){
       if (!time) time = new Date().toLocaleTimeString().slice(0,5);
-      if (who === "bot" && !fast) {
+      if (who === "bot") {
         typeWriterEffect(text, who, time);
       } else {
         const d = document.createElement('div');
         d.className = `message ${who}`;
-        d.innerHTML = (who==="user"?text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') : formatBotMessage(text)) + `<span class="msg-time">${time}</span>`;
+        d.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') + `<span class="msg-time">${time}</span>`;
         msgsContainer.appendChild(d);
-        scrollChatToBottom(true);
+        scrollChatToBottom();
       }
     }
 
@@ -464,21 +446,17 @@ ${memoryText}
       d.className = 'message bot typing';
       d.textContent = '…';
       msgsContainer.appendChild(d);
-      scrollChatToBottom(true);
+      scrollChatToBottom();
       return d;
     }
 
-    function scrollChatToBottom(smooth){
+    function scrollChatToBottom(){
       setTimeout(()=>{
-        msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 100, behavior: smooth ? "smooth" : "auto" });
+        msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
       }, 10);
     }
 
-    // --- Сохраняем только последние 20 сообщений (10 пар user/assistant)
-    function trimHistory() {
-      if (messages.length > 20) messages = messages.slice(-20);
-    }
-
+    // ГЛАВНОЕ ИЗМЕНЕНИЕ: НЕ СОХРАНЯЕМ SNAPSHOT В messages!
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -486,8 +464,6 @@ ${memoryText}
       addMessage(txt,'user',nowTime);
       input.value='';
       messages.push({ role:'user', content:txt, time: nowTime });
-      trimHistory();
-      saveHistory();
 
       const typing = addTyping();
 
@@ -506,13 +482,10 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-
-      // Оставляем только последние 10 пар
-      const shortHistory = messages.length>20 ? messages.slice(-20) : messages;
-
+      // Только для запроса — в messages НЕ КЛАДЁМ!
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(), snapshot, ...shortHistory],
+        messages:[getSystemMessage(), snapshot, ...messages],
         temperature:0.88,
         user:"neurona-user"
       };
@@ -524,8 +497,7 @@ ${latestNews}
           body:JSON.stringify(payload)
         });
         const data  = await resp.json();
-        let reply = (data && data.choices && data.choices[0]) ? data.choices[0].message.content : null;
-        if (!reply) throw new Error("No reply from AI");
+        let reply = data.choices[0].message.content;
         if (!/[😃😉🤓🤖💡📊🧐🫡📈👋🧠🔥😌🤝📢✨]$/.test(reply) && Math.random() < 0.6) {
           const moods = ["😃", "😉", "🤓", "🤖", "💡", "📊", "🧐", "📈", "🔥", "✨"];
           reply += ' ' + moods[Math.floor(Math.random()*moods.length)];
@@ -534,13 +506,12 @@ ${latestNews}
         const botTime = new Date().toLocaleTimeString().slice(0,5);
         addMessage(reply,'bot',botTime);
         messages.push({ role:'assistant', content:reply, time: botTime });
-        trimHistory();
         saveHistory();
-        scrollChatToBottom(true);
+        scrollChatToBottom();
       } catch {
         typing.remove();
         addMessage('Внутренняя ошибка, попробуйте позже.','bot', new Date().toLocaleTimeString().slice(0,5));
-        scrollChatToBottom(true);
+        scrollChatToBottom();
       }
     };
   </script>
