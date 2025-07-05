@@ -4,14 +4,11 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 7000; // ms per request
-
+const TIMEOUT = 7000;
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
     fetch(url, options),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), timeout)
-    ),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout)),
   ]);
 }
 
@@ -26,11 +23,10 @@ app.get('/api/cmc', async (req, res) => {
     );
     const js = await r.json();
     res.json(js);
-  } catch (e) {
+  } catch {
     res.json({ data: [], error: 'CMC error' });
   }
 });
-
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -55,7 +51,6 @@ app.get('/api/news', async (req, res) => {
     res.json({ articles: [] });
   }
 });
-
 app.get('/api/gnews', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -74,7 +69,6 @@ app.get('/api/gnews', async (req, res) => {
     res.json({ articles: [] });
   }
 });
-
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -98,7 +92,6 @@ app.get('/api/coingecko', async (req, res) => {
     res.json({ found: false });
   }
 });
-
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -115,7 +108,6 @@ app.get('/api/binance', async (req, res) => {
     res.json({ found: false });
   }
 });
-
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -128,7 +120,6 @@ app.get('/api/tview', async (req, res) => {
     res.json({ support: null, resistance: null, url: null });
   }
 });
-
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
@@ -145,10 +136,8 @@ app.post('/api/openai', async (req, res) => {
     res.status(500).json({ error: 'OpenAI error' });
   }
 });
-
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
