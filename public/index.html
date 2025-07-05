@@ -171,7 +171,8 @@
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
       background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s;
-      min-width:44px; min-height:44px; display: flex; align-items: center; justify-content: center;
+      min-width:44px; min-height:50px; /* Вернул высоту как раньше */
+      height:50px; display: flex; align-items: center; justify-content: center;
     }
     #send:hover { background:#222; }
     .copy-btn {
@@ -191,14 +192,14 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
-    /* СТИЛЬ для стрелочки */
+    /* КРУЖОК стрелка — больше и выше! */
     #scroll-down {
-      display:none; position:absolute; left:50%; bottom:14px;
+      display:none; position:absolute; left:50%; bottom:64px;
       transform:translateX(-50%);
       background:#fff; color:#222;
       border-radius:50%; box-shadow:0 3px 14px #0001;
-      width:28px; height:28px; align-items:center; justify-content:center;
-      cursor:pointer; font-size:1.6rem; border:none; outline:none;
+      width:38px; height:38px; align-items:center; justify-content:center;
+      cursor:pointer; font-size:2rem; border:none; outline:none;
       transition:.3s;
       opacity:0.91;
       z-index:99;
@@ -207,13 +208,12 @@
       padding:0;
     }
     #scroll-down svg {
-      width:17px; height:17px; display:block; stroke-width:3.7px;
+      width:21px; height:21px; display:block; stroke-width:3.7px;
       margin: 0 auto;
     }
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
     @media(max-width:600px){
-      body{padding:0;}
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
       .top-logo{width:22px; margin-right:7px;}
@@ -225,10 +225,10 @@
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
-      #send { font-size:.89rem; padding:0 10px; min-width:25px; min-height:25px;}
+      #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
       .chat-container { min-height:300px; }
-      #scroll-down { width:23px; height:23px; font-size:1.1rem;}
-      #scroll-down svg { width:12px; height:12px; }
+      #scroll-down { width:28px; height:28px; font-size:1.1rem; bottom:54px;}
+      #scroll-down svg { width:15px; height:15px; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -338,7 +338,6 @@
     });
 
     function formatBotMessage(text) {
-      // Чистка невалидных символов/квадратиков (проблема emoji)
       text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, ""); // variation selectors
       text = text.replace(/\uFFFD/g, ""); // удаляет �
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
@@ -465,16 +464,17 @@
       }, 10);
     }
 
-    // --- Новый чекер стрелки! ---
+    // --- Новый ЧЕКЕР для стрелки! ---
     function checkScrollBtn(){
-      // Стрелка показывается если прокрутка не внизу, весь messages не виден
+      // Стрелка показывается если прокрутка не внизу
       if(botIsTyping) {
         scrollDownBtn.classList.remove('show');
         return;
       }
-      // появится, когда нижний край messages выше видимой области на 10px+
-      let threshold = 10;
-      if (msgsContainer.scrollHeight - msgsContainer.scrollTop - msgsContainer.clientHeight > threshold) {
+      // появится, когда прокручен на высоту одного экрана чата (messages) вверх и больше
+      let view = msgsContainer.clientHeight;
+      let fromBottom = msgsContainer.scrollHeight - msgsContainer.scrollTop - view;
+      if(fromBottom > view*0.99) { // прокрутка на "один экран"
         scrollDownBtn.classList.add('show');
       } else {
         scrollDownBtn.classList.remove('show');
@@ -497,7 +497,6 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Самый умный system prompt для AI ---
     function getSystemMessage(){
       return {
         role: 'system', content: `
