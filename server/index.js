@@ -7,7 +7,7 @@ const app     = express();
 app.use(express.static(path.join(__dirname,'..','public')));
 app.use(express.json());
 
-// CMC — Топ-5
+// CoinMarketCap — Топ-5
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetch(
@@ -17,6 +17,7 @@ app.get('/api/cmc', async (req, res) => {
     const js = await r.json();
     res.json(js);
   } catch (e) {
+    console.error('/api/cmc error:', e);
     res.status(500).json({ error: 'CMC error' });
   }
 });
@@ -42,7 +43,8 @@ app.get('/api/news', async (req, res) => {
       }
     }
     res.json({articles});
-  } catch {
+  } catch (e) {
+    console.error('/api/news error:', e);
     res.json({ articles: [] });
   }
 });
@@ -62,7 +64,8 @@ app.get('/api/gnews', async (req, res) => {
       source: a.source?.name || 'gnews'
     }));
     res.json({ articles });
-  } catch {
+  } catch (e) {
+    console.error('/api/gnews error:', e);
     res.json({ articles: [] });
   }
 });
@@ -92,7 +95,8 @@ app.get('/api/coingecko', async (req, res) => {
       price: coin.current_price,
       url: `https://www.coingecko.com/en/coins/${coin.id}`
     });
-  } catch {
+  } catch (e) {
+    console.error('/api/coingecko error:', e);
     res.json({found:false});
   }
 });
@@ -110,7 +114,8 @@ app.get('/api/binance', async (req, res) => {
     } else {
       res.json({found:false});
     }
-  } catch {
+  } catch (e) {
+    console.error('/api/binance error:', e);
     res.json({found:false});
   }
 });
@@ -125,13 +130,17 @@ app.get('/api/tview', async (req, res) => {
     const resistance = page.match(/Resistance[\s\S]*?(\$[0-9,]+)/i)?.[1] || null;
     res.json({ support, resistance, url });
   } catch (e) {
+    console.error('/api/tview error:', e);
     res.json({ support:null, resistance:null, url:null });
   }
 });
 
-// OpenAI
+// OpenAI — GPT-4o
 app.post('/api/openai', async (req, res) => {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OPENAI_API_KEY not set' });
+    }
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -141,8 +150,13 @@ app.post('/api/openai', async (req, res) => {
       body: JSON.stringify(req.body)
     });
     const js = await r.json();
+    if (js.error) {
+      console.error('OpenAI error:', js.error);
+      return res.status(500).json({ error: js.error.message || 'OpenAI error' });
+    }
     res.json(js);
   } catch (e) {
+    console.error('/api/openai error:', e);
     res.status(500).json({ error: 'OpenAI error' });
   }
 });
