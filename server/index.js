@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 7000; // миллисекунд на каждый внешний запрос
+const TIMEOUT = 7000; // ms
 
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
@@ -18,6 +18,7 @@ async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
 
+// CoinMarketCap — топ-5
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetchTimeout(
@@ -31,6 +32,47 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
+// GNews
+app.get('/api/gnews', async (req, res) => {
+  try {
+    const q = encodeURIComponent(req.query.q || 'crypto');
+    const url = `https://gnews.io/api/v4/search?q=${q}&token=${process.env.GNEWS_API_KEY}&lang=en&max=5`;
+    const r = await fetchTimeout(url);
+    const js = await r.json();
+    if (!js.articles) return res.json({ articles: [] });
+    const articles = js.articles.map(a => ({
+      title: a.title,
+      url: a.url,
+      time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
+      source: a.source?.name || 'gnews'
+    }));
+    res.json({ articles });
+  } catch {
+    res.json({ articles: [] });
+  }
+});
+
+// NewsAPI (можно добавлять параллельно, если нужен второй источник)
+app.get('/api/newsapi', async (req, res) => {
+  try {
+    const q = encodeURIComponent(req.query.q || 'crypto');
+    const url = `https://newsapi.org/v2/everything?q=${q}&language=en&pageSize=5&apiKey=${process.env.NEWS_API_KEY}`;
+    const r = await fetchTimeout(url);
+    const js = await r.json();
+    if (!js.articles) return res.json({ articles: [] });
+    const articles = js.articles.map(a => ({
+      title: a.title,
+      url: a.url,
+      time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
+      source: a.source?.name || 'newsapi'
+    }));
+    res.json({ articles });
+  } catch {
+    res.json({ articles: [] });
+  }
+});
+
+// CryptoPanic (демо токен — можно заменить)
 app.get('/api/news', async (req, res) => {
   try {
     const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
@@ -56,25 +98,7 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-app.get('/api/gnews', async (req, res) => {
-  try {
-    const q = encodeURIComponent(req.query.q || 'crypto');
-    const url = `https://gnews.io/api/v4/search?q=${q}&token=${process.env.GNEWS_API_KEY}&lang=en&max=5`;
-    const r = await fetchTimeout(url);
-    const js = await r.json();
-    if (!js.articles) return res.json({ articles: [] });
-    const articles = js.articles.map(a => ({
-      title: a.title,
-      url: a.url,
-      time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
-      source: a.source?.name || 'gnews'
-    }));
-    res.json({ articles });
-  } catch {
-    res.json({ articles: [] });
-  }
-});
-
+// CoinGecko (по символу)
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -99,6 +123,7 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
+// Binance (по символу)
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -116,6 +141,22 @@ app.get('/api/binance', async (req, res) => {
   }
 });
 
+// Coindesk (BTC/USD)
+app.get('/api/coindesk', async (req, res) => {
+  try {
+    const r = await fetchTimeout(`https://api.coindesk.com/v1/bpi/currentprice/BTC.json`);
+    const js = await r.json();
+    if(js.bpi && js.bpi.USD) {
+      res.json({ found:true, price:js.bpi.USD.rate_float, time:js.time.updated, source:'Coindesk', url:'https://www.coindesk.com/price/bitcoin/' });
+    } else {
+      res.json({ found:false });
+    }
+  } catch {
+    res.json({ found:false });
+  }
+});
+
+// TradingView levels
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -129,6 +170,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
+// OpenAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
@@ -146,6 +188,7 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
+// Любые другие роуты
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
