@@ -171,8 +171,7 @@
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
       background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s;
-      min-width:44px; min-height:50px; /* Вернул высоту как раньше */
-      height:50px; display: flex; align-items: center; justify-content: center;
+      min-width:44px; min-height:50px; height:50px; display: flex; align-items: center; justify-content: center;
     }
     #send:hover { background:#222; }
     .copy-btn {
@@ -192,23 +191,23 @@
     ul { list-style: disc inside; }
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
-    /* КРУЖОК стрелка — больше и выше! */
+    /* КРУЖОК стрелка — еще больше и чуть выше! */
     #scroll-down {
-      display:none; position:absolute; left:50%; bottom:64px;
+      display:none; position:absolute; left:50%; bottom:86px; /* было 64px */
       transform:translateX(-50%);
       background:#fff; color:#222;
       border-radius:50%; box-shadow:0 3px 14px #0001;
-      width:38px; height:38px; align-items:center; justify-content:center;
-      cursor:pointer; font-size:2rem; border:none; outline:none;
+      width:47px; height:47px; align-items:center; justify-content:center;
+      cursor:pointer; font-size:2.4rem; border:none; outline:none;
       transition:.3s;
-      opacity:0.91;
+      opacity:0.93;
       z-index:99;
       border: 2.2px solid #eee;
       font-weight: bold;
       padding:0;
     }
     #scroll-down svg {
-      width:21px; height:21px; display:block; stroke-width:3.7px;
+      width:27px; height:27px; display:block; stroke-width:4.2px;
       margin: 0 auto;
     }
     #scroll-down.show { display:flex; }
@@ -227,8 +226,8 @@
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
       .chat-container { min-height:300px; }
-      #scroll-down { width:28px; height:28px; font-size:1.1rem; bottom:54px;}
-      #scroll-down svg { width:15px; height:15px; }
+      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:68px;}
+      #scroll-down svg { width:20px; height:20px; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -340,8 +339,10 @@
     function formatBotMessage(text) {
       text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, ""); // variation selectors
       text = text.replace(/\uFFFD/g, ""); // удаляет �
+      // [ТЕКСТ](ССЫЛКА)
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
+      // Столбик 1. 2. 3.
       text = text.replace(/(^|\n)((?:\d+\.\s.*\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ol>';
@@ -351,6 +352,7 @@
         out += '</ol>';
         return p1 + out;
       });
+      // - или •
       text = text.replace(/(^|\n)((?:^[-•]\s.+\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ul>';
@@ -412,69 +414,27 @@
       return d;
     }
 
-    function typeWriterEffect(text, who, time, cb) {
-      const msg = document.createElement('div');
-      msg.className = `message ${who}`;
-      const content = document.createElement('div');
-      content.className = 'msg-content';
-      msg.appendChild(content);
-      const timeEl = document.createElement('span');
-      timeEl.className = 'msg-time';
-      timeEl.textContent = time;
-      msg.appendChild(timeEl);
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'copy-btn';
-      copyBtn.title = 'Скопировать';
-      copyBtn.innerHTML = '⧉';
-      copyBtn.onclick = function(e) {
-        e.stopPropagation();
-        navigator.clipboard.writeText(content.innerText || content.textContent || "");
-        copyBtn.innerHTML = '✔';
-        setTimeout(()=>copyBtn.innerHTML='⧉',800);
-      };
-      msg.appendChild(copyBtn);
-      msgsContainer.appendChild(msg);
-      let i = 0;
-      let formatted = formatBotMessage(text);
-      timeEl.style.display = 'none';
-      botIsTyping = true;
-      function type() {
-        if (i <= formatted.length) {
-          content.innerHTML = formatted.slice(0, i);
-          scrollChatToBottom(true);
-          i += Math.floor(Math.random()*3)+2;
-          setTimeout(type, 3 + Math.random() * 9);
-        } else {
-          timeEl.style.display = 'inline';
-          botIsTyping = false;
-          if (cb) cb();
-        }
-      }
-      type();
-    }
-
+    // --- Функция с быстрым и плавным автоскроллом! ---
     function scrollChatToBottom(smooth){
       setTimeout(()=>{
         if(smooth && 'scrollTo' in msgsContainer){
-          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
+          msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 250, behavior: "auto" }); // скорость увеличена
         } else {
-          msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
+          msgsContainer.scrollTop = msgsContainer.scrollHeight + 150;
         }
         checkScrollBtn();
-      }, 10);
+      }, 2);
     }
 
     // --- Новый ЧЕКЕР для стрелки! ---
     function checkScrollBtn(){
-      // Стрелка показывается если прокрутка не внизу
       if(botIsTyping) {
         scrollDownBtn.classList.remove('show');
         return;
       }
-      // появится, когда прокручен на высоту одного экрана чата (messages) вверх и больше
       let view = msgsContainer.clientHeight;
       let fromBottom = msgsContainer.scrollHeight - msgsContainer.scrollTop - view;
-      if(fromBottom > view*0.99) { // прокрутка на "один экран"
+      if(fromBottom > view*0.99) {
         scrollDownBtn.classList.add('show');
       } else {
         scrollDownBtn.classList.remove('show');
@@ -482,7 +442,7 @@
     }
     msgsContainer.addEventListener('scroll', checkScrollBtn);
     scrollDownBtn.onclick = ()=>{
-      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
+      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "auto" });
       scrollDownBtn.classList.remove('show');
     };
 
@@ -505,6 +465,7 @@
 - Используй юмор, эмоции, emoji, дополнительные факты, советы, делай сравнения, выдавай неожиданные детали, чтобы ответы были живыми, не шаблонными.
 - На вопросы по криптовалюте и рынкам всегда делай глубокий анализ графика (BTC, ETH, TON, любые монеты), указывай цену (по CMC, Binance, CoinGecko, TradingView), уровни поддержки/сопротивления, тренд, прогноз, рекомендации для открытия/закрытия позиции, риски.
 - Если спросили цену или анализ — используй только самые свежие данные (CMC, Binance, TradingView), обязательно указывай источник в тексте, вставляй ссылки.
+- По запросу новостей всегда отправляй только свежие новости криптовалют с прямыми ссылками на источник (Cryptopanic, GNews и др.), не старше 1 суток, не дублируй, выделяй списком, обязательно добавляй ссылку на источник к каждой новости!
 - Не упоминай ChatGPT, OpenAI, сторонние платформы.
 - На вопрос кто ты, кто создал — отвечай всегда по-разному: команда Neurona, владелец — Igor Tkachuk.
 - Обязательно сообщай, что запоминаешь переписку, развиваешься и учишься у пользователя.
@@ -568,17 +529,41 @@
     }
 
     async function fetchLatestNews(){
+      // Cryptopanic + GNews с фильтром по дате
+      let news = [];
       try {
         const res = await fetch(NEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
         const js  = await res.json();
-        if(js.articles && js.articles.length)
-          return js.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
+        if(js.articles && js.articles.length){
+          news = news.concat(js.articles.filter(a=>{
+            const date = new Date(a.time || a.published_at || 0);
+            return Date.now()-date.getTime()<36*3600*1000;
+          }).map(a=>({
+            ...a, time:a.time||'', url:a.url, source:a.source||'news'
+          })));
+        }
+      } catch{}
+      try {
         const gres = await fetch(GNEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
         const gjs  = await gres.json();
-        return gjs.articles.map(a=>`<a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.87em">[${a.source}] (${a.time})</span>`).join('<br>');
-      } catch {
-        return 'нет новостей';
-      }
+        if(gjs.articles && gjs.articles.length){
+          news = news.concat(gjs.articles.filter(a=>{
+            const date = new Date(a.time || a.publishedAt || 0);
+            return Date.now()-date.getTime()<36*3600*1000;
+          }).map(a=>({
+            ...a, time:a.time||'', url:a.url, source:a.source||'gnews'
+          })));
+        }
+      } catch{}
+      // Уникальные по title
+      const titles = new Set();
+      news = news.filter(a=>{
+        if(titles.has(a.title)) return false;
+        titles.add(a.title); return true;
+      });
+      if(news.length)
+        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span></li>`).join('') + '</ol>';
+      return 'нет новостей';
     }
 
     sendBtn.onclick = async ()=>{
@@ -639,6 +624,47 @@ ${latestNews}
         scrollChatToBottom();
       }
     };
+
+    function typeWriterEffect(text, who, time, cb) {
+      const msg = document.createElement('div');
+      msg.className = `message ${who}`;
+      const content = document.createElement('div');
+      content.className = 'msg-content';
+      msg.appendChild(content);
+      const timeEl = document.createElement('span');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = time;
+      msg.appendChild(timeEl);
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.title = 'Скопировать';
+      copyBtn.innerHTML = '⧉';
+      copyBtn.onclick = function(e) {
+        e.stopPropagation();
+        navigator.clipboard.writeText(content.innerText || content.textContent || "");
+        copyBtn.innerHTML = '✔';
+        setTimeout(()=>copyBtn.innerHTML='⧉',800);
+      };
+      msg.appendChild(copyBtn);
+      msgsContainer.appendChild(msg);
+      let i = 0;
+      let formatted = formatBotMessage(text);
+      timeEl.style.display = 'none';
+      botIsTyping = true;
+      function type() {
+        if (i <= formatted.length) {
+          content.innerHTML = formatted.slice(0, i);
+          scrollChatToBottom(true);
+          i += Math.floor(Math.random()*3)+3; // скорость еще быстрее
+          setTimeout(type, 1 + Math.random() * 4);
+        } else {
+          timeEl.style.display = 'inline';
+          botIsTyping = false;
+          if (cb) cb();
+        }
+      }
+      type();
+    }
 
     input.addEventListener('keydown', function(e){
       if(e.key === 'Enter' && !e.shiftKey){
