@@ -109,6 +109,7 @@
     #messages {
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
       gap:7px; scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
     .message {
       display: flex;
@@ -117,7 +118,7 @@
       position:relative;
       background:#e0e0e0;
       margin: 2px 0;
-      padding:10px 15px 12px 12px;
+      padding:10px 15px 26px 12px; /* увеличен нижний паддинг */
       max-width:83%; min-width:70px;
       border-radius:12px 12px 12px 0;
       box-shadow:0 1.5px 5px #ccc3;
@@ -138,12 +139,13 @@
       font-style:italic; color:#666;
       background: #ebebeb;
       min-width:60px;
+      padding-bottom:14px;
     }
     .msg-content { width: 100%; padding-bottom: 3px; }
     .msg-time {
       position:absolute;
       right:14px;
-      bottom:7px;
+      bottom:6px;
       font-size:0.8em;
       color:#666;
       opacity:0.88;
@@ -162,10 +164,30 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
-    .input-area { display:flex; padding:10px; background:#fff; }
+    .input-area { display:flex; padding:10px; background:#fff; align-items: flex-end; }
     #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
-    #send { margin-left:8px; padding:0 16px; border:none; border-radius:4px; background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s; }
-    #send:hover { background:#666; }
+    #send, #pause {
+      margin-left:8px; padding:0 16px; border:none; border-radius:4px;
+      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s;
+      min-width:44px; min-height:44px; display: flex; align-items: center; justify-content: center;
+    }
+    #send:hover, #pause:hover { background:#222; }
+    #pause {
+      background: #000; color:#fff;
+      font-size: 1.45rem;
+      font-weight: bold;
+      min-width:44px; min-height:44px;
+      border-radius:8px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 4px; right: 3px;
+      background: none; border: none; cursor: pointer; color: #888; font-size: 1.15em; opacity: 0.8; z-index: 15;
+      display:none;
+    }
+    .message:hover .copy-btn { display:inline; }
+    .message.user .copy-btn { color:#777; }
+    .message.bot .copy-btn { color:#000; }
     ol, ul {
       margin: 12px 0 12px 15px;
       padding-left: 24px;
@@ -200,7 +222,7 @@
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
-      #send { font-size:.89rem; padding:0 10px; }
+      #send, #pause { font-size:.89rem; padding:0 10px; min-width:36px; min-height:36px;}
       .chat-container { min-height:300px; }
       #scroll-down { width:36px; height:36px; font-size:1.55rem; left:50%; bottom:55px;}
     }
@@ -279,10 +301,11 @@
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages'),
-          scrollDownBtn = document.getElementById('scroll-down');
+          scrollDownBtn = document.getElementById('scroll-down'),
+          inputArea = document.querySelector('.input-area');
+    let messages = [], typingProcess = null, pauseBtn = null, stopTyping = false;
 
-    // История (локально)
-    let messages = [];
+    // История
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
@@ -357,6 +380,18 @@
       timeEl.className = 'msg-time';
       timeEl.textContent = time;
       msg.appendChild(timeEl);
+      // copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.title = 'Скопировать';
+      copyBtn.innerHTML = '⧉';
+      copyBtn.onclick = function(e) {
+        e.stopPropagation();
+        navigator.clipboard.writeText(content.innerText || content.textContent || "");
+        copyBtn.innerHTML = '✔';
+        setTimeout(()=>copyBtn.innerHTML='⧉',800);
+      };
+      msg.appendChild(copyBtn);
       msgsContainer.appendChild(msg);
       setTimeout(()=>{timeEl.style.display='inline'}, 100);
       scrollChatToBottom(true);
@@ -371,6 +406,27 @@
       return d;
     }
 
+    function setPauseButton(show) {
+      if (show) {
+        if (!pauseBtn) {
+          pauseBtn = document.createElement('button');
+          pauseBtn.id = 'pause';
+          pauseBtn.innerHTML = '⏸';
+          pauseBtn.title = "Остановить вывод";
+          pauseBtn.onclick = ()=>{
+            stopTyping = true;
+            if (pauseBtn) pauseBtn.disabled = true;
+          };
+          inputArea.replaceChild(pauseBtn, sendBtn);
+        }
+      } else {
+        if (pauseBtn) {
+          inputArea.replaceChild(sendBtn, pauseBtn);
+          pauseBtn = null;
+        }
+      }
+    }
+
     function typeWriterEffect(text, who, time, cb) {
       const msg = document.createElement('div');
       msg.className = `message ${who}`;
@@ -381,18 +437,42 @@
       timeEl.className = 'msg-time';
       timeEl.textContent = time;
       msg.appendChild(timeEl);
+      // copy
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.title = 'Скопировать';
+      copyBtn.innerHTML = '⧉';
+      copyBtn.onclick = function(e) {
+        e.stopPropagation();
+        navigator.clipboard.writeText(content.innerText || content.textContent || "");
+        copyBtn.innerHTML = '✔';
+        setTimeout(()=>copyBtn.innerHTML='⧉',800);
+      };
+      msg.appendChild(copyBtn);
       msgsContainer.appendChild(msg);
       let i = 0;
       let formatted = formatBotMessage(text);
       timeEl.style.display = 'none';
+      stopTyping = false;
+      setPauseButton(true);
+
       function type() {
+        if (stopTyping) {
+          content.innerHTML = formatted;
+          timeEl.style.display = 'inline';
+          setPauseButton(false);
+          if (cb) cb();
+          stopTyping = false;
+          return;
+        }
         if (i <= formatted.length) {
           content.innerHTML = formatted.slice(0, i);
           scrollChatToBottom(true);
-          i++;
-          setTimeout(type, 6 + Math.random() * 13);
+          i += Math.floor(Math.random()*3)+2;
+          setTimeout(type, 3 + Math.random() * 9);
         } else {
           timeEl.style.display = 'inline';
+          setPauseButton(false);
           if (cb) cb();
         }
       }
@@ -410,7 +490,6 @@
       }, 10);
     }
 
-    // Стрелка вниз появляется только если реально прокрутили хотя бы на 70px
     function checkScrollBtn(){
       if(msgsContainer.scrollHeight - msgsContainer.clientHeight - msgsContainer.scrollTop > 70){
         scrollDownBtn.classList.add('show');
@@ -435,7 +514,6 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Системное сообщение для AI (не показывается юзеру!)
     function getSystemMessage(){
       return {
         role: 'system', content: `
@@ -542,7 +620,6 @@ ${cmc.rec}
 ${latestNews}
 -------------------------------`
       };
-      // --- Обрезаем историю, если сообщений > 15 (важно!)
       let safeMessages = messages;
       if (safeMessages.length > 15) {
         safeMessages = safeMessages.slice(-15);
@@ -561,9 +638,8 @@ ${latestNews}
           body:JSON.stringify(payload)
         });
         const data  = await resp.json();
-        // --- Теперь покажем текст OpenAI-ошибки прямо в чате!
-        let reply = data.choices?.[0]?.message?.content || (data.error ? ('[OpenAI Error]: ' + data.error) : i18n[lang].internal);
         typing.remove();
+        let reply = data.choices?.[0]?.message?.content || (data.error ? ('[OpenAI Error]: ' + data.error) : i18n[lang].internal);
         const botTime = new Date().toLocaleTimeString().slice(0,5);
         typeWriterEffect(reply,'bot',botTime);
         messages.push({ role:'assistant', content:reply, time: botTime });
