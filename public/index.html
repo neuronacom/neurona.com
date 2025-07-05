@@ -98,9 +98,9 @@
       max-height: 65vh;
     }
     .message { 
-      margin:10px 0 17px 0; 
-      line-height:1.5; 
-      max-width:90%; 
+      margin:12px 0; 
+      line-height:1.45; 
+      max-width:95%; 
       word-wrap:break-word; 
       padding:14px 14px 22px 14px; 
       border-radius:14px; 
@@ -110,31 +110,34 @@
       min-height:44px;
       transition: box-shadow .14s;
       box-shadow: 0 1.2px 5.5px 0 rgba(50,60,100,0.07);
-      will-change: transform, opacity;
     }
     .message.user { align-self:flex-end; background:#f0f0f0; border-radius:16px 16px 0 16px; }
     .message.bot  { align-self:flex-start; background:#e0e0e0; border-radius:16px 16px 16px 0; }
     .message .msg-time { 
-      font-size:0.81em; 
+      font-size:0.77em; 
       color:#888; 
-      position:absolute; 
-      right:9px; bottom:5px; 
-      opacity:0.77;
+      display:block;
+      text-align:right;
+      margin-top:8px;
+      margin-right:2px;
+      opacity:0.67;
       font-family:Arial,sans-serif;
       font-weight:400;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
+      line-height:1.1;
       pointer-events:none;
     }
     .msg-copy {
-      position:absolute; top:10px; right:8px; background:none; border:none; cursor:pointer;
-      width:28px; height:28px; z-index:10; opacity:0.81; padding:0;
-      display:flex; align-items:center; justify-content:center;
-      transition: opacity 0.2s, filter 0.2s;
+      position:absolute; top:10px; right:7px; background:none; border:none; cursor:pointer;
+      width:18px; height:18px; z-index:10; opacity:0.81; padding:0;
+      display:none; align-items:center; justify-content:center;
       outline: none;
+      transition: opacity 0.2s;
     }
     .msg-copy img {
-      width:25px; height:25px; display:block; filter:drop-shadow(0 0 1.5px #fff8);
+      width:16px; height:16px; display:block; filter:drop-shadow(0 0 1.5px #fff8);
     }
+    .message.show-copy .msg-copy { display:flex; }
     .msg-copy:hover { opacity:1; filter: drop-shadow(0 0 1.5px #0005);}
     .message.typing { font-style:italic; color:#666; }
     .message a { color: #206ad7; font-weight: bold; text-decoration: underline; }
@@ -204,7 +207,7 @@
     </div>
   </div>
   <script>
-    // Фон-анимация (нейросеть) — не меняется
+    // Анимация-фон
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -239,12 +242,11 @@
     }
     resize(); init(); draw();
 
-    // UI
+    // UI & messages
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages');
 
-    // i18n — как раньше
     const i18n = {
       en:{ph:"Type a message...",send:"Send"},
       ru:{ph:"Напишите сообщение...",send:"Отправить"},
@@ -279,12 +281,6 @@
       scrollChatToBottom();
     }
 
-    function getSystemMessage(){
-      // ...как было раньше, не меняем
-      // (твой системный prompt уже умный)
-      return { role:'system', content: `...` };
-    }
-
     // --- API endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
@@ -294,7 +290,7 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Получить цены и аналитику по тикерам
+    // Анализ текста на тикеры — и запрашиваем актуальные цены
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -327,7 +323,6 @@
       return '';
     }
 
-    // fetchCMC, fetchLatestNews — без изменений
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT);
@@ -391,23 +386,27 @@
       return text;
     }
 
-    // Typewriter эффект с иконкой и временем
+    // Typewriter эффект + иконка появляется после анимации!
     function typeWriterEffect(text, who, time, isHistory, cb) {
       const d = document.createElement('div');
       d.className = `message ${who}`;
-      d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)"><img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"></button>`;
       msgsContainer.appendChild(d);
       let i = 0;
       let formatted = formatBotMessage(text);
       function type() {
         if (i <= formatted.length) {
-          d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)"><img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"></button>` + 
-            formatted.slice(0, i) + 
-            `<span class="msg-time">${(time||new Date().toLocaleTimeString().slice(0,5))}</span>`;
+          d.innerHTML = formatted.slice(0, i) + `<span class="msg-time">${(time||new Date().toLocaleTimeString().slice(0,5))}</span>`;
           scrollChatToBottom();
           i += isHistory ? formatted.length : 1;
-          if (!isHistory) setTimeout(type, 6 + Math.random() * 14);
-        } else if (cb) cb();
+          if (!isHistory) setTimeout(type, 6 + Math.random() * 12);
+        } else {
+          d.classList.add('show-copy');
+          d.insertAdjacentHTML("afterbegin",
+            `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
+              <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy">
+            </button>`);
+          if(cb) cb();
+        }
       }
       type();
     }
@@ -418,8 +417,11 @@
         typeWriterEffect(text, who, time, isHistory);
       } else {
         const d = document.createElement('div');
-        d.className = `message ${who}`;
-        d.innerHTML = `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)"><img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy"></button>` +
+        d.className = `message ${who} show-copy`;
+        d.innerHTML =
+          `<button class="msg-copy" title="Скопировать" onclick="copyMsgText(this)">
+            <img src='https://i.ibb.co/Nnb8VKjk/26-1.png' alt="copy">
+          </button>` +
           text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>') +
           `<span class="msg-time">${time}</span>`;
         msgsContainer.appendChild(d);
@@ -451,6 +453,18 @@
       setTimeout(()=>{btn.querySelector('img').style.filter="";}, 600);
     };
 
+    // ГЛАВНОЕ — вставка цен в system-подсказку (чтобы OpenAI не брал свои!)
+    function getSystemMessage(snapshot){
+      return {
+        role:'system',
+        content: 
+`<span class="neurona-title">NEURONA</span>
+Ты — NEURONA 1.0, персональный интеллектуальный AI-ассистент.
+${snapshot || ''}
+Всегда отвечай актуальной рыночной ценой по крипте, используя только данные, которые тебе переданы выше.`
+      };
+    }
+
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
@@ -463,9 +477,7 @@
 
       let pricesHtml = await fetchAllPrices(txt);
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
-      const snapshot = {
-        role:'system',
-        content:
+      const snapshot = 
 `<b>ДАННЫЕ НА ${new Date().toLocaleTimeString().slice(0,5)}:</b><br>
 ${pricesHtml ? "<p>Актуальные цены и уровни:</p>" + pricesHtml : ""}
 <p>CMC топ-5:</p>
@@ -474,12 +486,11 @@ ${cmc.txt}
 ${cmc.rec}
 <p>Актуальные новости:</p>
 ${latestNews}
--------------------------------`
-      };
+-------------------------------`;
 
       const payload = {
         model:'gpt-4o',
-        messages:[getSystemMessage(), snapshot, ...messages],
+        messages:[getSystemMessage(snapshot), ...messages],
         temperature:0.92,
         user:"neurona-user"
       };
