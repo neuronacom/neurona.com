@@ -104,11 +104,11 @@
       max-height: 82vh;
       height: auto;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
+      position:relative;
     }
     #messages {
       flex:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;
-      gap:7px;
-      scroll-behavior: smooth;
+      gap:7px; scroll-behavior: smooth;
     }
     .message {
       display: flex;
@@ -139,15 +139,13 @@
       background: #ebebeb;
       min-width:60px;
     }
-    .msg-content {
-      width: 100%;
-      padding-bottom: 3px;
-    }
+    .msg-content { width: 100%; padding-bottom: 3px; }
     .msg-time {
       position:absolute;
-      right:13px;
-      bottom:5px;
-      font-size:0.79em;
+      left:50%;
+      bottom:3px;
+      transform:translateX(-50%);
+      font-size:0.8em;
       color:#666;
       opacity:0.88;
       background:none !important;
@@ -178,14 +176,15 @@
     li { margin-bottom: 5px; line-height: 1.5; }
     p { margin: 7px 0; }
     #scroll-down {
-      display:none; position:fixed; z-index:999;
-      bottom:86px; right:32px;
+      display:none; position:absolute; left:50%; bottom:61px;
+      transform:translateX(-50%);
       background:#222; color:#fff;
       border-radius:50%; box-shadow:0 5px 25px #0002;
       width:42px; height:42px; align-items:center; justify-content:center;
       cursor:pointer; font-size:2.2rem; border:none; outline:none;
       transition:.3s;
       opacity:0.75;
+      z-index:99;
     }
     #scroll-down.show { display:flex; }
     #scroll-down:hover { opacity:1; background:#444; }
@@ -204,7 +203,7 @@
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; }
       .chat-container { min-height:300px; }
-      #scroll-down { width:36px; height:36px; font-size:1.55rem; right:8px; bottom:70px;}
+      #scroll-down { width:36px; height:36px; font-size:1.55rem; left:50%; bottom:55px;}
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -364,8 +363,7 @@
       timeEl.textContent = time;
       msg.appendChild(timeEl);
       msgsContainer.appendChild(msg);
-      timeEl.style.display = 'none';
-      setTimeout(()=>{ timeEl.style.display = 'inline'; }, 500);
+      setTimeout(()=>{timeEl.style.display='inline'}, 150);
       scrollChatToBottom(true);
     }
 
@@ -397,7 +395,7 @@
           content.innerHTML = formatted.slice(0, i);
           scrollChatToBottom(true);
           i++;
-          setTimeout(type, 6 + Math.random() * 18);
+          setTimeout(type, 5 + Math.random() * 12);
         } else {
           timeEl.style.display = 'inline';
           if (cb) cb();
@@ -413,12 +411,13 @@
         } else {
           msgsContainer.scrollTop = msgsContainer.scrollHeight + 50;
         }
+        checkScrollBtn();
       }, 10);
     }
 
     // Плавающая стрелка вниз
     function checkScrollBtn(){
-      if(msgsContainer.scrollHeight - msgsContainer.clientHeight - msgsContainer.scrollTop > 100){
+      if(msgsContainer.scrollHeight - msgsContainer.clientHeight - msgsContainer.scrollTop > 50){
         scrollDownBtn.classList.add('show');
       } else {
         scrollDownBtn.classList.remove('show');
@@ -428,23 +427,21 @@
     scrollDownBtn.onclick = ()=>{
       msgsContainer.scrollTo({ top: msgsContainer.scrollHeight + 150, behavior: "smooth" });
       scrollDownBtn.classList.remove('show');
-    }
+    };
 
+    // i18n
     const i18n = {
-      en:{ph:"Type a message...",send:"Send"},
-      ru:{ph:"Напишите сообщение...",send:"Отправить"},
-      ua:{ph:"Введіть повідомлення...",send:"Надіслати"}
+      en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later."},
+      ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже."},
+      ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше."}
     };
     let lang = navigator.language.slice(0,2);
     if(!i18n[lang]) lang='en';
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // --- Системное сообщение (для AI), не показывается пользователю!
-    function getSystemMessage(){
-      // Только живая дата! Без лишних инструкций, для точности.
-      return { role: 'system', content: '' };
-    }
+    // --- Системное сообщение для AI (не показывается юзеру!)
+    function getSystemMessage(){ return { role: 'system', content: '' }; }
 
     // --- API endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
@@ -455,7 +452,7 @@
     const TVIEW_ENDPOINT  = '/api/tview';
     const OPENAI_ENDPOINT = '/api/openai';
 
-    // Только самые свежие цены — всегда с timestamp
+    // Только самые свежие цены — всегда с timestamp!
     async function fetchAllPrices(text){
       const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
       const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -525,7 +522,6 @@
 
       const typing = addTyping();
 
-      // ВСЁ подтягивается каждый раз с API в реальном времени
       let pricesHtml = await fetchAllPrices(txt);
       const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
       const snapshot = {
@@ -555,7 +551,7 @@ ${latestNews}
           body:JSON.stringify(payload)
         });
         const data  = await resp.json();
-        let reply = data.choices[0].message.content;
+        let reply = data.choices?.[0]?.message?.content || i18n[lang].internal;
         typing.remove();
         const botTime = new Date().toLocaleTimeString().slice(0,5);
         typeWriterEffect(reply,'bot',botTime);
@@ -564,7 +560,7 @@ ${latestNews}
         scrollChatToBottom(true);
       } catch {
         typing.remove();
-        addMessage('Внутренняя ошибка, попробуйте позже.','bot', new Date().toLocaleTimeString().slice(0,5));
+        addMessage(i18n[lang].internal,'bot', new Date().toLocaleTimeString().slice(0,5));
         scrollChatToBottom();
       }
     };
@@ -576,6 +572,10 @@ ${latestNews}
         sendBtn.click();
       }
     });
+
+    // При загрузке страницы всегда скролл вниз
+    setTimeout(()=>{scrollChatToBottom(true)}, 500);
+
   </script>
 </body>
 </html>
