@@ -589,30 +589,19 @@
       }
     }
 
+    // ==== ОБНОВЛЁННЫЙ ФУНКЦИОНАЛ НОВОСТЕЙ ====
     async function fetchLatestNews(){
       let news = [];
       try {
         const res = await fetch(NEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
         const js  = await res.json();
         if(js.articles && js.articles.length){
-          news = news.concat(js.articles.filter(a=>{
+          news = js.articles.filter(a=>{
             const date = new Date(a.time || a.published_at || 0);
             return Date.now()-date.getTime()<36*3600*1000;
           }).map(a=>({
-            ...a, time:a.time||'', url:a.url, source:a.source||'news'
-          })));
-        }
-      } catch{}
-      try {
-        const gres = await fetch(GNEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
-        const gjs  = await gres.json();
-        if(gjs.articles && gjs.articles.length){
-          news = news.concat(gjs.articles.filter(a=>{
-            const date = new Date(a.time || a.publishedAt || 0);
-            return Date.now()-date.getTime()<36*3600*1000;
-          }).map(a=>({
-            ...a, time:a.time||'', url:a.url, source:a.source||'gnews'
-          })));
+            ...a, time:a.time||'', url:a.url, source:a.source||'news', impact: a.impact || ''
+          }));
         }
       } catch{}
       const titles = new Set();
@@ -620,9 +609,25 @@
         if(titles.has(a.title)) return false;
         titles.add(a.title); return true;
       });
+      // Формируем текст: + анализ "на что влияет"
       if(news.length)
-        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span></li>`).join('') + '</ol>';
+        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
       return 'нет новостей';
+    }
+
+    // Функция для анализа новости (очень простой анализ, по ключевым словам)
+    function analyzeNewsImpact(title, impact){
+      title = (title||'').toLowerCase();
+      impact = (impact||'').toUpperCase();
+      if(/bitcoin|btc/.test(title) || impact.includes('BTC')) return 'Может повлиять на курс BTC';
+      if(/ethereum|eth/.test(title) || impact.includes('ETH')) return 'Может повлиять на курс ETH';
+      if(/solana|sol/.test(title) || impact.includes('SOL')) return 'Возможно, влияет на SOL';
+      if(/toncoin|ton/.test(title) || impact.includes('TON')) return 'Может отразиться на TON';
+      if(/binance|bnb/.test(title) || impact.includes('BNB')) return 'Связано с экосистемой Binance';
+      if(/regulat|SEC|ETF|cftc|law|legal|court|закон|регуляц/.test(title)) return 'Важная регуляторная новость — может повлиять на весь рынок!';
+      if(/scam|hack|exploit|украл|взлом|рухнул|ским|rug/.test(title)) return 'Потенциально негативно влияет на рынок/монету';
+      if(/partnership|launch|integration|интеграц|партнер|листинг|listing/.test(title)) return 'Позитивная новость для упомянутых монет';
+      return 'Общая рыночная новость';
     }
 
     sendBtn.onclick = async ()=>{
