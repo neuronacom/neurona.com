@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 7000; // миллисекунд на каждый внешний запрос
+const TIMEOUT = 7000;
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -32,33 +32,61 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// Крипто-новости (Cryptopanic)
+// Крипто-новости (Cryptopanic, GNews, без дублей, только новые)
 app.get('/api/news', async (req, res) => {
   try {
-    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=demo&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
+    // Cryptopanic
+    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=${process.env.CRYPTOPANIC_API_KEY}&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
     const r = await fetchTimeout(url);
     const js = await r.json();
+
+    let news = [];
     const seen = new Set();
-    const articles = [];
-    for (let n of js.results || []) {
+    for (let n of (js.results || [])) {
       if (!seen.has(n.title)) {
-        articles.push({
+        news.push({
           title: n.title,
           url: n.url,
           time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
-          source: n.domain || 'news'
+          source: n.domain || 'cryptopanic',
+          impact: n.currencies && n.currencies.length ? n.currencies.join(', ') : ''
         });
         seen.add(n.title);
-        if (articles.length >= 7) break;
+        if (news.length >= 6) break;
       }
     }
-    res.json({ articles });
+
+    // GNews (дополнение)
+    const gnewsUrl = `https://gnews.io/api/v4/search?q=crypto&token=${process.env.GNEWS_API_KEY}&lang=en&max=6`;
+    const gres = await fetchTimeout(gnewsUrl);
+    const gjs = await gres.json();
+    for (let a of (gjs.articles || [])) {
+      if (!seen.has(a.title)) {
+        news.push({
+          title: a.title,
+          url: a.url,
+          time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
+          source: a.source?.name || 'gnews',
+          impact: ''
+        });
+        seen.add(a.title);
+        if (news.length >= 12) break;
+      }
+    }
+
+    // Оставить только уникальные и свежие (до 24ч)
+    news = news.filter(a => {
+      const date = new Date(a.time || 0);
+      return Date.now() - date.getTime() < 32 * 3600 * 1000;
+    }).slice(0, 9);
+
+    res.json({ articles: news });
   } catch {
     res.json({ articles: [] });
   }
 });
 
-// GNews backup
+// Остальные эндпоинты — без изменений!
 app.get('/api/gnews', async (req, res) => {
   try {
     const q = encodeURIComponent(req.query.q || 'crypto');
@@ -78,7 +106,6 @@ app.get('/api/gnews', async (req, res) => {
   }
 });
 
-// CoinGecko
 app.get('/api/coingecko', async (req, res) => {
   try {
     const query = (req.query.q || '').trim().toLowerCase();
@@ -103,7 +130,6 @@ app.get('/api/coingecko', async (req, res) => {
   }
 });
 
-// Binance price
 app.get('/api/binance', async (req, res) => {
   try {
     let symbol = (req.query.q || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -121,7 +147,6 @@ app.get('/api/binance', async (req, res) => {
   }
 });
 
-// TradingView simple support/resistance
 app.get('/api/tview', async (req, res) => {
   try {
     const symbol = (req.query.symbol || 'BTC').toUpperCase();
@@ -135,7 +160,6 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OPENAI
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
