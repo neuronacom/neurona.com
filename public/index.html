@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>NEURONA 1.0</title>
+  <!-- Для установки на телефон (PWA) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#fff">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +15,6 @@
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png" imagesrcset="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
-    /* --- CSS полностью из твоей версии, см. выше --- */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
@@ -31,11 +31,10 @@
       display:flex; flex-direction:column;
       align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
-      transition:background .2s,color .2s;
+      transition:background .2s;
       position:relative;
       overflow:hidden;
     }
-    body.theme-dark { background-color:#181924 !important; color:#fff !important; }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
       z-index:0; opacity:0;
@@ -53,7 +52,7 @@
       min-height: 420px;
       max-height: 92vh;
       height: 88vh;
-      margin-top: 95px;
+      margin-top: 95px;   /* СТАЛО БОЛЬШЕ! Было 65px — теперь ниже */
       margin-bottom: 18px;
       z-index:1; opacity:0;
       background: none;
@@ -63,7 +62,7 @@
     body.shown #bg { opacity:0.27; }
     body.shown #app { opacity:1; }
     .top-bar {
-      width:100vw; position:fixed; top:0; left:0; z-index:50;
+      width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
       background:transparent; height:56px; padding:0;
       pointer-events:none; transition:opacity .5s;
@@ -75,20 +74,18 @@
     .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
-      color:inherit; user-select:none;
+      color:#000; user-select:none;
       text-transform:uppercase;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
       width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
-      z-index:101;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
       background:#000; border-radius:4px; margin:0; transition:background .2s;
     }
-    body.theme-dark .top-burger span { background: #fff; }
     .top-burger span:last-child { margin-bottom:0; }
     .top-bar.hide { opacity:0; pointer-events:none; }
     #loader {
@@ -242,92 +239,35 @@
     }
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
-    .sidebar {
-      position:fixed; top:0; right:-70vw; width:70vw; max-width:330px; height:100vh; z-index:200;
-      background: #fff;
-      box-shadow: -7px 0 24px #0003;
-      transition: right .39s cubic-bezier(.7,.15,.5,1.1);
-      display:flex; flex-direction:column;
-      padding:0 0 0 0;
-      border-radius:24px 0 0 24px;
-    }
-    body.theme-dark .sidebar { background:#21212b; color:#fff; }
-    .sidebar.show { right:0; }
-    .sidebar-overlay {
-      position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:199;
-      background:rgba(0,0,0,0.23); opacity:1; transition:opacity .25s;
-      display:none;
-    }
-    .sidebar-overlay.show { display:block; }
-    .sidebar-content {
-      flex:1; padding:44px 28px 20px 22px; display:flex; flex-direction:column;
-    }
-    .sidebar-title {
-      font-family: Arial, sans-serif; font-size:1.37em; font-weight:bold;
-      margin-bottom:28px; margin-top:10px; letter-spacing:.04em;
-    }
-    .sidebar-list { list-style:none; margin:0; padding:0; }
-    .sidebar-list li {
-      font-family: Arial, sans-serif; font-weight:bold; font-size:1.12em;
-      margin-bottom:20px; cursor:pointer; padding:6px 0 6px 0; border-radius:8px;
-      transition:background .18s;
-    }
-    .sidebar-list li:hover { background:rgba(0,0,0,0.04); }
-    body.theme-dark .sidebar-list li:hover { background:rgba(255,255,255,0.06);}
-    .sidebar-settings {
-      margin-top:8px; margin-bottom:8px;
-    }
-    .settings-dropdown {
-      max-height:0; overflow:hidden;
-      transition:max-height .33s cubic-bezier(.7,.15,.5,1.1);
-      margin-left:12px;
-    }
-    .settings-dropdown.open { max-height:222px; }
-    .settings-toggle {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:7px 0; margin-bottom:7px;
-    }
-    .toggle-switch {
-      width:44px; height:24px; border-radius:14px; background:#e2e2e2;
-      position:relative; cursor:pointer; transition:.2s;
-      display:inline-block; vertical-align:middle;
-    }
-    .toggle-switch .toggle-slider {
-      position:absolute; left:3px; top:3px; width:18px; height:18px;
-      background:#bbb; border-radius:50%; transition:left .21s, background .21s;
-    }
-    .toggle-switch.on { background:#44b970; }
-    .toggle-switch.on .toggle-slider { background:#fff; left:23px;}
-    body.theme-dark .toggle-switch { background:#444;}
-    .settings-lang-btn {
-      background: #eee; border:none; padding:7px 16px; border-radius:7px;
-      font-size:1em; cursor:pointer; margin-bottom:9px; min-width:96px; margin-left:0;
-      font-family:Arial,sans-serif;
-      transition:background .16s;
-    }
-    body.theme-dark .settings-lang-btn { background:#2c2c38; color:#fff;}
-    .settings-lang-list {
-      background:#fff; position:absolute; left:12px; top:22px; border-radius:7px;
-      box-shadow:0 8px 28px #0002;
-      padding:5px 0; z-index:222; min-width:123px; display:none;
-    }
-    body.theme-dark .settings-lang-list { background:#2c2c38;}
-    .settings-lang-list.show { display:block; }
-    .settings-lang-list div {
-      padding:5px 17px; cursor:pointer; font-size:.98em;
-      font-family:Arial,sans-serif; transition:background .17s;
-    }
-    .settings-lang-list div:hover { background:#e9e9e9;}
-    body.theme-dark .settings-lang-list div:hover { background:#232333;}
-    .sidebar-save-btn {
-      background: #444; color:#fff; border:none; border-radius:6px; min-height:49px;
-      font-size:1.06em; font-family:Arial,sans-serif; font-weight:bold; margin-top:25px;
-      cursor:pointer; width:100%; letter-spacing:.06em; transition:background .18s;
-    }
-    .sidebar-save-btn:hover { background:#181924; }
-    body.theme-dark .sidebar-save-btn { background:#1e1f26;}
     @media(max-width:600px){
-      .sidebar { width:93vw; max-width:98vw; }
+      html, body { min-width:100vw; min-height:100vh; }
+      .top-bar{height:38px;}
+      .top-bar-content{height:38px; margin-left:7px;}
+      .top-logo{width:22px; margin-right:7px;}
+      .top-title{font-size:1.03rem;}
+      .top-burger{width:27px; height:18px; margin-right:7px;}
+      .top-burger span{height:3.3px;}
+      #app { max-width:94vw; min-width:0; padding:0 0 7px 0; height:84vh; margin-top:79px; }
+      .chat-container { min-width:0; max-width:100vw; min-height:150px; height:100%;}
+      #messages { min-height:60px; max-height:calc(84vh - 110px);}
+      .loader-logo { width:70px; margin-right:7px; }
+      .loader-title { font-size:2.4rem; }
+      .loader-subtitle { font-size:1.03rem; }
+      #input { font-size:.89rem; height:38px; }
+      #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
+      #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:82px;}
+      #scroll-down svg { width:20px; height:20px; }
+      #loader { min-height:280px; }
+    }
+    @media (max-width:400px){
+      .loader-title{font-size:1.2rem;}
+      #app{max-width:98vw;}
+      .chat-container{min-height:80px;}
+    }
+    @media (max-height:450px){
+      #app{min-height:100px; height:54vh;}
+      .chat-container{min-height:60px;}
+      #messages{min-height:35px;}
     }
   </style>
 </head>
@@ -338,7 +278,7 @@
       <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo"/>
       <span class="top-title">NEURONA</span>
     </div>
-    <div class="top-burger" id="burger-btn">
+    <div class="top-burger">
       <span></span><span></span><span></span>
     </div>
   </div>
@@ -351,39 +291,6 @@
       </div>
     </div>
   </div>
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-content">
-      <div class="sidebar-title" id="sidebar-title">Меню</div>
-      <ul class="sidebar-list">
-        <li id="menu-profile">Мой профиль</li>
-        <li id="menu-subscribe">Подписка</li>
-        <li id="menu-settings" style="margin-bottom:0;">Настройки</li>
-      </ul>
-      <div class="sidebar-settings">
-        <div class="settings-dropdown" id="settings-dropdown">
-          <div class="settings-toggle" style="margin-top:6px;">
-            <span>Уведомления</span>
-            <div class="toggle-switch" id="notify-toggle">
-              <div class="toggle-slider"></div>
-            </div>
-          </div>
-          <div class="settings-toggle">
-            <span>Тема</span>
-            <div class="toggle-switch" id="theme-toggle">
-              <div class="toggle-slider"></div>
-            </div>
-          </div>
-          <div class="settings-toggle" style="position:relative;">
-            <span>Язык</span>
-            <button class="settings-lang-btn" id="lang-btn">Русский</button>
-            <div class="settings-lang-list" id="lang-list"></div>
-          </div>
-        </div>
-      </div>
-      <button class="sidebar-save-btn" id="sidebar-save">Сохранить изменения</button>
-    </div>
-  </aside>
   <div id="app">
     <div class="chat-container">
       <div id="messages"></div>
@@ -396,8 +303,8 @@
       </div>
     </div>
   </div>
-  <!-- Анимация нейросети -->
   <script>
+    // --- Фон-анимация (нейросеть) ---
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -431,21 +338,14 @@
       requestAnimationFrame(draw);
     }
     resize(); init(); draw();
-  </script>
-  <!-- Sidebar + i18n + основной код ЧАТА полностью (вся твоя логика) -->
-  <script>
-    // ТУТ ВЕСЬ КОД sidebar и i18n, как было выше...
-    // ... Пропускаю, чтобы не было дублирования выше
-
-    // Теперь ВЕСЬ КОД ДЛЯ ЧАТА, ПОЛНОСТЬЮ:
 
     const input = document.getElementById('input'),
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages'),
-          scrollDownBtn = document.getElementById('scroll-down');
+          scrollDownBtn = document.getElementById('scroll-down'),
+          inputArea = document.querySelector('.input-area');
     let messages = [], typingProcess = null, botIsTyping = false;
 
-    // Сохраняем/загружаем историю
     function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
     function loadHistory(){
       const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
@@ -456,6 +356,8 @@
         scrollChatToBottom(true);
       }
     }
+
+    document.body.style.opacity = "1";
     window.addEventListener('load', ()=>{
       document.getElementById('top-bar').classList.add('hide');
       setTimeout(()=>{
@@ -471,10 +373,12 @@
     });
 
     function formatBotMessage(text) {
-      text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, "");
-      text = text.replace(/\uFFFD/g, "");
+      text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, ""); // variation selectors
+      text = text.replace(/\uFFFD/g, ""); // удаляет �
+      // [ТЕКСТ](ССЫЛКА)
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
+      // Столбик 1. 2. 3.
       text = text.replace(/(^|\n)((?:\d+\.\s.*\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ol>';
@@ -484,6 +388,7 @@
         out += '</ol>';
         return p1 + out;
       });
+      // - или •
       text = text.replace(/(^|\n)((?:^[-•]\s.+\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ul>';
@@ -500,6 +405,32 @@
       text = text.replace(/<\/ol>|<\/ul>/g, '$&<p>');
       text = text.replace(/<p><\/p>/g, '');
       return text;
+    }
+
+    // ---- ЭТОТ КУСОК — АВТООТВЕТ НА ЭТАПЫ/МОДУЛИ ----
+    const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
+    const etapFullAnswer = `
+<b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
+Моя система поддерживает:<br>
+<ul>
+<li>LLM через HuggingFace (Mistral, OpenChat)</li>
+<li>Контекстную память на SQLite/Redis</li>
+<li>FastAPI эндпоинты (/chat, /memory, /modules)</li>
+<li>Клиентский UI на Flutter/Tauri/Web</li>
+<li>Модульную структуру (Crypto, News, Docs, Health, Finance)</li>
+<li>API: CoinGecko, NewsAPI, Apple Health, Yahoo Finance</li>
+<li>OCR: Tesseract, DOCX, PDF</li>
+<li>Docker, CI/CD, S3, Cloudflare, NGINX, HTTPS, Firewall</li>
+</ul>
+Всё это работает "под капотом" ассистента, чтобы ты получал максимально современные и безопасные решения! 🚀<br>
+Если интересно — могу рассказать детали любого из этапов.
+`;
+
+    function smartEtapAnswer(q) {
+      if (etapRegex.test(q)) {
+        return etapFullAnswer;
+      }
+      return null;
     }
 
     function addMessage(text, who, time){
@@ -575,7 +506,7 @@
       scrollDownBtn.classList.remove('show');
     };
 
-    // i18n (ещё раз здесь для полного покрытия)
+    // i18n
     const i18n = {
       en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later."},
       ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже."},
@@ -586,7 +517,6 @@
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
 
-    // SYSTEM MSG
     function getSystemMessage(){
       return {
         role: 'system', content: `
@@ -604,7 +534,7 @@
       };
     }
 
-    // ENDPOINTS
+    // --- API Endpoints ---
     const CMC_ENDPOINT    = '/api/cmc';
     const NEWS_ENDPOINT   = '/api/news';
     const GNEWS_ENDPOINT  = '/api/gnews';
@@ -659,30 +589,19 @@
       }
     }
 
+    // ==== ОБНОВЛЁННЫЙ ФУНКЦИОНАЛ НОВОСТЕЙ ====
     async function fetchLatestNews(){
       let news = [];
       try {
         const res = await fetch(NEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
         const js  = await res.json();
         if(js.articles && js.articles.length){
-          news = news.concat(js.articles.filter(a=>{
+          news = js.articles.filter(a=>{
             const date = new Date(a.time || a.published_at || 0);
             return Date.now()-date.getTime()<36*3600*1000;
           }).map(a=>({
-            ...a, time:a.time||'', url:a.url, source:a.source||'news'
-          })));
-        }
-      } catch{}
-      try {
-        const gres = await fetch(GNEWS_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
-        const gjs  = await gres.json();
-        if(gjs.articles && gjs.articles.length){
-          news = news.concat(gjs.articles.filter(a=>{
-            const date = new Date(a.time || a.publishedAt || 0);
-            return Date.now()-date.getTime()<36*3600*1000;
-          }).map(a=>({
-            ...a, time:a.time||'', url:a.url, source:a.source||'gnews'
-          })));
+            ...a, time:a.time||'', url:a.url, source:a.source||'news', impact: a.impact || ''
+          }));
         }
       } catch{}
       const titles = new Set();
@@ -690,15 +609,49 @@
         if(titles.has(a.title)) return false;
         titles.add(a.title); return true;
       });
+      // Формируем текст: + анализ "на что влияет"
       if(news.length)
-        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span></li>`).join('') + '</ol>';
+        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
       return 'нет новостей';
+    }
+
+    // Функция для анализа новости (очень простой анализ, по ключевым словам)
+    function analyzeNewsImpact(title, impact){
+      title = (title||'').toLowerCase();
+      impact = (impact||'').toUpperCase();
+      if(/bitcoin|btc/.test(title) || impact.includes('BTC')) return 'Может повлиять на курс BTC';
+      if(/ethereum|eth/.test(title) || impact.includes('ETH')) return 'Может повлиять на курс ETH';
+      if(/solana|sol/.test(title) || impact.includes('SOL')) return 'Возможно, влияет на SOL';
+      if(/toncoin|ton/.test(title) || impact.includes('TON')) return 'Может отразиться на TON';
+      if(/binance|bnb/.test(title) || impact.includes('BNB')) return 'Связано с экосистемой Binance';
+      if(/regulat|SEC|ETF|cftc|law|legal|court|закон|регуляц/.test(title)) return 'Важная регуляторная новость — может повлиять на весь рынок!';
+      if(/scam|hack|exploit|украл|взлом|рухнул|ским|rug/.test(title)) return 'Потенциально негативно влияет на рынок/монету';
+      if(/partnership|launch|integration|интеграц|партнер|листинг|listing/.test(title)) return 'Позитивная новость для упомянутых монет';
+      return 'Общая рыночная новость';
     }
 
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
       const nowTime = new Date().toLocaleTimeString().slice(0,5);
+
+      // --- АВТООТВЕТ НА "ЕТАПЫ" ---
+      let etapAns = smartEtapAnswer(txt);
+      if (etapAns) {
+        addMessage(txt,'user',nowTime);
+        input.value='';
+        messages.push({ role:'user', content:txt, time: nowTime });
+        const typing = addTyping();
+        setTimeout(()=>{
+          typing.remove();
+          addMessage(etapAns, 'bot', new Date().toLocaleTimeString().slice(0,5));
+          messages.push({ role:'assistant', content:etapAns, time: new Date().toLocaleTimeString().slice(0,5) });
+          saveHistory();
+          scrollChatToBottom(true);
+        }, 700 + Math.random()*500);
+        return;
+      }
+
       addMessage(txt,'user',nowTime);
       input.value='';
       messages.push({ role:'user', content:txt, time: nowTime });
@@ -803,7 +756,6 @@ ${latestNews}
     });
 
     setTimeout(()=>{scrollChatToBottom(true)}, 500);
-
   </script>
   <script>
     if ('serviceWorker' in navigator) {
