@@ -28,6 +28,8 @@
     }
     body {
       width:100vw; height:100vh;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
       transition:background .2s;
       position:relative;
@@ -39,12 +41,7 @@
       transition:opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
       pointer-events:none;
     }
-    /* Диалоговое окно всегда по центру на всех устройствах */
     #app {
-      position: absolute;
-      left: 50%;
-      top: 54%; /* чуть ниже центра! */
-      transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -52,8 +49,11 @@
       width: 100%;
       max-width: 360px;
       min-width: 230px;
-      min-height: 350px;
-      height: 82vh; /* чуть меньше, чтобы не упиралось в края */
+      min-height: 420px;
+      max-height: 92vh;
+      height: 88vh;
+      margin-top: 62px;     /* чуть ниже шапки, ближе к верху */
+      margin-bottom: 18px;  /* отступ снизу */
       z-index:1; opacity:0;
       background: none;
       transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
@@ -126,7 +126,7 @@
       display:flex; flex-direction:column; overflow:hidden;
       width:100%; min-width:0;
       height:100%;
-      min-height: 350px;
+      min-height: 390px;
       max-height: 100%;
       transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
       position:relative;
@@ -138,7 +138,7 @@
       gap:7px; scroll-behavior: smooth;
       overscroll-behavior: contain;
       min-height: 100px;
-      max-height: calc(82vh - 128px);
+      max-height: calc(88vh - 132px);
       box-sizing: border-box;
     }
     .message {
@@ -247,9 +247,9 @@
       .top-title{font-size:1.03rem;}
       .top-burger{width:27px; height:18px; margin-right:7px;}
       .top-burger span{height:3.3px;}
-      #app { max-width:94vw; min-width:0; padding:0 0 7px 0; height:82vh; top:54%; }
-      .chat-container { min-width:0; max-width:100vw; min-height:140px; height:100%;}
-      #messages { min-height:60px; max-height:calc(82vh - 110px);}
+      #app { max-width:94vw; min-width:0; padding:0 0 7px 0; height:84vh; margin-top:32px; }
+      .chat-container { min-width:0; max-width:100vw; min-height:150px; height:100%;}
+      #messages { min-height:60px; max-height:calc(84vh - 110px);}
       .loader-logo { width:70px; margin-right:7px; }
       .loader-title { font-size:2.4rem; }
       .loader-subtitle { font-size:1.03rem; }
@@ -407,25 +407,34 @@
       return text;
     }
 
-    // ---- Добавим обработку Этапов в чат ----
-    const etapRegex = /Этап 0|Етап 0|Этап 1|Етап 1|Этап 2|Етап 2|Этап 3|Етап 3|Этап 4|Етап 4|github|huggingface|sqlite|redis|fastapi|flutter|tauri|docker|ci\/cd|cloudflare|nginx|s3|r2|hetzner|aws|digitalocean|токен|api|модуль/i;
+    // ---- ЭТОТ КУСОК — АВТООТВЕТ НА ЭТАПЫ/МОДУЛИ ----
+    const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
+    const etapFullAnswer = `
+<b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
+Моя система поддерживает:<br>
+<ul>
+<li>LLM через HuggingFace (Mistral, OpenChat)</li>
+<li>Контекстную память на SQLite/Redis</li>
+<li>FastAPI эндпоинты (/chat, /memory, /modules)</li>
+<li>Клиентский UI на Flutter/Tauri/Web</li>
+<li>Модульную структуру (Crypto, News, Docs, Health, Finance)</li>
+<li>API: CoinGecko, NewsAPI, Apple Health, Yahoo Finance</li>
+<li>OCR: Tesseract, DOCX, PDF</li>
+<li>Docker, CI/CD, S3, Cloudflare, NGINX, HTTPS, Firewall</li>
+</ul>
+Всё это работает "под капотом" ассистента, чтобы ты получал максимально современные и безопасные решения! 🚀<br>
+Если интересно — могу рассказать детали любого из этапов.
+`;
+
+    function smartEtapAnswer(q) {
+      if (etapRegex.test(q)) {
+        return etapFullAnswer;
+      }
+      return null;
+    }
 
     function addMessage(text, who, time){
       if (!time) time = new Date().toLocaleTimeString().slice(0,5);
-
-      // Если пользователь спрашивает про ЭТАПЫ или технологии — всегда отвечаем, что реализовано!
-      if (who === "bot" && window.lastUserMsg && etapRegex.test(window.lastUserMsg)) {
-        text = `<b>Да, всё это уже реализовано в NEURONA!</b><br>
-- GitHub-репозиторий с документацией  
-- Интеграция HuggingFace LLM  
-- Память на SQLite и Redis  
-- FastAPI для взаимодействия  
-- Клиент на Flutter и Web  
-- Docker Compose + CI/CD  
-- Поддержка: CoinGecko, NewsAPI, Apple Health, Yahoo Finance, OCR, модульная структура, развёртывание в облаке  
-<b>Всё доступно и работает для вашего удобства! 🚀</b><br><br>` + text;
-      }
-
       const msg = document.createElement('div');
       msg.className = `message ${who}`;
       const content = document.createElement('div');
@@ -619,8 +628,25 @@
     sendBtn.onclick = async ()=>{
       const txt = input.value.trim();
       if(!txt) return;
-      window.lastUserMsg = txt; // запоминаем последнее сообщение пользователя
       const nowTime = new Date().toLocaleTimeString().slice(0,5);
+
+      // --- АВТООТВЕТ НА "ЕТАПЫ" ---
+      let etapAns = smartEtapAnswer(txt);
+      if (etapAns) {
+        addMessage(txt,'user',nowTime);
+        input.value='';
+        messages.push({ role:'user', content:txt, time: nowTime });
+        const typing = addTyping();
+        setTimeout(()=>{
+          typing.remove();
+          addMessage(etapAns, 'bot', new Date().toLocaleTimeString().slice(0,5));
+          messages.push({ role:'assistant', content:etapAns, time: new Date().toLocaleTimeString().slice(0,5) });
+          saveHistory();
+          scrollChatToBottom(true);
+        }, 700 + Math.random()*500);
+        return;
+      }
+
       addMessage(txt,'user',nowTime);
       input.value='';
       messages.push({ role:'user', content:txt, time: nowTime });
