@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>NEURONA 1.0</title>
+  <!-- Для установки на телефон (PWA) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#fff">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="NEURONA 1.0">
   <link rel="apple-touch-icon" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
-  <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png">
+  <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png" imagesrcset="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
@@ -30,7 +31,7 @@
       display:flex; flex-direction:column;
       align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
-      transition:background .42s cubic-bezier(.38,.85,.48,1.01),color .41s;
+      transition:background .2s;
       position:relative;
       overflow:hidden;
     }
@@ -51,7 +52,7 @@
       min-height: 420px;
       max-height: 92vh;
       height: 88vh;
-      margin-top: 95px;
+      margin-top: 95px;   /* СТАЛО БОЛЬШЕ! Было 65px — теперь ниже */
       margin-bottom: 18px;
       z-index:1; opacity:0;
       background: none;
@@ -70,19 +71,16 @@
       display:flex; align-items:center; height:56px; pointer-events:all;
       margin-left:18px;
     }
-    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter .35s;}
+    .top-logo { width:36px; height:auto; margin-right:13px; }
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
       color:#000; user-select:none;
       text-transform:uppercase;
-      transition: color .41s;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
       width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
-      z-index: 1110;
-      transition: background .2s;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
@@ -90,14 +88,12 @@
     }
     .top-burger span:last-child { margin-bottom:0; }
     .top-bar.hide { opacity:0; pointer-events:none; }
-
-    /* ===== ЛОАДЕР ===== */
     #loader {
       position:fixed; inset:0; background:rgba(255,255,255,0.98);
       display:flex; align-items:center; justify-content:center;
       z-index:1001; flex-direction:column;
       opacity:1;
-      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01), background .41s;
+      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01);
       pointer-events:auto;
       width: 100vw;
       height: 100vh;
@@ -111,32 +107,28 @@
       animation:fade 8s ease-in-out infinite;
       min-height:140px; min-width:270px;
     }
-    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; transition: filter .41s;}
+    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; }
     .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
       font-size:5.3rem; font-weight:bold; letter-spacing:.14em; color:#000;
       text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
       line-height:0.98; text-transform:uppercase;
-      transition: color .41s;
     }
     .loader-subtitle {
       font-size:1.38rem; letter-spacing:.06em; color:#222; margin-top:5px;
       line-height:1.09; font-weight:500;
-      transition: color .41s;
     }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
-
-    /* ==== ЧАТ/КОНТЕЙНЕР ==== */
     .chat-container {
       background:rgba(255,255,255,0.93);
-      border-radius:14px; border:1.6px solid #d1d1d1;
+      border-radius:14px; border:1px solid #ccc;
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       width:100%; min-width:0;
       height:100%;
       min-height: 390px;
       max-height: 100%;
-      transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1), border .27s, background .41s, color .41s;
+      transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1);
       position:relative;
       margin:0 auto 0 auto;
       box-sizing: border-box;
@@ -164,15 +156,13 @@
       line-height:1.48;
       font-size:1rem;
       color:#111;
-      border:1.2px solid #d7d7d7;
-      transition:background .17s, border .19s, color .41s;
+      transition:background .17s;
     }
     .message.user {
       align-self:flex-end;
-      background:#f5f5f5;
+      background:#f0f0f0;
       border-radius:12px 12px 0 12px;
       color:#222;
-      border:1.2px solid #d7d7d7;
     }
     .message.bot  { align-self:flex-start; }
     .message.typing {
@@ -204,21 +194,14 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
-    .input-area { display:flex; padding:0; background:rgba(245,245,245,0.97); align-items: flex-end; transition:background .41s;}
-    body.dark .input-area { background:rgba(30,30,32,0.97);}
-    #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; background:none; transition:background .41s;color:inherit;}
+    .input-area { display:flex; padding:10px; background:#fff; align-items: flex-end; }
+    #input { flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem; }
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
-      background:#fff; color:#000; font-size:1rem; cursor:pointer; transition:background .22s,color .22s;
+      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .2s;
       min-width:44px; min-height:50px; height:50px; display: flex; align-items: center; justify-content: center;
-      font-weight:bold;
-      border:1.2px solid #d7d7d7;
     }
-    #send:hover { background:#eaeaea; }
-    body.dark #send {
-      background:#fff; color:#000; border:1.2px solid #888;
-    }
-    body.dark #input { color:#fff; }
+    #send:hover { background:#222; }
     .copy-btn {
       position: absolute;
       top: 4px; right: 3px;
@@ -256,181 +239,8 @@
     }
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
-
-    /* === Стили бокового меню NEURONA === */
-    .side-menu-bg {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.22);
-      z-index: 1101;
-      opacity: 0; pointer-events: none;
-      transition: opacity .35s;
-    }
-    .side-menu-bg.active {
-      opacity: 1; pointer-events: auto;
-    }
-    .side-menu {
-      position: fixed; top: 0; right: 0;
-      width: 56vw; max-width: 420px; min-width: 230px;
-      height: 100vh;
-      background: var(--side-bg, #fff);
-      color: var(--side-txt, #222);
-      z-index: 1102;
-      box-shadow: -9px 0 38px #0002;
-      transform: translateX(120%);
-      transition: transform .44s cubic-bezier(.64,.03,.32,1), background .22s, color .41s;
-      display: flex; flex-direction: column;
-      border-radius: 25px 0 0 25px;
-      padding: 28px 0 0 0;
-      overflow-y: auto;
-      border-left: 1.8px solid #ededed;
-    }
-    .side-menu.active { transform: translateX(0); }
-    .side-menu-list {
-      display: flex; flex-direction: column;
-      gap: 2px; margin: 0 0 18px 0; padding: 0 24px;
-    }
-    .side-menu-item {
-      padding: 15px 0 12px 7px;
-      font-size: 1.15rem;
-      font-weight: bold;
-      border-bottom: 1px solid #ececec;
-      cursor: pointer; user-select: none;
-      display: flex; align-items: center;
-      gap: 12px;
-      transition: background .15s;
-    }
-    .side-menu-item:last-child { border-bottom: none; }
-    .side-menu-item:active { background: #f7f7fa; }
-    .side-menu-section {
-      margin-top: 0;
-      margin-bottom: 2px;
-      font-weight: bold;
-      font-size: 1.03rem;
-      letter-spacing: .05em;
-      color: var(--side-muted, #888);
-      text-transform: uppercase;
-      padding-left: 7px;
-      transition: color .41s;
-    }
-    .side-switch-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 0 8px 7px;
-    }
-    .side-switch-label { font-size: 1.06rem; font-weight: bold; }
-
-    /* ===== КАСТОМНЫЙ СЕРЫЙ SWITCH ===== */
-    .switch {
-      width: 52px; height: 30px; background: #dedede;
-      border-radius: 18px;
-      position: relative; cursor: pointer;
-      transition: background .19s, border .23s;
-      margin-left: 5px;
-      flex-shrink: 0;
-      border: 1.4px solid #bcbcbc;
-      box-shadow: 0 1.5px 4px #0001;
-      display: flex; align-items: center;
-    }
-    .switch-inner {
-      width: 28px; height: 28px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute; left: 1.4px; top: 1px;
-      box-shadow: 0 2.5px 12px #bbb2;
-      transition: left .27s cubic-bezier(.64,.03,.32,1), background .19s, border .23s;
-      border: 1.8px solid #d2d2d2;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .switch.on { background: #444; border-color: #888; }
-    .switch.on .switch-inner {
-      left: 22px;
-      background: #eee;
-      border-color: #c7c7c7;
-    }
-
-    /* Темная тема — ЧБ стиль */
-    body.dark {
-      background: #17181a !important; color: #f2f2f2 !important;
-      transition: background .42s cubic-bezier(.38,.85,.48,1.01),color .41s;
-    }
-    body.dark #app,
-    body.dark .chat-container {
-      background: #1b1c1e !important; color: #ececec;
-      border-color: #323232;
-      transition: background .32s, color .32s, border .32s;
-    }
-    body.dark .message, body.dark .message.user {
-      background: #242428;
-      color: #f5f5f7;
-      border-color: #545458;
-      transition: background .26s, color .26s, border .26s;
-    }
-    body.dark .message.user { background: #28282c; color: #eaeaea; }
-    body.dark .side-menu {
-      --side-bg:#16171a; --side-txt:#eee; --side-muted:#999;
-      background: #16171a; color: #eee;
-      border-left: 2.3px solid #323232;
-    }
-    body.dark .side-menu-item { border-bottom: 1.3px solid #23232b; color: #fff; }
-    body.dark .side-menu-item:active { background: #23232b; }
-    body.dark .side-switch-row, body.dark .side-menu-section { color: #bfc7d2; }
-    body.dark .switch {
-      background: #23242a; border-color: #545458;
-      box-shadow: 0 1.5px 6px #0003;
-    }
-    body.dark .switch.on {
-      background: #ededed;
-      border-color: #888;
-    }
-    body.dark .switch-inner {
-      background: #141414;
-      border-color: #23242a;
-    }
-    body.dark .switch.on .switch-inner {
-      background: #dfdfdf;
-      border-color: #bcbcbc;
-    }
-    .side-close-btn {
-      position: absolute; top: 12px; right: 17px;
-      width: 41px; height: 41px;
-      background: none; border: none;
-      font-size: 2.17rem; color: #888;
-      cursor: pointer; border-radius: 100%;
-      transition: background .15s;
-      z-index: 1122;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .side-close-btn:active { background: #eee; }
-    body.dark .side-close-btn { color: #aaa; }
-    .side-langs {
-      max-height: 168px; overflow-y: auto; border-radius: 9px;
-      box-shadow: 0 3px 12px #0001;
-      background: var(--side-bg, #fff);
-      margin: 10px 0 0 0; padding: 2px 0;
-      border: 1.1px solid #eee;
-      position: absolute; left: 23px; right: 23px; z-index: 1111;
-      display: none;
-      animation: showLang .25s;
-    }
-    .side-langs.show { display: block; }
-    .side-lang-item {
-      padding: 13px 15px; font-size: 1.08rem;
-      cursor: pointer;
-      color: var(--side-txt, #111);
-      transition: background .16s, color .18s;
-      border-radius: 8px;
-      user-select: none;
-      font-weight: bold;
-    }
-    .side-lang-item.active, .side-lang-item:active {
-      background: #ededed;
-      color: #242428;
-    }
-    body.dark .side-langs { background: #16171a; border-color:#23252a; }
-    body.dark .side-lang-item { color: #eee; }
-    body.dark .side-lang-item.active, body.dark .side-lang-item:active {
-      background: #262b35; color: #fff;
-    }
     @media(max-width:600px){
+      html, body { min-width:100vw; min-height:100vh; }
       .top-bar{height:38px;}
       .top-bar-content{height:38px; margin-left:7px;}
       .top-logo{width:22px; margin-right:7px;}
@@ -448,8 +258,6 @@
       #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:82px;}
       #scroll-down svg { width:20px; height:20px; }
       #loader { min-height:280px; }
-      .side-menu{ width:80vw; min-width:0; }
-      .side-langs{ left: 9px; right: 9px; }
     }
     @media (max-width:400px){
       .loader-title{font-size:1.2rem;}
@@ -467,54 +275,19 @@
   <canvas id="bg"></canvas>
   <div class="top-bar" id="top-bar">
     <div class="top-bar-content">
-      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo" id="mainLogo"/>
-      <span class="top-title" id="mainTitle">NEURONA</span>
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo"/>
+      <span class="top-title">NEURONA</span>
     </div>
-    <div class="top-burger" id="burgerBtn">
+    <div class="top-burger">
       <span></span><span></span><span></span>
     </div>
   </div>
-  <div class="side-menu-bg" id="sideMenuBg"></div>
-  <nav class="side-menu" id="sideMenu" tabindex="-1">
-    <button class="side-close-btn" id="sideCloseBtn" title="Закрыть меню">&times;</button>
-    <div class="side-menu-list">
-      <div class="side-menu-item" style="margin-top:8px;">
-        <span>Мой профиль</span>
-      </div>
-      <div class="side-menu-item">
-        <span>Подписка</span>
-      </div>
-      <div class="side-menu-section" id="settingsSection">Настройки</div>
-      <div style="display: flex; flex-direction: column;">
-        <div class="side-switch-row">
-          <span class="side-switch-label">Уведомления</span>
-          <div class="switch" id="notifSwitch">
-            <div class="switch-inner"></div>
-          </div>
-        </div>
-        <div class="side-switch-row">
-          <span class="side-switch-label">Тема</span>
-          <div class="switch" id="themeSwitch">
-            <div class="switch-inner"></div>
-          </div>
-        </div>
-        <div class="side-switch-row" style="border-bottom:0;">
-          <span class="side-switch-label">Язык интерфейса</span>
-        </div>
-        <div class="side-menu-item" id="langSelectBtn">
-          <span id="currLangName">Русский</span>
-          <svg style="margin-left:8px; opacity:0.66;" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="side-langs" id="langList"></div>
-      </div>
-    </div>
-  </nav>
   <div id="loader">
     <div class="loader-content">
-      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo" id="loaderLogo" onload="this.style.opacity=1;" style="opacity:0;transition:opacity .4s;"/>
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo" onload="this.style.opacity=1;" style="opacity:0;transition:opacity .4s;"/>
       <div class="loader-text">
-        <div class="loader-title" id="loaderTitle">NEURONA</div>
-        <div class="loader-subtitle" id="loaderSubtitle">PERSONAL AI ASSISTANT</div>
+        <div class="loader-title">NEURONA</div>
+        <div class="loader-subtitle">PERSONAL AI ASSISTANT</div>
       </div>
     </div>
   </div>
@@ -605,6 +378,7 @@
       // [ТЕКСТ](ССЫЛКА)
       text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
+      // Столбик 1. 2. 3.
       text = text.replace(/(^|\n)((?:\d+\.\s.*\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ol>';
@@ -614,6 +388,7 @@
         out += '</ol>';
         return p1 + out;
       });
+      // - или •
       text = text.replace(/(^|\n)((?:^[-•]\s.+\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
         let out = '<ul>';
@@ -632,6 +407,7 @@
       return text;
     }
 
+    // ---- ЭТОТ КУСОК — АВТООТВЕТ НА ЭТАПЫ/МОДУЛИ ----
     const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
     const etapFullAnswer = `
 <b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
@@ -730,35 +506,13 @@
       scrollDownBtn.classList.remove('show');
     };
 
-    // i18n - add many more languages
+    // i18n
     const i18n = {
       en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later."},
       ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже."},
-      ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше."},
-      es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde."},
-      de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen."},
-      fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard."},
-      it:{ph:"Scrivi un messaggio...",send:"Invia",error:"Ops, qualcosa è andato storto. Riprova!", internal:"Errore interno, riprova più tardi."},
-      pl:{ph:"Napisz wiadomość...",send:"Wyślij",error:"Ups, coś poszło nie tak. Spróbuj ponownie!", internal:"Błąd wewnętrzny, spróbuj później."},
-      tr:{ph:"Bir mesaj yaz...",send:"Gönder",error:"Bir şeyler ters gitti. Lütfen tekrar deneyin!", internal:"Dahili hata, lütfen daha sonra tekrar deneyin."},
-      zh:{ph:"输入消息...",send:"发送",error:"哎呀，出了点问题。请再试一次！", internal:"内部错误，请稍后再试。"}
+      ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше."}
     };
-
-    // Full language list for interface
-    const langs = [
-      {code:'ru',name:'Русский'},
-      {code:'en',name:'English'},
-      {code:'ua',name:'Українська'},
-      {code:'es',name:'Español'},
-      {code:'de',name:'Deutsch'},
-      {code:'fr',name:'Français'},
-      {code:'it',name:'Italiano'},
-      {code:'pl',name:'Polski'},
-      {code:'tr',name:'Türkçe'},
-      {code:'zh',name:'中文'}
-    ];
-
-    let lang = (localStorage.getItem('neurona_lang')||navigator.language.slice(0,2));
+    let lang = navigator.language.slice(0,2);
     if(!i18n[lang]) lang='en';
     input.placeholder = i18n[lang].ph;
     sendBtn.textContent = i18n[lang].send;
@@ -835,6 +589,7 @@
       }
     }
 
+    // ==== ОБНОВЛЁННЫЙ ФУНКЦИОНАЛ НОВОСТЕЙ ====
     async function fetchLatestNews(){
       let news = [];
       try {
@@ -854,11 +609,13 @@
         if(titles.has(a.title)) return false;
         titles.add(a.title); return true;
       });
+      // Формируем текст: + анализ "на что влияет"
       if(news.length)
         return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
       return 'нет новостей';
     }
 
+    // Функция для анализа новости (очень простой анализ, по ключевым словам)
     function analyzeNewsImpact(title, impact){
       title = (title||'').toLowerCase();
       impact = (impact||'').toUpperCase();
@@ -878,6 +635,7 @@
       if(!txt) return;
       const nowTime = new Date().toLocaleTimeString().slice(0,5);
 
+      // --- АВТООТВЕТ НА "ЕТАПЫ" ---
       let etapAns = smartEtapAnswer(txt);
       if (etapAns) {
         addMessage(txt,'user',nowTime);
@@ -998,109 +756,6 @@ ${latestNews}
     });
 
     setTimeout(()=>{scrollChatToBottom(true)}, 500);
-
-    // ========== SIDEMENU LOGIC ==========
-    const sideMenu = document.getElementById('sideMenu');
-    const sideMenuBg = document.getElementById('sideMenuBg');
-    const burger = document.getElementById('burgerBtn');
-    const closeBtn = document.getElementById('sideCloseBtn');
-    burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
-    closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
-    sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
-    document.addEventListener('keydown', e=>{
-      if(e.key==='Escape' && sideMenu.classList.contains('active')) {
-        sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active');
-      }
-    });
-
-    // ТЁМНАЯ ТЕМА: плавное переключение и лого/текст
-    const themeSwitch = document.getElementById('themeSwitch');
-    const mainLogo = document.getElementById('mainLogo');
-    const loaderLogo = document.getElementById('loaderLogo');
-    const mainTitle = document.getElementById('mainTitle');
-    const loaderTitle = document.getElementById('loaderTitle');
-    const loaderSubtitle = document.getElementById('loaderSubtitle');
-
-    function setTheme(dark){
-      if(dark){
-        document.body.classList.add('dark');
-        localStorage.setItem('neurona_theme','dark');
-        // Белое лого (invert)
-        mainLogo.style.filter = "invert(1)";
-        loaderLogo.style.filter = "invert(1)";
-        mainTitle.style.color = "#fff";
-        loaderTitle.style.color = "#fff";
-        loaderSubtitle.style.color = "#fff";
-        // Бургер
-        Array.from(burger.children).forEach(span=>span.style.background='#fff');
-      } else {
-        document.body.classList.remove('dark');
-        localStorage.setItem('neurona_theme','light');
-        mainLogo.style.filter = "";
-        loaderLogo.style.filter = "";
-        mainTitle.style.color = "#000";
-        loaderTitle.style.color = "#000";
-        loaderSubtitle.style.color = "#222";
-        Array.from(burger.children).forEach(span=>span.style.background='#000');
-      }
-      themeSwitch.classList.toggle('on',dark);
-    }
-    themeSwitch.onclick = ()=>{ setTheme(!document.body.classList.contains('dark')); };
-    // При первой загрузке страницы
-    (()=>{ setTheme(localStorage.getItem('neurona_theme')==='dark'); })();
-
-    // Уведомления (фейк-переключатель)
-    const notifSwitch = document.getElementById('notifSwitch');
-    function setNotif(on){
-      notifSwitch.classList.toggle('on',on);
-      localStorage.setItem('neurona_notif',on?'on':'off');
-    }
-    notifSwitch.onclick = ()=>{ setNotif(notifSwitch.classList.contains('on')?false:true); };
-    (()=>{ setNotif(localStorage.getItem('neurona_notif')==='on'); })();
-
-    // ====== Языки меню ======
-    const currLangName = document.getElementById('currLangName');
-    function updateLangName(){
-      let found = langs.find(l=>l.code===lang);
-      currLangName.textContent = found ? found.name : lang;
-    }
-    updateLangName();
-
-    const langSelectBtn = document.getElementById('langSelectBtn');
-    const langList = document.getElementById('langList');
-    langSelectBtn.onclick = (e)=>{
-      langList.innerHTML = '';
-      langs.forEach(l=>{
-        const li = document.createElement('div');
-        li.className = 'side-lang-item' + (l.code===lang?' active':'');
-        li.textContent = l.name;
-        li.onclick = ()=>{
-          lang = l.code;
-          localStorage.setItem('neurona_lang',lang);
-          input.placeholder = i18n[lang].ph;
-          sendBtn.textContent = i18n[lang].send;
-          updateLangName();
-          langList.classList.remove('show');
-          sideMenu.classList.remove('active');
-          sideMenuBg.classList.remove('active');
-        };
-        langList.appendChild(li);
-      });
-      langList.classList.toggle('show');
-      e.stopPropagation();
-    };
-    document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); });
-
-    // сохранение языка
-    (()=> {
-      let storedLang = localStorage.getItem('neurona_lang');
-      if(storedLang && i18n[storedLang]){
-        lang = storedLang;
-        input.placeholder = i18n[lang].ph;
-        sendBtn.textContent = i18n[lang].send;
-        updateLangName();
-      }
-    })();
   </script>
   <script>
     if ('serviceWorker' in navigator) {
