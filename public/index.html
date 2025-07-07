@@ -30,18 +30,18 @@
       display:flex; flex-direction:column;
       align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
-      transition:background .38s cubic-bezier(.38,.85,.48,1.01),color .38s;
+      transition:background 0s,color 0s;
       position:relative;
       overflow:hidden;
     }
     body.dark {
       background: #17181a !important; color: #f2f2f2 !important;
-      transition: background .38s cubic-bezier(.38,.85,.48,1.01),color .38s;
+      transition: background 0s, color 0s;
     }
     #bg {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
       z-index:0; opacity:0;
-      transition:opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
+      transition:opacity .8s cubic-bezier(.38,.85,.48,1.01);
       pointer-events:none;
     }
     #app {
@@ -59,7 +59,7 @@
       margin-bottom: 18px;
       z-index:1; opacity:0;
       background: none;
-      transition: opacity 1.4s cubic-bezier(.38,.85,.48,1.01);
+      transition: opacity .8s cubic-bezier(.38,.85,.48,1.01);
       box-sizing: border-box;
     }
     body.shown #bg { opacity:0.27; }
@@ -68,55 +68,45 @@
       width:100vw; position:fixed; top:0; left:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between;
       background:transparent; height:56px; padding:0;
-      pointer-events:none; transition:opacity .5s;
-      opacity:0; /* Скрыто до появления */
-      transition: opacity .5s;
+      pointer-events:none; opacity:0;
+      transition:opacity .4s;
     }
     body.shown .top-bar { opacity:1; pointer-events:all;}
     .top-bar-content {
       display:flex; align-items:center; height:56px; pointer-events:all;
       margin-left:18px;
     }
-    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter .32s;}
+    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter 0s;}
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
       color:#000; user-select:none;
       text-transform:uppercase;
-      transition: color .38s;
+      transition: color 0s;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
       width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
       z-index: 1110;
-      transition: background .2s;
+      transition: background 0s;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
-      background:#000; border-radius:4px; margin:0; transition:background .2s;
+      background:#000; border-radius:4px; margin:0; transition:background 0s;
     }
     .top-burger span:last-child { margin-bottom:0; }
     .top-bar.hide { opacity:0; pointer-events:none; }
 
-    /* ===== ЛОАДЕР ===== */
     #loader {
       position:fixed; inset:0; background:rgba(255,255,255,0.98);
       display:flex; align-items:center; justify-content:center;
-      z-index:1001;
-      flex-direction:column;
-      opacity:1;
-      pointer-events:auto;
-      width: 100vw;
-      height: 100vh;
-      transition: opacity .8s cubic-bezier(.33,1.17,.52,1.01), background .38s;
+      z-index:1001; flex-direction:column;
+      opacity:1; pointer-events:auto;
+      width: 100vw; height: 100vh;
+      transition: opacity .6s, background .0s;
     }
-    body.dark #loader {
-      background: #17181a !important;
-    }
-    #loader.hide {
-      opacity:0; pointer-events:none;
-      transition: opacity 1.3s cubic-bezier(.22,.7,.49,1.01);
-    }
+    body.dark #loader { background: #17181a !important; }
+    #loader.hide { opacity:0; pointer-events:none; }
     .loader-content {
       display:flex; align-items:center; justify-content:center;
       animation:fade 8s ease-in-out infinite;
@@ -126,7 +116,7 @@
       width:110px; margin-right:18px; image-rendering: auto; 
       filter: none;
       opacity: 0;
-      transition: filter .32s, opacity .38s;
+      transition: filter 0s, opacity .4s;
     }
     .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
@@ -134,13 +124,13 @@
       text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
       line-height:0.98; text-transform:uppercase;
       opacity: 0;
-      transition: color .38s, opacity .38s;
+      transition: color 0s, opacity .4s;
     }
     .loader-subtitle {
       font-size:1.38rem; letter-spacing:.06em; color:#222; margin-top:5px;
       line-height:1.09; font-weight:500;
       opacity: 0;
-      transition: color .38s, opacity .38s;
+      transition: color 0s, opacity .4s;
     }
     .loader-content.show .loader-logo,
     .loader-content.show .loader-title,
@@ -152,7 +142,6 @@
     body.dark .loader-subtitle { color: #fff; }
     @keyframes fade { 0%,100%{opacity:0;} 50%{opacity:1;} }
 
-    /* ==== ЧАТ/КОНТЕЙНЕР ==== */
     .chat-container {
       background:rgba(255,255,255,0.93);
       border-radius:14px; border:1.6px solid #d1d1d1;
@@ -162,7 +151,7 @@
       height:100%;
       min-height: 390px;
       max-height: 100%;
-      transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1), border .27s, background .38s, color .38s;
+      transition: box-shadow 0.22s cubic-bezier(.3,.9,.3,1), border .27s, background 0s, color 0s;
       position:relative;
       margin:0 auto 0 auto;
       box-sizing: border-box;
@@ -195,7 +184,7 @@
       font-size:1rem;
       color:#111;
       border:1.2px solid #d7d7d7;
-      transition:background .17s, border .19s, color .38s;
+      transition:background .0s, border .0s, color .0s;
     }
     .message.user {
       align-self:flex-end;
@@ -233,7 +222,7 @@
       font-family:Arial,sans-serif;
       pointer-events: none;
       box-shadow: none;
-      transition:.18s;
+      transition:.0s;
       display: none;
     }
     .neurona-title {
@@ -245,18 +234,18 @@
       padding: 10px;
       background: #fff;
       align-items: flex-end;
-      transition: background .38s;
+      transition: background 0s;
     }
     body.dark .input-area { background: #1b1c1e; }
     #input {
       flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem;
       background: none;
       color: inherit;
-      transition: background .38s, color .38s;
+      transition: background 0s, color 0s;
     }
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
-      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background .22s,color .22s;
+      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background 0s,color 0s;
       min-width:44px; min-height:50px; height:50px; display: flex; align-items: center; justify-content: center;
       font-weight:bold;
       border:1.2px solid #d7d7d7;
@@ -289,7 +278,7 @@
       border-radius:50%; box-shadow:0 3px 14px #0001;
       width:47px; height:47px; align-items:center; justify-content:center;
       cursor:pointer; font-size:2.4rem; border:none; outline:none;
-      transition:.3s;
+      transition:.0s;
       opacity:0.93;
       z-index:99;
       border: 2.2px solid #eee;
@@ -303,13 +292,12 @@
     #scroll-down.show { display:flex; }
     #scroll-down:hover { background:#f0f0f0; }
 
-    /* === Стили бокового меню NEURONA === */
     .side-menu-bg {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.22);
       z-index: 1101;
       opacity: 0; pointer-events: none;
-      transition: opacity .35s;
+      transition: opacity .2s;
     }
     .side-menu-bg.active {
       opacity: 1; pointer-events: auto;
@@ -323,7 +311,7 @@
       z-index: 1102;
       box-shadow: -9px 0 38px #0002;
       transform: translateX(120%);
-      transition: transform .44s cubic-bezier(.64,.03,.32,1), background .22s, color .38s;
+      transition: transform .22s cubic-bezier(.64,.03,.32,1), background 0s, color 0s;
       display: flex; flex-direction: column;
       border-radius: 25px 0 0 25px;
       padding: 28px 0 0 0;
@@ -343,14 +331,14 @@
       cursor: pointer; user-select: none;
       display: flex; align-items: center;
       gap: 12px;
-      transition: background .15s;
+      transition: background .0s;
       position: relative;
     }
     .side-menu-item:last-child { border-bottom: none; }
     .side-menu-item:active { background: #f7f7fa; }
     .side-arrow {
       margin-left: auto;
-      transition: transform .22s;
+      transition: transform .12s;
       opacity: 0.6;
       width: 18px;
       height: 18px;
@@ -375,12 +363,11 @@
       height: 18px;
       vertical-align: text-bottom;
     }
-    /* ===== КАСТОМНЫЙ СЕРЫЙ SWITCH ===== */
     .switch {
       width: 52px; height: 30px; background: #dedede;
       border-radius: 18px;
       position: relative; cursor: pointer;
-      transition: background .19s, border .23s;
+      transition: none;
       margin-left: 5px;
       flex-shrink: 0;
       border: 1.4px solid #bcbcbc;
@@ -393,9 +380,9 @@
       width: 28px; height: 28px;
       background: #fff;
       border-radius: 50%;
-      position: absolute; left: 1.4px; top: 0px;
+      position: absolute; left: 1.4px; top: -1px;
       box-shadow: 0 2.5px 12px #bbb2;
-      transition: left .22s cubic-bezier(.64,.03,.32,1), background .16s, border .16s;
+      transition: none;
       border: 1.8px solid #d2d2d2;
       display: flex; align-items: center; justify-content: center;
       will-change: left;
@@ -468,7 +455,7 @@
       padding: 13px 15px; font-size: 1.08rem;
       cursor: pointer;
       color: var(--side-txt, #111);
-      transition: background .16s, color .18s;
+      transition: background .0s, color .0s;
       border-radius: 8px;
       user-select: none;
       font-weight: bold;
@@ -530,31 +517,27 @@
   <nav class="side-menu" id="sideMenu" tabindex="-1">
     <button class="side-close-btn" id="sideCloseBtn" title="Close menu">&times;</button>
     <div class="side-menu-list">
-      <div class="side-menu-item">
-        <span>My profile</span>
-      </div>
-      <div class="side-menu-item">
-        <span>Subscription</span>
-      </div>
+      <div class="side-menu-item" id="profileMenu"><span></span></div>
+      <div class="side-menu-item" id="subMenu"><span></span></div>
       <div class="side-menu-item with-arrow" id="settingsBtn">
-        <span>Settings</span>
+        <span></span>
         <svg class="side-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="settings-group" id="settingsGroup">
-        <div class="side-switch-row">
-          <span class="side-switch-label">Notifications</span>
+        <div class="side-switch-row" id="notifRow">
+          <span class="side-switch-label"></span>
           <div class="switch" id="notifSwitch">
             <div class="switch-inner"></div>
           </div>
         </div>
-        <div class="side-switch-row">
-          <span class="side-switch-label">Theme</span>
+        <div class="side-switch-row" id="themeRow">
+          <span class="side-switch-label"></span>
           <div class="switch" id="themeSwitch">
             <div class="switch-inner"></div>
           </div>
         </div>
         <div class="side-switch-row" id="langRow" style="cursor:pointer;">
-          <span class="side-switch-label">Interface language</span>
+          <span class="side-switch-label"></span>
           <svg class="lang-row-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="side-langs" id="langList"></div>
@@ -583,51 +566,11 @@
     </div>
   </div>
   <script>
-    // Theme/Language INIT before visible elements
-    let theme = localStorage.getItem('neurona_theme');
+    // Инициализация языка и темы ДО загрузки интерфейса
     let lang = localStorage.getItem('neurona_lang') || 'en';
+    let theme = localStorage.getItem('neurona_theme');
     if(theme === 'dark') document.body.classList.add('dark');
-    // Loader: force dark if dark
-    if(theme === 'dark') {
-      document.getElementById('loader')?.classList.add('dark');
-      document.documentElement.style.background='#17181a';
-    }
-
-    // --- Фон-анимация (нейросеть) ---
-    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
-    let W, H, nodes;
-    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
-    window.addEventListener('resize', resize);
-    function init(){
-      nodes = Array.from({length:33}).map(_=>({
-        x:Math.random()*W, y:Math.random()*H,
-        vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6
-      }));
-    }
-    function draw(){
-      ctx.clearRect(0,0,W,H);
-      ctx.lineCap='round'; ctx.lineJoin='round';
-      nodes.forEach((a,i)=>{
-        nodes.slice(i+1).forEach(b=>{
-          const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
-          if(d<240){
-            ctx.strokeStyle=`rgba(0,0,0,${Math.min(0.46,(240-d)/170)})`;
-            ctx.lineWidth=2.1;
-            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-          }
-        });
-      });
-      nodes.forEach(n=>{
-        n.x+=n.vx; n.y+=n.vy;
-        if(n.x<0||n.x>W) n.vx*=-1;
-        if(n.y<0||n.y>H) n.vy*=-1;
-        ctx.fillStyle='rgba(0,0,0,0.95)';
-        ctx.beginPath(); ctx.arc(n.x,n.y,4.4,0,Math.PI*2); ctx.fill();
-      });
-      requestAnimationFrame(draw);
-    }
-    resize(); init(); draw();
-
+    if(theme === 'dark') { document.getElementById('loader')?.classList.add('dark'); document.documentElement.style.background='#17181a'; }
     const langs = [
       {code:'en',name:'English'},
       {code:'ru',name:'Русский'},
@@ -640,18 +583,157 @@
       {code:'tr',name:'Türkçe'},
       {code:'zh',name:'中文'}
     ];
-    const i18n = {
-      en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later."},
-      ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже."},
-      ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше."},
-      es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde."},
-      de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen."},
-      fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard."},
-      it:{ph:"Scrivi un messaggio...",send:"Invia",error:"Ops, qualcosa è andato storto. Riprova!", internal:"Errore interno, riprova più tardi."},
-      pl:{ph:"Napisz wiadomość...",send:"Wyślij",error:"Ups, coś poszło nie tak. Spróbuj ponownie!", internal:"Błąd wewnętrzny, spróbuj później."},
-      tr:{ph:"Bir mesaj yaz...",send:"Gönder",error:"Bir şeyler ters gitti. Lütfen tekrar deneyin!", internal:"Dahili hata, lütfen daha sonra tekrar deneyin."},
-      zh:{ph:"输入消息...",send:"发送",error:"哎呀，出了点问题。请再试一次！", internal:"内部错误，请稍后再试。"}
+    // Все строки интерфейса
+    const dict = {
+      en: {
+        ph: "Type a message...",
+        send: "Send",
+        error: "Oops, something went wrong. Please try again!",
+        internal: "Internal error, please try again later.",
+        profile: "My profile",
+        subscription: "Subscription",
+        settings: "Settings",
+        notifications: "Notifications",
+        theme: "Theme",
+        lang: "Interface language",
+        assistant: "PERSONAL AI ASSISTANT"
+      },
+      ru: {
+        ph: "Напишите сообщение...",
+        send: "Отправить",
+        error: "Что-то пошло не так. Попробуйте снова!",
+        internal: "Внутренняя ошибка, попробуйте позже.",
+        profile: "Мой профиль",
+        subscription: "Подписка",
+        settings: "Настройки",
+        notifications: "Уведомления",
+        theme: "Тема",
+        lang: "Язык интерфейса",
+        assistant: "ПЕРСОНАЛЬНЫЙ AI АССИСТЕНТ"
+      },
+      ua: {
+        ph: "Введіть повідомлення...",
+        send: "Надіслати",
+        error: "Щось пішло не так. Спробуйте ще раз!",
+        internal: "Внутрішня помилка, спробуйте пізніше.",
+        profile: "Мій профіль",
+        subscription: "Підписка",
+        settings: "Налаштування",
+        notifications: "Сповіщення",
+        theme: "Тема",
+        lang: "Мова інтерфейсу",
+        assistant: "ПЕРСОНАЛЬНИЙ AI АСИСТЕНТ"
+      },
+      es: {
+        ph: "Escribe un mensaje...",
+        send: "Enviar",
+        error: "¡Vaya, algo salió mal! Inténtalo de nuevo.",
+        internal: "Error interno, inténtalo más tarde.",
+        profile: "Mi perfil",
+        subscription: "Suscripción",
+        settings: "Configuración",
+        notifications: "Notificaciones",
+        theme: "Tema",
+        lang: "Idioma de la interfaz",
+        assistant: "ASISTENTE DE IA PERSONAL"
+      },
+      de: {
+        ph: "Schreibe eine Nachricht...",
+        send: "Senden",
+        error: "Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!",
+        internal: "Interner Fehler, bitte später erneut versuchen.",
+        profile: "Mein Profil",
+        subscription: "Abonnement",
+        settings: "Einstellungen",
+        notifications: "Benachrichtigungen",
+        theme: "Thema",
+        lang: "Oberflächensprache",
+        assistant: "PERSÖNLICHER KI-ASSISTENT"
+      },
+      fr: {
+        ph: "Écrivez un message...",
+        send: "Envoyer",
+        error: "Oups, quelque chose s'est mal passé. Veuillez réessayer !",
+        internal: "Erreur interne, veuillez réessayer plus tard.",
+        profile: "Mon profil",
+        subscription: "Abonnement",
+        settings: "Paramètres",
+        notifications: "Notifications",
+        theme: "Thème",
+        lang: "Langue de l'interface",
+        assistant: "ASSISTANT IA PERSONNEL"
+      },
+      it: {
+        ph: "Scrivi un messaggio...",
+        send: "Invia",
+        error: "Ops, qualcosa è andato storto. Riprova!",
+        internal: "Errore interno, riprova più tardi.",
+        profile: "Il mio profilo",
+        subscription: "Abbonamento",
+        settings: "Impostazioni",
+        notifications: "Notifiche",
+        theme: "Tema",
+        lang: "Lingua interfaccia",
+        assistant: "ASSISTENTE PERSONALE IA"
+      },
+      pl: {
+        ph: "Napisz wiadomość...",
+        send: "Wyślij",
+        error: "Ups, coś poszło nie tak. Spróbuj ponownie!",
+        internal: "Błąd wewnętrzny, spróbuj później.",
+        profile: "Mój profil",
+        subscription: "Subskrypcja",
+        settings: "Ustawienia",
+        notifications: "Powiadomienia",
+        theme: "Motyw",
+        lang: "Język interfejsu",
+        assistant: "OSOBISTY ASYSTENT AI"
+      },
+      tr: {
+        ph: "Bir mesaj yaz...",
+        send: "Gönder",
+        error: "Bir şeyler ters gitti. Lütfen tekrar deneyin!",
+        internal: "Dahili hata, lütfen daha sonra tekrar deneyin.",
+        profile: "Profilim",
+        subscription: "Abonelik",
+        settings: "Ayarlar",
+        notifications: "Bildirimler",
+        theme: "Tema",
+        lang: "Arayüz dili",
+        assistant: "KİŞİSEL YAPAY ZEKA ASİSTANI"
+      },
+      zh: {
+        ph: "输入消息...",
+        send: "发送",
+        error: "哎呀，出了点问题。请再试一次！",
+        internal: "内部错误，请稍后再试。",
+        profile: "我的资料",
+        subscription: "订阅",
+        settings: "设置",
+        notifications: "通知",
+        theme: "主题",
+        lang: "界面语言",
+        assistant: "个人AI助手"
+      }
     };
+
+    // Интерфейс локализация
+    function updateInterfaceLang() {
+      const t = dict[lang] || dict['en'];
+      document.getElementById('profileMenu').querySelector('span').textContent = t.profile;
+      document.getElementById('subMenu').querySelector('span').textContent = t.subscription;
+      document.getElementById('settingsBtn').querySelector('span').textContent = t.settings;
+      document.getElementById('notifRow').querySelector('.side-switch-label').textContent = t.notifications;
+      document.getElementById('themeRow').querySelector('.side-switch-label').textContent = t.theme;
+      document.getElementById('langRow').querySelector('.side-switch-label').textContent = t.lang + " (" + (langs.find(l=>l.code===lang)?.name||lang) + ")";
+      document.getElementById('loaderSubtitle').textContent = t.assistant;
+      document.getElementById('input').placeholder = t.ph;
+      document.getElementById('send').textContent = t.send;
+    }
+
+    // Первый запуск языка
+    if(!dict[lang]) lang='en';
+    updateInterfaceLang();
 
     // ========== SIDEMENU LOGIC ==========
     const sideMenu = document.getElementById('sideMenu');
@@ -681,14 +763,6 @@
     // Языки 
     const langRow = document.getElementById('langRow');
     const langList = document.getElementById('langList');
-    let currLangName = "";
-    function updateLangName(){
-      let found = langs.find(l=>l.code===lang);
-      currLangName = found? found.name : lang;
-      langRow.querySelector('.side-switch-label').textContent = "Interface language (" + currLangName + ")";
-    }
-    updateLangName();
-
     langRow.onclick = (e)=>{
       langList.innerHTML = '';
       langs.forEach(l=>{
@@ -698,9 +772,7 @@
         li.onclick = ()=>{
           lang = l.code;
           localStorage.setItem('neurona_lang',lang);
-          input.placeholder = i18n[lang].ph;
-          sendBtn.textContent = i18n[lang].send;
-          updateLangName();
+          updateInterfaceLang();
           langList.classList.remove('show');
         };
         langList.appendChild(li);
@@ -710,15 +782,7 @@
     };
     document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); });
 
-    // сохранение языка
-    (()=> {
-      let storedLang = localStorage.getItem('neurona_lang');
-      if(storedLang && i18n[storedLang]){
-        lang = storedLang;
-      }
-    })();
-
-    // ТЁМНАЯ ТЕМА: плавное переключение и лого/текст
+    // ТЁМНАЯ ТЕМА: мгновенно и плавно, без глюков
     const themeSwitch = document.getElementById('themeSwitch');
     const mainLogo = document.getElementById('mainLogo');
     const loaderLogo = document.getElementById('loaderLogo');
@@ -769,8 +833,8 @@
           sendBtn = document.getElementById('send'),
           msgsContainer = document.getElementById('messages'),
           scrollDownBtn = document.getElementById('scroll-down');
-    input.placeholder = i18n[lang].ph;
-    sendBtn.textContent = i18n[lang].send;
+    input.placeholder = dict[lang].ph;
+    sendBtn.textContent = dict[lang].send;
 
     let messages = [], typingProcess = null, botIsTyping = false;
 
@@ -803,10 +867,10 @@
             document.getElementById('loader').style.display='none';
             document.getElementById('top-bar').classList.remove('hide');
             loadHistory();
-            setTimeout(()=>scrollChatToBottom(true), 300);
-          }, 900);
-        }, 2200);
-      }, 550);
+            setTimeout(()=>scrollChatToBottom(true), 200);
+          }, 700);
+        }, 1200);
+      }, 400);
     });
 
     function formatBotMessage(text) {
@@ -871,7 +935,7 @@
       };
       msg.appendChild(copyBtn);
       msgsContainer.appendChild(msg);
-      setTimeout(()=>{timeEl.style.display='inline'}, 100);
+      setTimeout(()=>{timeEl.style.display='inline'}, 80);
       scrollChatToBottom(true);
     }
 
@@ -916,8 +980,7 @@
 
     // ========== БЫСТРЫЙ ОТВЕТ НА "ЕТАПЫ" ========== 
     const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
-    const etapFullAnswer = `
-<b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
+    const etapFullAnswer = `<b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
 Моя система поддерживает:<br>
 <ul>
 <li>LLM через HuggingFace (Mistral, OpenChat)</li>
@@ -930,8 +993,7 @@
 <li>Docker, CI/CD, S3, Cloudflare, NGINX, HTTPS, Firewall</li>
 </ul>
 Всё это работает "под капотом" ассистента, чтобы ты получал максимально современные и безопасные решения! 🚀<br>
-Если интересно — могу рассказать детали любого из этапов.
-`;
+Если интересно — могу рассказать детали любого из этапов.`;
 
     function smartEtapAnswer(q) {
       if (etapRegex.test(q)) {
@@ -1013,7 +1075,7 @@
           content.innerHTML = formatted.slice(0, i);
           scrollChatToBottom(true);
           i += Math.floor(Math.random()*4)+4;
-          setTimeout(type, 1 + Math.random() * 2);
+          setTimeout(type, 1);
         } else {
           timeEl.style.display = 'inline';
           botIsTyping = false;
@@ -1030,7 +1092,7 @@
       }
     });
 
-    setTimeout(()=>{scrollChatToBottom(true)}, 500);
+    setTimeout(()=>{scrollChatToBottom(true)}, 200);
   </script>
   <script>
     if ('serviceWorker' in navigator) {
