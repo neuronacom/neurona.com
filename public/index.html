@@ -210,7 +210,6 @@
       font-weight:bold; font-size:2.05rem; letter-spacing:.10em; display:block;
       text-align:center; margin: 0 0 8px 0; text-transform:uppercase;
     }
-
     .input-area {
       display: flex;
       padding: 10px;
@@ -867,7 +866,6 @@
       let dark = settingsBuffer.theme;
       setTheme(dark, true);
     })();
-
     // ========== ЧАТ ==========
     let messages = [], typingProcess = null, botIsTyping = false;
 
@@ -900,7 +898,10 @@
     function formatBotMessage(text) {
       text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, "");
       text = text.replace(/\uFFFD/g, "");
-      text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank"><b>$1</b></a>');
+      // --- Формат ссылок с учётом тёмной темы
+      text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, function(match, label, url) {
+        return `<a href="${url}" target="_blank" class="bot-link"><b>${label}</b></a>`;
+      });
       text = text.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
       text = text.replace(/(^|\n)((?:\d+\.\s.*\n?)+)/gm, (m, p1, block) => {
         const items = block.trim().split(/\n/).filter(Boolean);
@@ -928,6 +929,14 @@
       text = text.replace(/<p><\/p>/g, '');
       return text;
     }
+
+    // Дополнительная стилизация ссылок для тёмной темы
+    const styleDarkLink = document.createElement('style');
+    styleDarkLink.textContent = `
+      .bot-link { color: #296DDF; text-decoration: underline; font-size: 0.98em; }
+      body.dark .bot-link { color: #5B7EC8!important; text-decoration: underline; font-size: 0.94em; }
+    `;
+    document.head.appendChild(styleDarkLink);
 
     const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
     const etapFullAnswer = `
@@ -1064,7 +1073,7 @@
         } catch{}
         let row = '';
         if(cg && cg.found){
-          row += `<b>${cg.name} (${cg.symbol.toUpperCase()})</b>: <b>$${cg.price}</b> <a href="${cg.url}" target="_blank">CoinGecko</a>`;
+          row += `<b>${cg.name} (${cg.symbol.toUpperCase()})</b>: <b>$${cg.price}</b> <a href="${cg.url}" target="_blank" class="bot-link">CoinGecko</a>`;
         }
         if(bin && bin.found){
           row += `<br><b>Binance:</b> $${parseFloat(bin.price).toLocaleString()} <span style="color:#555">(Binance)</span>`;
@@ -1074,7 +1083,6 @@
       if (results.length) return '<ul><li>' + results.join('</li><li>') + '</li></ul>';
       return '';
     }
-
     async function fetchCMC(){
       try {
         const res = await fetch(CMC_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
@@ -1087,8 +1095,8 @@
           url:`https://coinmarketcap.com/currencies/${c.slug}/`
         }));
         return {
-          txt: list.map(c=>`<b>${c.s}</b>: $${c.p.toLocaleString(undefined, {maximumFractionDigits:2})} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>'),
-          rec: list.map(c=>`<b>${c.s}</b>: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank">CMC</a>`).join('<br>')
+          txt: list.map(c=>`<b>${c.s}</b>: $${c.p.toLocaleString(undefined, {maximumFractionDigits:2})} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank" class="bot-link">CMC</a>`).join('<br>'),
+          rec: list.map(c=>`<b>${c.s}</b>: ${c.ch>=0?'LONG':'SHORT'} (${c.ch.toFixed(2)}%) <a href="${c.url}" target="_blank" class="bot-link">CMC</a>`).join('<br>')
         };
       } catch {
         return { txt:'нет данных CMC', rec:'' };
@@ -1115,7 +1123,7 @@
         titles.add(a.title); return true;
       });
       if(news.length)
-        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
+        return '<ol>' + news.slice(0,9).map(a=>`<li><a href="${a.url}" target="_blank" class="bot-link"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
       return 'нет новостей';
     }
 
@@ -1260,6 +1268,7 @@ ${latestNews}
     });
 
     setTimeout(()=>{scrollChatToBottom(true)}, 500);
+
   </script>
   <script>
     if ('serviceWorker' in navigator) {
