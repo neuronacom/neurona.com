@@ -30,7 +30,7 @@
       display:flex; flex-direction:column;
       align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
-      transition:background 0.12s cubic-bezier(.38,.85,.48,1.01),color 0.12s;
+      transition:background 0.22s cubic-bezier(.38,.85,.48,1.01),color 0.22s;
       position:relative;
       overflow:hidden;
     }
@@ -70,23 +70,23 @@
       display:flex; align-items:center; height:56px; pointer-events:all;
       margin-left:18px;
     }
-    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter 0.12s;}
+    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter 0.18s;}
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
       color:#000; user-select:none;
       text-transform:uppercase;
-      transition: color 0.12s;
+      transition: color 0.18s;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
       width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
       z-index: 1110;
-      transition: background 0.12s;
+      transition: background 0.18s;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
-      background:#000; border-radius:4px; margin:0; transition:background 0.12s;
+      background:#000; border-radius:4px; margin:0; transition:background 0.18s;
     }
     .top-burger span:last-child { margin-bottom:0; }
     .top-bar.hide { opacity:0; pointer-events:none; }
@@ -107,27 +107,21 @@
     }
     .loader-content {
       display:flex; align-items:center; justify-content:center;
+      animation:fade 8s ease-in-out infinite;
       min-height:140px; min-width:270px;
-      flex-direction:row;
-      gap:16px;
     }
-    .loader-logo { width:64px; height:64px; margin:0; image-rendering: auto; transition: filter 0.12s;}
-    .loader-neurona-block {
-      display:flex; align-items:center; gap:12px;
-    }
+    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; transition: filter 0.18s;}
+    .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
-      font-size:2.7rem; font-weight:bold; letter-spacing:.14em; color:#000;
+      font-size:5.3rem; font-weight:bold; letter-spacing:.14em; color:#000;
       text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
-      line-height:1.1; text-transform:uppercase;
-      transition: color 0.12s;
-      margin: 0 0 2px 0;
-      display:inline-block;
+      line-height:0.98; text-transform:uppercase;
+      transition: color 0.18s;
     }
     .loader-subtitle {
-      font-size:1.22rem; letter-spacing:.06em; color:#222; margin-top:5px;
+      font-size:1.38rem; letter-spacing:.06em; color:#222; margin-top:5px;
       line-height:1.09; font-weight:500;
-      transition: color 0.12s;
-      margin: 0;
+      transition: color 0.18s;
     }
     body.dark #loader, body.dark #loader .loader-content {
       background:#17181a !important;
@@ -144,7 +138,7 @@
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       width:100%; min-width:0; height:100%; min-height: 390px; max-height: 100%;
-      transition: box-shadow 0.12s cubic-bezier(.3,.9,.3,1), border 0.12s, background 0.12s, color 0.12s;
+      transition: box-shadow 0.18s cubic-bezier(.3,.9,.3,1), border 0.18s, background 0.18s, color 0.18s;
       position:relative;
       margin:0 auto 0 auto;
       box-sizing: border-box;
@@ -176,7 +170,7 @@
       font-size:1rem;
       color:#111;
       border:1.2px solid #d7d7d7;
-      transition:background 0.12s, border 0.12s, color 0.12s;
+      transition:background 0.18s, border 0.18s, color 0.18s;
       will-change:unset;
     }
     .message.user {
@@ -222,18 +216,18 @@
       padding: 10px;
       background: #fff;
       align-items: flex-end;
-      transition: background 0.12s;
+      transition: background 0.18s;
     }
     body.dark .input-area { background: #1b1c1e; }
     #input {
       flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem;
       background: none;
       color: inherit;
-      transition: background 0.12s, color 0.12s;
+      transition: background 0.18s, color 0.18s;
     }
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
-      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background 0.12s,color 0.12s;
+      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background 0.18s,color 0.18s;
       min-width:44px; min-height:50px; height:50px; display: flex; align-items: center; justify-content: center;
       font-weight:bold;
       border:1.2px solid #d7d7d7;
@@ -313,7 +307,7 @@
       background: rgba(0,0,0,0.22);
       z-index: 1101;
       opacity: 0; pointer-events: none;
-      transition: opacity .28s;
+      transition: opacity .30s;
     }
     .side-menu-bg.active {
       opacity: 1; pointer-events: auto;
@@ -327,7 +321,7 @@
       z-index: 1102;
       box-shadow: -9px 0 38px #0002;
       transform: translateX(120%);
-      transition: transform .33s cubic-bezier(.64,.03,.32,1), background .18s, color .18s;
+      transition: transform .44s cubic-bezier(.64,.03,.32,1), background .22s, color .22s;
       display: flex; flex-direction: column;
       border-radius: 25px 0 0 25px;
       padding: 28px 0 0 0;
@@ -384,7 +378,7 @@
       flex-shrink: 0;
       box-shadow: 0 1.5px 4px #0001;
       display: flex; align-items: center;
-      transition: background 0.09s, border 0.09s;
+      transition: background 0.17s, border 0.17s;
       overflow: visible;
       will-change:unset;
       border: 1.4px solid #bcbcbc;
@@ -398,9 +392,9 @@
 
     .switch-inner {
       width: 28px; height: 28px;
-      position: absolute; left: 1.4px; top: 2px;
+      position: absolute; left: 1.4px; top: -1px;
       box-shadow: 0 2.5px 12px #bbb2;
-      transition: left .09s cubic-bezier(.64,.03,.32,1), background .09s, border .09s;
+      transition: left .18s cubic-bezier(.64,.03,.32,1), background .16s, border .16s;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       will-change:unset;
@@ -420,30 +414,30 @@
       width: 18px; height: 18px; display: flex; align-items: center; justify-content:center;
       pointer-events:none; user-select:none;
       opacity: 0.9; transition: opacity .15s;
-      position: absolute; left: 5px; top: 5px;
+      position: absolute; left: 5px; top: 4px;
     }
     .switch.theme .switch-inner .switch-icon.sun { display:inline;}
     .switch.theme .switch-inner .switch-icon.moon { display:none;}
     .switch.theme.on .switch-inner .switch-icon.sun { display:none;}
     .switch.theme.on .switch-inner .switch-icon.moon { display:inline;}
-    .switch.theme .switch-inner .switch-icon { left: 5px; top: 5px; right:unset; }
-    .switch.theme.on .switch-inner .switch-icon { left: 5px; top: 5px; right:unset; }
+    .switch.theme .switch-inner .switch-icon { left: 5px; top: 4px; right:unset; }
+    .switch.theme.on .switch-inner .switch-icon { left: 5px; top: 4px; right:unset; }
 
     body.dark {
       background: #17181a !important; color: #f2f2f2 !important;
-      transition: background 0.12s cubic-bezier(.38,.85,.48,1.01),color 0.12s;
+      transition: background 0.22s cubic-bezier(.38,.85,.48,1.01),color 0.22s;
     }
     body.dark #app,
     body.dark .chat-container {
       background: #1b1c1e !important; color: #ececec;
       border-color: #323232;
-      transition: background 0.10s, color 0.10s, border 0.10s;
+      transition: background 0.18s, color 0.18s, border 0.18s;
     }
     body.dark .message, body.dark .message.user {
       background: #242428;
       color: #f5f5f7;
       border-color: #545458;
-      transition: background 0.10s, color 0.10s, border 0.10s;
+      transition: background 0.18s, color 0.18s, border 0.18s;
     }
     body.dark .message.user { background: #28282c; color: #eaeaea; }
     body.dark .side-menu {
@@ -481,7 +475,7 @@
       display: block;
       width: 100%;
       opacity:0; pointer-events:none;
-      transition: max-height 0.22s cubic-bezier(.4,0,.7,1), opacity 0.16s cubic-bezier(.4,0,.7,1);
+      transition: max-height 0.34s cubic-bezier(.4,0,.7,1), opacity 0.24s cubic-bezier(.4,0,.7,1);
     }
     .side-langs.show {
       max-height: 1000px;
@@ -529,9 +523,9 @@
       #app { max-width:94vw; min-width:0; padding:0 0 7px 0; height:84vh; margin-top:79px; }
       .chat-container { min-width:0; max-width:100vw; min-height:150px; height:100%;}
       #messages { min-height:60px; max-height:calc(84vh - 110px);}
-      .loader-logo { width:38px; margin-right:7px; }
-      .loader-title { font-size:1.2rem; }
-      .loader-subtitle { font-size:.93rem; }
+      .loader-logo { width:70px; margin-right:7px; }
+      .loader-title { font-size:2.4rem; }
+      .loader-subtitle { font-size:1.03rem; }
       #input { font-size:.89rem; height:38px; }
       #send { font-size:.89rem; padding:0 10px; min-width:34px; min-height:38px; height:38px;}
       #scroll-down { width:35px; height:35px; font-size:1.3rem; bottom:82px;}
@@ -541,7 +535,7 @@
       .side-langs{ left: 0; right: 0; }
     }
     @media (max-width:400px){
-      .loader-title{font-size:1.1rem;}
+      .loader-title{font-size:1.2rem;}
       #app{max-width:98vw;}
       .chat-container{min-height:80px;}
     }
@@ -550,18 +544,10 @@
       .chat-container{min-height:60px;}
       #messages{min-height:35px;}
     }
-    /* A tag for news in bot answer */
-    .message.bot a, .message.bot a:visited, .msg-content a, .msg-content a:visited {
-      color: #1877d2;
-      transition:color 0.13s;
-    }
-    body.dark .message.bot a, body.dark .msg-content a, body.dark .message.bot a:visited, body.dark .msg-content a:visited {
-      color: #7eb8ff; /* less blue in dark */
-    }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
+<canvas id="bg"></canvas>
   <div class="top-bar" id="top-bar">
     <div class="top-bar-content">
       <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="top-logo" alt="logo" id="mainLogo"/>
@@ -588,21 +574,14 @@
       <div class="settings-group" id="settingsGroup">
         <div class="side-switch-row">
           <span class="side-switch-label menu-text">Уведомления</span>
-          <div class="switch notif" id="notifSwitch">
+          <div class="switch" id="notifSwitch">
             <div class="switch-inner"></div>
           </div>
         </div>
         <div class="side-switch-row">
           <span class="side-switch-label menu-text">Тема</span>
-          <div class="switch theme" id="themeSwitch">
-            <div class="switch-inner">
-              <span class="switch-icon sun">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-              </span>
-              <span class="switch-icon moon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3e79c3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 0 1 12.21 3 7 7 0 1 0 21 12.79z"/></svg>
-              </span>
-            </div>
+          <div class="switch" id="themeSwitch">
+            <div class="switch-inner"></div>
           </div>
         </div>
         <div class="side-switch-row" id="langRow" style="cursor:pointer;">
@@ -618,11 +597,11 @@
   </nav>
   <div id="loader">
     <div class="loader-content">
-      <div class="loader-neurona-block">
-        <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo" id="loaderLogo"/>
-        <span class="loader-title" id="loaderTitle">NEURONA</span>
+      <img src="https://i.ibb.co/Mk4WpHL9/25-1.png" class="loader-logo" alt="Logo" id="loaderLogo" onload="this.style.opacity=1;" style="opacity:0;transition:opacity .4s;"/>
+      <div class="loader-text">
+        <div class="loader-title" id="loaderTitle">NEURONA</div>
+        <div class="loader-subtitle" id="loaderSubtitle">PERSONAL AI ASSISTANT</div>
       </div>
-      <span class="loader-subtitle" id="loaderSubtitle">PERSONAL AI ASSISTANT</span>
     </div>
   </div>
   <div id="app">
@@ -637,8 +616,8 @@
       </div>
     </div>
   </div>
-<script>
- // --- Фон-анимация (нейросеть) ---
+  <script>
+    // --- Фон-анимация (нейросеть) ---
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let W, H, nodes;
     function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -673,8 +652,7 @@
     }
     resize(); init(); draw();
 
-    // ========== ЛОКАЛИЗАЦИИ ================
-    // Меню и языки
+    // --- Локализация и настройки
     const langs = [
       {code:'ru',name:'Русский'},
       {code:'en',name:'English'},
@@ -771,15 +749,7 @@
       loaderTitle.style.color = dark ? "#fff" : "#000";
       loaderSubtitle.style.color = dark ? "#fff" : "#222";
       Array.from(burger.children).forEach(span=>span.style.background=dark?'#fff':'#000');
-      if (dark) {
-        themeSwitch.classList.add('on');
-        themeSwitch.querySelector('.switch-inner .sun').style.display = 'inline';
-        themeSwitch.querySelector('.switch-inner .moon').style.display = 'none';
-      } else {
-        themeSwitch.classList.remove('on');
-        themeSwitch.querySelector('.switch-inner .sun').style.display = 'none';
-        themeSwitch.querySelector('.switch-inner .moon').style.display = 'inline';
-      }
+      themeSwitch.classList.toggle('on',dark);
       if(fast){
         document.body.style.transition = "none";
         mainLogo.style.transition = "none";
@@ -799,7 +769,6 @@
 
     function setNotif(on){
       notifSwitch.classList.toggle('on',on);
-      if (on) notifSwitch.classList.add('on'); else notifSwitch.classList.remove('on');
     }
 
     function showSaveBtnIfChanged() {
@@ -807,17 +776,12 @@
           settingsBuffer.notif !== lastSavedSettings.notif ||
           settingsBuffer.lang !== lastSavedSettings.lang) {
         saveSettingsBtn.style.display = '';
-        saveSettingsBtn.classList.remove('saving');
-        saveSettingsBtn.style.opacity = '1';
       } else {
         saveSettingsBtn.style.display = 'none';
       }
     }
 
-    burger.onclick = ()=>{
-      sideMenu.classList.add('active');
-      sideMenuBg.classList.add('active');
-    }
+    burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
     closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
     sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
     document.addEventListener('keydown', e=>{
@@ -839,7 +803,7 @@
 
     themeSwitch.onclick = ()=>{
       settingsBuffer.theme = !settingsBuffer.theme;
-      setTheme(settingsBuffer.theme, false);
+      setTheme(settingsBuffer.theme, true);
       showSaveBtnIfChanged();
     };
     notifSwitch.onclick = ()=>{
@@ -878,21 +842,14 @@
     document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
     saveSettingsBtn.onclick = ()=>{
-      saveSettingsBtn.classList.add('saving');
-      setTimeout(()=>{
-        localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
-        localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
-        localStorage.setItem('neurona_lang', settingsBuffer.lang);
-        lastSavedSettings = {...settingsBuffer};
-        saveSettingsBtn.classList.add('saving');
-        setTimeout(()=>{
-          saveSettingsBtn.style.opacity = '0';
-          setTimeout(()=>{saveSettingsBtn.style.display = 'none'; saveSettingsBtn.classList.remove('saving'); saveSettingsBtn.style.opacity = '1';},300)
-        },200);
-        updateMenuI18n();
-        input.placeholder = i18n[settingsBuffer.lang].ph;
-        sendBtn.textContent = i18n[settingsBuffer.lang].send;
-      },200);
+      localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
+      localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
+      localStorage.setItem('neurona_lang', settingsBuffer.lang);
+      lastSavedSettings = {...settingsBuffer};
+      saveSettingsBtn.style.display = 'none';
+      updateMenuI18n();
+      input.placeholder = i18n[settingsBuffer.lang].ph;
+      sendBtn.textContent = i18n[settingsBuffer.lang].send;
     };
 
     function loadSettings(){
@@ -1042,7 +999,7 @@
 
     function scrollChatToBottom(smooth){
       if(smooth){
-        msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "smooth" });
+        msgsContainer.scrollTop = msgsContainer.scrollHeight;
       } else {
         msgsContainer.scrollTop = msgsContainer.scrollHeight;
       }
@@ -1064,7 +1021,7 @@
     }
     msgsContainer.addEventListener('scroll', checkScrollBtn);
     scrollDownBtn.onclick = ()=>{
-      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "smooth" });
+      msgsContainer.scrollTop = msgsContainer.scrollHeight;
       scrollDownBtn.classList.remove('show');
     };
 
@@ -1282,8 +1239,8 @@ ${latestNews}
         if (i <= formatted.length) {
           content.innerHTML = formatted.slice(0, i);
           if ((i % 10) === 0) scrollChatToBottom(true);
-          i += 5 + Math.floor(Math.random()*6);
-          setTimeout(type, 3 + Math.random() * 7);
+          i += 5 + Math.floor(Math.random()*5);
+          setTimeout(type, 1 + Math.random() * 2);
         } else {
           content.innerHTML = formatted;
           scrollChatToBottom(true);
@@ -1292,7 +1249,7 @@ ${latestNews}
           if (cb) cb();
         }
       }
-      requestAnimationFrame(type);
+      type();
     }
 
     input.addEventListener('keydown', function(e){
@@ -1308,6 +1265,6 @@ ${latestNews}
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
-</script>
+  </script>
 </body>
 </html>
