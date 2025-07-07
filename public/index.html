@@ -30,7 +30,7 @@
       display:flex; flex-direction:column;
       align-items:center; justify-content:flex-start;
       background-color:#fff !important; color:#000 !important;
-      transition:background 0.12s cubic-bezier(.38,.85,.48,1.01),color 0.12s;
+      transition:background 0.33s cubic-bezier(.38,.85,.48,1.01),color 0.33s;
       position:relative;
       overflow:hidden;
     }
@@ -70,23 +70,23 @@
       display:flex; align-items:center; height:56px; pointer-events:all;
       margin-left:18px;
     }
-    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter 0.10s;}
+    .top-logo { width:36px; height:auto; margin-right:13px; transition:filter 0.20s;}
     .top-title {
       font-size:1.52rem; letter-spacing:.11em; font-weight:bold;
       color:#000; user-select:none;
       text-transform:uppercase;
-      transition: color 0.10s;
+      transition: color 0.20s;
     }
     .top-burger {
       display:flex; flex-direction:column; justify-content:center;
       width:36px; height:29px; margin-right:18px;
       cursor:pointer; pointer-events:all; gap:3.2px;
       z-index: 1110;
-      transition: background 0.10s;
+      transition: background 0.20s;
     }
     .top-burger span {
       display:block; height:5.6px; width:100%;
-      background:#000; border-radius:4px; margin:0; transition:background 0.10s;
+      background:#000; border-radius:4px; margin:0; transition:background 0.20s;
     }
     .top-burger span:last-child { margin-bottom:0; }
     .top-bar.hide { opacity:0; pointer-events:none; }
@@ -110,18 +110,18 @@
       animation:fade 8s ease-in-out infinite;
       min-height:140px; min-width:270px;
     }
-    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; transition: filter 0.10s;}
+    .loader-logo { width:110px; margin-right:18px; image-rendering: auto; transition: filter 0.20s;}
     .loader-text { display:flex; flex-direction:column; align-items:center; line-height:1.01; }
     .loader-title {
       font-size:5.3rem; font-weight:bold; letter-spacing:.14em; color:#000;
       text-shadow:0 1px 0 #fff, 0 4px 16px #bbb6;
       line-height:0.98; text-transform:uppercase;
-      transition: color 0.10s;
+      transition: color 0.20s;
     }
     .loader-subtitle {
       font-size:1.38rem; letter-spacing:.06em; color:#222; margin-top:5px;
       line-height:1.09; font-weight:500;
-      transition: color 0.10s;
+      transition: color 0.20s;
     }
     body.dark #loader, body.dark #loader .loader-content {
       background:#17181a !important;
@@ -138,7 +138,7 @@
       box-shadow:0 7px 36px 0 rgba(30,40,80,0.19), 0 2.5px 10px 0 rgba(50,50,90,0.14);
       display:flex; flex-direction:column; overflow:hidden;
       width:100%; min-width:0; height:100%; min-height: 390px; max-height: 100%;
-      transition: box-shadow 0.12s cubic-bezier(.3,.9,.3,1), border 0.12s, background 0.12s, color 0.12s;
+      transition: box-shadow 0.20s cubic-bezier(.3,.9,.3,1), border 0.20s, background 0.20s, color 0.20s;
       position:relative;
       margin:0 auto 0 auto;
       box-sizing: border-box;
@@ -170,7 +170,7 @@
       font-size:1rem;
       color:#111;
       border:1.2px solid #d7d7d7;
-      transition:background 0.12s, border 0.12s, color 0.12s;
+      transition:background 0.20s, border 0.20s, color 0.20s;
       will-change:unset;
     }
     .message.user {
@@ -216,18 +216,18 @@
       padding: 10px;
       background: #fff;
       align-items: flex-end;
-      transition: background 0.12s;
+      transition: background 0.20s;
     }
     body.dark .input-area { background: #1b1c1e; }
     #input {
       flex:1; resize:none; border:1px solid #ccc; padding:12px; border-radius:4px; height:50px; font-size:1rem;
       background: none;
       color: inherit;
-      transition: background 0.12s, color 0.12s;
+      transition: background 0.20s, color 0.20s;
     }
     #send {
       margin-left:8px; padding:0 16px; border:none; border-radius:4px;
-      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background 0.10s,color 0.10s;
+      background:#444; color:#fff; font-size:1rem; cursor:pointer; transition:background 0.20s,color 0.20s;
       min-width:44px; min-height:50px; height:50px; display: flex; align-items: center; justify-content: center;
       font-weight:bold;
       border:1.2px solid #d7d7d7;
@@ -245,12 +245,19 @@
       color:#fff;
       font-size:1rem;
       cursor:pointer;
-      transition:background 0.10s,color 0.10s;
+      transition:background 0.23s,color 0.23s,opacity 0.23s;
       min-width:44px; min-height:44px; height:44px;
       display: flex; align-items: center; justify-content: center;
       font-weight:bold;
       border:1.2px solid #d7d7d7;
       box-shadow: 0 2px 8px #0001;
+      opacity:1;
+    }
+    .save-btn.saving {
+      background:#222;
+      color:#fff;
+      opacity:0.6;
+      pointer-events: none;
     }
     body.dark .save-btn { background:#fff; color:#000; border:1.2px solid #888;}
     .save-btn:hover { background:#222; color:#fff; }
@@ -299,7 +306,7 @@
       background: rgba(0,0,0,0.22);
       z-index: 1101;
       opacity: 0; pointer-events: none;
-      transition: opacity .15s;
+      transition: opacity .30s;
     }
     .side-menu-bg.active {
       opacity: 1; pointer-events: auto;
@@ -313,7 +320,7 @@
       z-index: 1102;
       box-shadow: -9px 0 38px #0002;
       transform: translateX(120%);
-      transition: transform .15s cubic-bezier(.64,.03,.32,1), background .12s, color .12s;
+      transition: transform .44s cubic-bezier(.64,.03,.32,1), background .22s, color .22s;
       display: flex; flex-direction: column;
       border-radius: 25px 0 0 25px;
       padding: 28px 0 0 0;
@@ -340,7 +347,7 @@
     .side-menu-item:active { background: #f7f7fa; }
     .side-arrow {
       margin-left: 6px;
-      transition: transform .13s;
+      transition: transform .22s;
       opacity: 0.7;
       width: 18px;
       height: 18px;
@@ -363,56 +370,69 @@
     .side-switch-label { font-size: 1.06rem; font-weight: bold; display:flex; align-items:center;}
 
     .switch {
-      width: 52px; height: 30px; background: #dedede;
+      width: 52px; height: 30px;
       border-radius: 18px;
       position: relative; cursor: pointer;
-      transition: background 0.10s, border 0.10s;
       margin-left: 5px;
       flex-shrink: 0;
-      border: 1.4px solid #bcbcbc;
       box-shadow: 0 1.5px 4px #0001;
       display: flex; align-items: center;
-      transition: background 0.10s, border 0.10s;
+      transition: background 0.22s, border 0.22s;
       overflow: visible;
       will-change:unset;
+      border: 1.4px solid #bcbcbc;
     }
     .switch-inner {
       width: 28px; height: 28px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute; left: 1.4px; top: 1px;
+      position: absolute; left: 1.4px; top: 0px;
       box-shadow: 0 2.5px 12px #bbb2;
-      transition: left .13s cubic-bezier(.64,.03,.32,1), background .10s, border .10s;
-      border: 1.8px solid #d2d2d2;
+      transition: left .22s cubic-bezier(.64,.03,.32,1), background .18s, border .18s;
+      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       will-change:unset;
+      border-width: 1.8px;
+      border-style: solid;
     }
-    .switch.on .switch-inner {
-      left: 22px;
-      background: #eee;
-      border-color: #c7c7c7;
+    /* Уведомления (темный/светлый) */
+    .switch.notif { background: #18181c; border-color:#23242a; }
+    .switch.notif.on { background: #ededed; border-color: #888; }
+    .switch.notif .switch-inner { background: #23242a; border-color: #23242a; }
+    .switch.notif.on .switch-inner { background: #fff; border-color: #bcbcbc; }
+    /* Тема (месяц/солнце) */
+    .switch.theme { background: #ddd; border-color:#bcbcbc; }
+    .switch.theme.on { background: #23242a; border-color: #545458; }
+    .switch.theme .switch-inner { background: #fff; border-color: #d2d2d2; }
+    .switch.theme.on .switch-inner { background: #141414; border-color: #23242a; }
+    /* Положение кружков чуть выше */
+    .switch-inner { top: -1px; }
+    .switch.on .switch-inner { left: 22px; }
+    .switch:not(.on) .switch-inner { left: 1.4px; }
+
+    .switch-icon {
+      width: 18px; height: 18px; display: flex; align-items: center; justify-content:center;
+      pointer-events:none; user-select:none;
+      opacity: 0.85; transition: opacity .15s;
     }
-    .switch:not(.on) .switch-inner {
-      left: 1.4px;
-      background: #fff;
-      border-color: #d2d2d2;
-    }
+    .switch.theme .switch-inner .switch-icon.sun { display:none;}
+    .switch.theme .switch-inner .switch-icon.moon { display:inline;}
+    .switch.theme.on .switch-inner .switch-icon.sun { display:inline;}
+    .switch.theme.on .switch-inner .switch-icon.moon { display:none;}
 
     body.dark {
       background: #17181a !important; color: #f2f2f2 !important;
-      transition: background 0.12s cubic-bezier(.38,.85,.48,1.01),color 0.12s;
+      transition: background 0.33s cubic-bezier(.38,.85,.48,1.01),color 0.33s;
     }
     body.dark #app,
     body.dark .chat-container {
       background: #1b1c1e !important; color: #ececec;
       border-color: #323232;
-      transition: background 0.10s, color 0.10s, border 0.10s;
+      transition: background 0.20s, color 0.20s, border 0.20s;
     }
     body.dark .message, body.dark .message.user {
       background: #242428;
       color: #f5f5f7;
       border-color: #545458;
-      transition: background 0.10s, color 0.10s, border 0.10s;
+      transition: background 0.20s, color 0.20s, border 0.20s;
     }
     body.dark .message.user { background: #28282c; color: #eaeaea; }
     body.dark .side-menu {
@@ -423,23 +443,6 @@
     body.dark .side-menu-item { border-bottom: 1.3px solid #23232b; color: #fff; }
     body.dark .side-menu-item:active { background: #23232b; }
     body.dark .side-switch-row, body.dark .side-menu-section { color: #bfc7d2; }
-    body.dark .switch {
-      background: #23242a; border-color: #545458;
-      box-shadow: 0 1.5px 6px #0003;
-    }
-    body.dark .switch.on {
-      background: #ededed;
-      border-color: #888;
-    }
-    body.dark .switch-inner {
-      background: #141414;
-      border-color: #23242a;
-    }
-    body.dark .switch.on .switch-inner {
-      background: #dfdfdf;
-      border-color: #bcbcbc;
-    }
-
     .side-close-btn {
       position: absolute; top: 12px; right: 17px;
       width: 41px; height: 41px;
@@ -455,33 +458,26 @@
 
     .side-langs {
       position: static;
-      max-height: none;
-      overflow-y: visible;
+      max-height: 0;
+      overflow: hidden;
       border-radius: 9px;
       box-shadow: 0 3px 12px #0001;
       background: var(--side-bg, #fff);
-      margin: 0 0 0 0; padding: 2px 0 6px 0;
+      margin: 0 0 0 0; padding: 0 0 0 0;
       border: 1.1px solid #eee;
       left: 0; right: 0;
       z-index: 1111;
-      display: none;
-      animation: showLang .16s;
+      display: block;
       width: 100%;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity 0.14s;
+      opacity:0; pointer-events:none;
+      transition: max-height 0.34s cubic-bezier(.4,0,.7,1), opacity 0.24s cubic-bezier(.4,0,.7,1);
     }
     .side-langs.show {
-      display: block;
+      max-height: 400px;
       opacity:1;
       pointer-events:auto;
-      animation: showLang .18s;
-      max-height: none;
-      overflow-y: visible;
-    }
-    @keyframes showLang {
-      from {opacity:0;}
-      to {opacity:1;}
+      padding: 2px 0 6px 0;
+      overflow: visible;
     }
     .side-lang-item {
       padding: 13px 15px; font-size: 1.08rem;
@@ -572,14 +568,21 @@
       <div class="settings-group" id="settingsGroup">
         <div class="side-switch-row">
           <span class="side-switch-label menu-text">Уведомления</span>
-          <div class="switch" id="notifSwitch">
+          <div class="switch notif" id="notifSwitch">
             <div class="switch-inner"></div>
           </div>
         </div>
         <div class="side-switch-row">
           <span class="side-switch-label menu-text">Тема</span>
-          <div class="switch" id="themeSwitch">
-            <div class="switch-inner"></div>
+          <div class="switch theme" id="themeSwitch">
+            <div class="switch-inner">
+              <span class="switch-icon sun" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              </span>
+              <span class="switch-icon moon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3e79c3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 0 1 12.21 3 7 7 0 1 0 21 12.79z"/></svg>
+              </span>
+            </div>
           </div>
         </div>
         <div class="side-switch-row" id="langRow" style="cursor:pointer;">
@@ -650,7 +653,8 @@
     }
     resize(); init(); draw();
 
-    // --- Локализация и настройки
+    // ========== ЛОКАЛИЗАЦИИ ================
+    // Меню и языки
     const langs = [
       {code:'ru',name:'Русский'},
       {code:'en',name:'English'},
@@ -747,7 +751,15 @@
       loaderTitle.style.color = dark ? "#fff" : "#000";
       loaderSubtitle.style.color = dark ? "#fff" : "#222";
       Array.from(burger.children).forEach(span=>span.style.background=dark?'#fff':'#000');
-      themeSwitch.classList.toggle('on',dark);
+      if (dark) {
+        themeSwitch.classList.add('on');
+        themeSwitch.querySelector('.switch-inner .sun').style.display = 'inline';
+        themeSwitch.querySelector('.switch-inner .moon').style.display = 'none';
+      } else {
+        themeSwitch.classList.remove('on');
+        themeSwitch.querySelector('.switch-inner .sun').style.display = 'none';
+        themeSwitch.querySelector('.switch-inner .moon').style.display = 'inline';
+      }
       if(fast){
         document.body.style.transition = "none";
         mainLogo.style.transition = "none";
@@ -767,6 +779,7 @@
 
     function setNotif(on){
       notifSwitch.classList.toggle('on',on);
+      if (on) notifSwitch.classList.add('on'); else notifSwitch.classList.remove('on');
     }
 
     function showSaveBtnIfChanged() {
@@ -774,12 +787,17 @@
           settingsBuffer.notif !== lastSavedSettings.notif ||
           settingsBuffer.lang !== lastSavedSettings.lang) {
         saveSettingsBtn.style.display = '';
+        saveSettingsBtn.classList.remove('saving');
+        saveSettingsBtn.style.opacity = '1';
       } else {
         saveSettingsBtn.style.display = 'none';
       }
     }
 
-    burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
+    burger.onclick = ()=>{
+      sideMenu.classList.add('active');
+      sideMenuBg.classList.add('active');
+    }
     closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
     sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
     document.addEventListener('keydown', e=>{
@@ -801,7 +819,7 @@
 
     themeSwitch.onclick = ()=>{
       settingsBuffer.theme = !settingsBuffer.theme;
-      setTheme(settingsBuffer.theme, true);
+      setTheme(settingsBuffer.theme, false);
       showSaveBtnIfChanged();
     };
     notifSwitch.onclick = ()=>{
@@ -840,14 +858,21 @@
     document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
     saveSettingsBtn.onclick = ()=>{
-      localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
-      localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
-      localStorage.setItem('neurona_lang', settingsBuffer.lang);
-      lastSavedSettings = {...settingsBuffer};
-      saveSettingsBtn.style.display = 'none';
-      updateMenuI18n();
-      input.placeholder = i18n[settingsBuffer.lang].ph;
-      sendBtn.textContent = i18n[settingsBuffer.lang].send;
+      saveSettingsBtn.classList.add('saving');
+      setTimeout(()=>{
+        localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
+        localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
+        localStorage.setItem('neurona_lang', settingsBuffer.lang);
+        lastSavedSettings = {...settingsBuffer};
+        saveSettingsBtn.classList.add('saving');
+        setTimeout(()=>{
+          saveSettingsBtn.style.opacity = '0';
+          setTimeout(()=>{saveSettingsBtn.style.display = 'none'; saveSettingsBtn.classList.remove('saving'); saveSettingsBtn.style.opacity = '1';},300)
+        },200);
+        updateMenuI18n();
+        input.placeholder = i18n[settingsBuffer.lang].ph;
+        sendBtn.textContent = i18n[settingsBuffer.lang].send;
+      },200);
     };
 
     function loadSettings(){
@@ -997,7 +1022,7 @@
 
     function scrollChatToBottom(smooth){
       if(smooth){
-        msgsContainer.scrollTop = msgsContainer.scrollHeight;
+        msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "smooth" });
       } else {
         msgsContainer.scrollTop = msgsContainer.scrollHeight;
       }
@@ -1019,7 +1044,7 @@
     }
     msgsContainer.addEventListener('scroll', checkScrollBtn);
     scrollDownBtn.onclick = ()=>{
-      msgsContainer.scrollTop = msgsContainer.scrollHeight;
+      msgsContainer.scrollTo({ top: msgsContainer.scrollHeight, behavior: "smooth" });
       scrollDownBtn.classList.remove('show');
     };
 
@@ -1237,8 +1262,8 @@ ${latestNews}
         if (i <= formatted.length) {
           content.innerHTML = formatted.slice(0, i);
           if ((i % 10) === 0) scrollChatToBottom(true);
-          i += 5 + Math.floor(Math.random()*5);
-          setTimeout(type, 1 + Math.random() * 2);
+          i += 5 + Math.floor(Math.random()*6);
+          setTimeout(type, 3 + Math.random() * 7);
         } else {
           content.innerHTML = formatted;
           scrollChatToBottom(true);
@@ -1247,7 +1272,7 @@ ${latestNews}
           if (cb) cb();
         }
       }
-      type();
+      requestAnimationFrame(type);
     }
 
     input.addEventListener('keydown', function(e){
