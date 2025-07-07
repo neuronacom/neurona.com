@@ -32,23 +32,27 @@ app.get('/api/cmc', async (req, res) => {
   }
 });
 
-// Крипто-новости (Cryptopanic, GNews, без дублей, только новые)
+// Крипто-новости (Cryptopanic + GNews, только свежие, прямые ссылки, без дублей)
 app.get('/api/news', async (req, res) => {
   try {
-    // Cryptopanic
-    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=${process.env.CRYPTOPANIC_API_KEY}&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
-    const r = await fetchTimeout(url);
-    const js = await r.json();
-
-    let news = [];
+    const news = [];
     const seen = new Set();
-    for (let n of (js.results || [])) {
+
+    // Cryptopanic (до 6 уникальных свежих)
+    const cryptopanicUrl = `https://cryptopanic.com/api/v1/posts/?auth_token=${process.env.CRYPTOPANIC_API_KEY}&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
+    const cr = await fetchTimeout(cryptopanicUrl);
+    const cj = await cr.json();
+    for (let n of (cj.results || [])) {
+      // найди прямую ссылку на источник (если есть), иначе url
+      let link = n.source && n.source.url ? n.source.url : n.url;
+      if (!link) continue;
+      // не добавляй дубли
       if (!seen.has(n.title)) {
         news.push({
           title: n.title,
-          url: n.url,
+          url: link,
           time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
-          source: n.domain || 'cryptopanic',
+          source: n.domain || (n.source && n.source.title) || 'cryptopanic',
           impact: n.currencies && n.currencies.length ? n.currencies.join(', ') : ''
         });
         seen.add(n.title);
@@ -56,11 +60,12 @@ app.get('/api/news', async (req, res) => {
       }
     }
 
-    // GNews (дополнение)
+    // GNews (до 6 уникальных свежих)
     const gnewsUrl = `https://gnews.io/api/v4/search?q=crypto&token=${process.env.GNEWS_API_KEY}&lang=en&max=6`;
-    const gres = await fetchTimeout(gnewsUrl);
-    const gjs = await gres.json();
-    for (let a of (gjs.articles || [])) {
+    const gr = await fetchTimeout(gnewsUrl);
+    const gj = await gr.json();
+    for (let a of (gj.articles || [])) {
+      if (!a.title || !a.url) continue;
       if (!seen.has(a.title)) {
         news.push({
           title: a.title,
@@ -74,14 +79,15 @@ app.get('/api/news', async (req, res) => {
       }
     }
 
-    // Оставить только уникальные и свежие (до 24ч)
-    news = news.filter(a => {
-      const date = new Date(a.time || 0);
-      return Date.now() - date.getTime() < 32 * 3600 * 1000;
-    }).slice(0, 9);
+    // Оставить только свежие (до 24ч) и отсортировать по времени (новые сверху)
+    const now = Date.now();
+    const out = news.filter(a => {
+      const t = new Date(a.time || 0).getTime();
+      return now - t < 24 * 3600 * 1000;
+    }).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 9);
 
-    res.json({ articles: news });
-  } catch {
+    res.json({ articles: out });
+  } catch (e) {
     res.json({ articles: [] });
   }
 });
