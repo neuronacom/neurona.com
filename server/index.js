@@ -235,9 +235,62 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
+// Simple fallback responses for basic queries
+function getSimpleResponse(message) {
+  const msg = message.toLowerCase().trim();
+  
+  // Russian availability/presence queries
+  if (msg.includes('ты тут') || msg.includes('ты здесь') || msg.includes('есть кто')) {
+    return 'Да, я здесь! Я NEURONA, ваш персональный ИИ-ассистент. Готов помочь вам с любыми вопросами.';
+  }
+  
+  // Russian greeting patterns
+  if (msg.includes('привет') || msg.includes('здравствуй') || msg.includes('добро пожаловать')) {
+    return 'Привет! Я NEURONA, ваш персональный ИИ-ассистент. Чем могу помочь?';
+  }
+  
+  // Russian status queries
+  if (msg.includes('как дела') || msg.includes('как работаешь') || msg.includes('работаешь')) {
+    return 'Все отлично! Я готов помочь вам с криптовалютами, новостями, анализом данных и многим другим.';
+  }
+  
+  // English availability queries
+  if (msg.includes('are you here') || msg.includes('are you there') || msg.includes('anyone there')) {
+    return 'Yes, I\'m here! I\'m NEURONA, your personal AI assistant. Ready to help you with any questions.';
+  }
+  
+  // English greetings
+  if (msg.includes('hello') || msg.includes('hi ') || msg.includes('hey ')) {
+    return 'Hello! I\'m NEURONA, your personal AI assistant. How can I help you?';
+  }
+  
+  return null;
+}
+
 // OpenAI (GPT-4o)
 app.post('/api/openai', async (req, res) => {
   try {
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      // Try to provide a simple fallback response
+      const lastMessage = req.body.messages?.[req.body.messages.length - 1];
+      if (lastMessage && lastMessage.role === 'user') {
+        const simpleResponse = getSimpleResponse(lastMessage.content);
+        if (simpleResponse) {
+          return res.json({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: simpleResponse
+              }
+            }]
+          });
+        }
+      }
+      
+      return res.status(500).json({ error: 'OpenAI API не настроен. Некоторые функции недоступны.' });
+    }
+    
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -252,6 +305,22 @@ app.post('/api/openai', async (req, res) => {
     }
     res.json(js);
   } catch (e) {
+    // Try to provide a simple fallback response on network error
+    const lastMessage = req.body.messages?.[req.body.messages.length - 1];
+    if (lastMessage && lastMessage.role === 'user') {
+      const simpleResponse = getSimpleResponse(lastMessage.content);
+      if (simpleResponse) {
+        return res.json({
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: simpleResponse
+            }
+          }]
+        });
+      }
+    }
+    
     res.status(500).json({ error: 'OpenAI error' });
   }
 });
