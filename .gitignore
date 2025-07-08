@@ -1,2 +1,5 @@
 node_modules/
 .env
+test.html
+demo.html
+complete_test.html
