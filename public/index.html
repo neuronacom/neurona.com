@@ -1408,5 +1408,60 @@ setTimeout(()=>{scrollChatToBottom(true, true)}, 500);
     navigator.serviceWorker.register('/sw.js');
   }
 </script>
+
+<!-- CryptoPanic Widget -->
+<div id="cryptopanic-widget" style="max-width: 600px; margin: 20px auto; padding: 10px;">
+  <div id="cryptopanic-news" style="width: 100%; min-height: 600px; border: none; display: block; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+    <h3 style="margin-bottom: 15px; color: #333; font-size: 18px; text-align: center;">Crypto News - BTC, ETH, TON, SOL, BNB</h3>
+    <div id="cryptopanic-content" style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <p style="text-align: center; color: #666;">Loading crypto news...</p>
+    </div>
+  </div>
+</div>
+<script>
+async function loadCryptoPanicWidget() {
+  try {
+    // Use the new CryptoPanic proxy endpoint
+    const response = await fetch('/api/cryptopanic?t=' + Date.now());
+    const data = await response.json();
+    
+    const contentDiv = document.getElementById('cryptopanic-content');
+    if (data.results && data.results.length > 0) {
+      let html = '<div style="max-height: 550px; overflow-y: auto;">';
+      
+      data.results.slice(0, 20).forEach(article => {
+        const time = new Date(article.published_at).toLocaleString('ru-RU');
+        const currencies = article.currencies ? article.currencies.map(c => c.code).join(', ') : '';
+        html += `
+          <div style="border-bottom: 1px solid #eee; padding: 12px 0; margin-bottom: 10px;">
+            <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 14px; line-height: 1.4;">
+              <a href="${article.url}" target="_blank" style="color: #2c3e50; text-decoration: none;">${article.title}</a>
+            </h4>
+            <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 5px;">
+              ${time} | ${article.source ? article.source.title : 'CryptoPanic'}
+            </div>
+            ${currencies ? `<div style="font-size: 11px; color: #27ae60; font-weight: bold;">Currencies: ${currencies}</div>` : ''}
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      contentDiv.innerHTML = html;
+    } else {
+      contentDiv.innerHTML = '<p style="text-align: center; color: #666;">No crypto news available at the moment.</p>';
+    }
+  } catch (error) {
+    console.error('Error loading crypto news:', error);
+    document.getElementById('cryptopanic-content').innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading crypto news. Please check your internet connection.</p>';
+  }
+}
+
+// Load widget on page load
+loadCryptoPanicWidget();
+
+// Refresh every 5 minutes
+setInterval(loadCryptoPanicWidget, 5 * 60 * 1000);
+</script>
+
 </body>
 </html>
