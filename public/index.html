@@ -535,6 +535,7 @@
       min-width:210px; max-width:88vw;
       background:#0e0; color:#fff;
       border-radius:13px; box-shadow:0 2px 15px #0003;
+      font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
       font-size:1.1rem; font-weight:bold;
       z-index:22222;
       padding:18px 22px 18px 20px;
@@ -905,10 +906,19 @@ langRow.onclick = (e)=>{
 };
 document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
-saveSettingsBtn.onclick = ()=>{
+saveSettingsBtn.onclick = async ()=>{
+  // Handle notification settings change
+  const notificationChanged = settingsBuffer.notif !== lastSavedSettings.notif;
+  
   localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
   localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
   localStorage.setItem('neurona_lang', settingsBuffer.lang);
+  
+  // Initialize push notifications if setting changed
+  if (notificationChanged && typeof window.initializePushNotifications === 'function') {
+    await window.initializePushNotifications(settingsBuffer.notif);
+  }
+  
   lastSavedSettings = {...settingsBuffer};
   saveSettingsBtn.style.opacity = "0";
   setTimeout(()=>saveSettingsBtn.classList.add('hide'), 320);

@@ -2,7 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
 const path = require('path');
+const webpush = require('web-push');
 const app = express();
+
+// Configure web-push
+webpush.setVapidDetails(
+  'mailto:contact@neurona.com',
+  process.env.VAPID_PUBLIC_KEY || 'BF7iT1U1U4mSjDrmFDXfEYO54D3HSgMEfsJJuQIxEywOK9kZf7WmXNuN4WYK4_LpBUfqT5HO78Ljxla7tWgyZWI',
+  process.env.VAPID_PRIVATE_KEY || 'vrklkeUJBwiTsUlcdv4OuW8oAKACciSuYrFBNfO-YYM'
+);
+
+// Store subscriptions in memory (in production, use a database)
+const subscriptions = new Map();
 
 const TIMEOUT = 12000;
 
@@ -254,6 +265,89 @@ app.post('/api/openai', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'OpenAI error' });
   }
+});
+
+// Push notification endpoints
+app.post('/api/subscribe', (req, res) => {
+  const { subscription, timestamp } = req.body;
+  
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Invalid subscription' });
+  }
+  
+  // Store subscription with timestamp
+  subscriptions.set(subscription.endpoint, {
+    subscription,
+    timestamp: timestamp || Date.now()
+  });
+  
+  console.log('New push subscription:', subscription.endpoint);
+  res.json({ success: true });
+});
+
+app.post('/api/unsubscribe', (req, res) => {
+  const { endpoint } = req.body;
+  
+  if (!endpoint) {
+    return res.status(400).json({ error: 'Invalid endpoint' });
+  }
+  
+  subscriptions.delete(endpoint);
+  console.log('Unsubscribed:', endpoint);
+  res.json({ success: true });
+});
+
+app.get('/api/vapid-public-key', (req, res) => {
+  res.json({ 
+    publicKey: process.env.VAPID_PUBLIC_KEY || 'BF7iT1U1U4mSjDrmFDXfEYO54D3HSgMEfsJJuQIxEywOK9kZf7WmXNuN4WYK4_LpBUfqT5HO78Ljxla7tWgyZWI'
+  });
+});
+
+// Send push notification to all subscribers
+app.post('/api/send-notification', async (req, res) => {
+  const { title, body, url } = req.body;
+  
+  if (!title || !body) {
+    return res.status(400).json({ error: 'Title and body are required' });
+  }
+  
+  const payload = JSON.stringify({
+    title,
+    body,
+    url: url || '/',
+    timestamp: Date.now()
+  });
+  
+  const promises = [];
+  
+  for (const [endpoint, data] of subscriptions) {
+    promises.push(
+      webpush.sendNotification(data.subscription, payload)
+        .catch(error => {
+          console.error('Error sending notification to', endpoint, error);
+          // Remove invalid subscriptions
+          if (error.statusCode === 410) {
+            subscriptions.delete(endpoint);
+          }
+        })
+    );
+  }
+  
+  try {
+    await Promise.allSettled(promises);
+    res.json({ 
+      success: true, 
+      sent: promises.length,
+      message: `Notification sent to ${promises.length} subscribers`
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to send notifications' });
+  }
+});
+
+// Get subscription count
+app.get('/api/subscription-count', (req, res) => {
+  res.json({ count: subscriptions.size });
 });
 
 // PWA: index.html fallback
