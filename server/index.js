@@ -272,7 +272,12 @@ app.post('/api/subscribe', (req, res) => {
   const { subscription, timestamp } = req.body;
   
   if (!subscription || !subscription.endpoint) {
-    return res.status(400).json({ error: 'Invalid subscription' });
+    return res.status(400).json({ error: 'Invalid subscription data' });
+  }
+  
+  // Validate subscription structure
+  if (!subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+    return res.status(400).json({ error: 'Invalid subscription keys' });
   }
   
   // Store subscription with timestamp
@@ -281,8 +286,8 @@ app.post('/api/subscribe', (req, res) => {
     timestamp: timestamp || Date.now()
   });
   
-  console.log('New push subscription:', subscription.endpoint);
-  res.json({ success: true });
+  console.log('New push subscription registered:', subscription.endpoint);
+  res.json({ success: true, message: 'Subscription registered successfully' });
 });
 
 app.post('/api/unsubscribe', (req, res) => {
@@ -292,15 +297,19 @@ app.post('/api/unsubscribe', (req, res) => {
     return res.status(400).json({ error: 'Invalid endpoint' });
   }
   
+  const wasSubscribed = subscriptions.has(endpoint);
   subscriptions.delete(endpoint);
-  console.log('Unsubscribed:', endpoint);
-  res.json({ success: true });
+  
+  console.log('Push subscription removed:', endpoint);
+  res.json({ 
+    success: true, 
+    message: wasSubscribed ? 'Subscription removed successfully' : 'Subscription was not found'
+  });
 });
 
 app.get('/api/vapid-public-key', (req, res) => {
-  res.json({ 
-    publicKey: process.env.VAPID_PUBLIC_KEY || 'BF7iT1U1U4mSjDrmFDXfEYO54D3HSgMEfsJJuQIxEywOK9kZf7WmXNuN4WYK4_LpBUfqT5HO78Ljxla7tWgyZWI'
-  });
+  const publicKey = process.env.VAPID_PUBLIC_KEY || 'BF7iT1U1U4mSjDrmFDXfEYO54D3HSgMEfsJJuQIxEywOK9kZf7WmXNuN4WYK4_LpBUfqT5HO78Ljxla7tWgyZWI';
+  res.json({ publicKey });
 });
 
 // Send push notification to all subscribers
@@ -311,6 +320,14 @@ app.post('/api/send-notification', async (req, res) => {
     return res.status(400).json({ error: 'Title and body are required' });
   }
   
+  if (subscriptions.size === 0) {
+    return res.json({ 
+      success: true, 
+      sent: 0,
+      message: 'No active subscriptions found'
+    });
+  }
+  
   const payload = JSON.stringify({
     title,
     body,
@@ -319,15 +336,26 @@ app.post('/api/send-notification', async (req, res) => {
   });
   
   const promises = [];
+  const results = {
+    successful: 0,
+    failed: 0,
+    removed: 0
+  };
   
   for (const [endpoint, data] of subscriptions) {
     promises.push(
       webpush.sendNotification(data.subscription, payload)
+        .then(() => {
+          results.successful++;
+        })
         .catch(error => {
           console.error('Error sending notification to', endpoint, error);
+          results.failed++;
+          
           // Remove invalid subscriptions
-          if (error.statusCode === 410) {
+          if (error.statusCode === 410 || error.statusCode === 404) {
             subscriptions.delete(endpoint);
+            results.removed++;
           }
         })
     );
@@ -335,19 +363,37 @@ app.post('/api/send-notification', async (req, res) => {
   
   try {
     await Promise.allSettled(promises);
+    
     res.json({ 
       success: true, 
-      sent: promises.length,
-      message: `Notification sent to ${promises.length} subscribers`
+      sent: results.successful,
+      failed: results.failed,
+      removed: results.removed,
+      message: `Notification sent to ${results.successful} subscribers. ${results.failed} failed. ${results.removed} invalid subscriptions removed.`
     });
   } catch (error) {
+    console.error('Error in send-notification:', error);
     res.status(500).json({ error: 'Failed to send notifications' });
   }
 });
 
-// Get subscription count
+// Get subscription count and stats
 app.get('/api/subscription-count', (req, res) => {
-  res.json({ count: subscriptions.size });
+  const now = Date.now();
+  const oneDayAgo = now - (24 * 60 * 60 * 1000);
+  
+  let recentCount = 0;
+  for (const [endpoint, data] of subscriptions) {
+    if (data.timestamp > oneDayAgo) {
+      recentCount++;
+    }
+  }
+  
+  res.json({ 
+    count: subscriptions.size,
+    recentCount: recentCount,
+    timestamp: now
+  });
 });
 
 // PWA: index.html fallback
