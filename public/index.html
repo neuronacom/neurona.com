@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
+    /* --- Оригинальные стили + доработки --- */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
@@ -255,6 +256,7 @@
       border:1.2px solid #d7d7d7;
       box-shadow: 0 2px 8px #0001;
       opacity:1;
+      /* плавное появление/исчезновение */
       will-change: opacity, display;
     }
     .save-btn.hide {
@@ -641,269 +643,263 @@
     </div>
     </div>
   </div>
-<script src="neurona-chat.js"></script>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+  // === АНИМАЦИЯ ФОНА (нейросеть) ===
+  const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+  let W, H, nodes;
+  function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+  window.addEventListener('resize', resize);
+  function init(){
+    nodes = Array.from({length:33}).map(_=>({
+      x:Math.random()*W, y:Math.random()*H,
+      vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6
+    }));
   }
-</script>
-<script>
-// === АНИМАЦИЯ ФОНА (нейросеть) ===
-const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
-let W, H, nodes;
-function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
-window.addEventListener('resize', resize);
-function init(){
-  nodes = Array.from({length:33}).map(_=>({
-    x:Math.random()*W, y:Math.random()*H,
-    vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6
-  }));
-}
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  ctx.lineCap='round'; ctx.lineJoin='round';
-  nodes.forEach((a,i)=>{
-    nodes.slice(i+1).forEach(b=>{
-      const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
-      if(d<240){
-        ctx.strokeStyle=`rgba(0,0,0,${Math.min(0.46,(240-d)/170)})`;
-        ctx.lineWidth=2.1;
-        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-      }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    nodes.forEach((a,i)=>{
+      nodes.slice(i+1).forEach(b=>{
+        const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<240){
+          ctx.strokeStyle=`rgba(0,0,0,${Math.min(0.46,(240-d)/170)})`;
+          ctx.lineWidth=2.1;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      });
     });
-  });
-  nodes.forEach(n=>{
-    n.x+=n.vx; n.y+=n.vy;
-    if(n.x<0||n.x>W) n.vx*=-1;
-    if(n.y<0||n.y>H) n.vy*=-1;
-    ctx.fillStyle='rgba(0,0,0,0.95)';
-    ctx.beginPath(); ctx.arc(n.x,n.y,4.4,0,Math.PI*2); ctx.fill();
-  });
-  requestAnimationFrame(draw);
-}
-resize(); init(); draw();
+    nodes.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+      ctx.fillStyle='rgba(0,0,0,0.95)';
+      ctx.beginPath(); ctx.arc(n.x,n.y,4.4,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  resize(); init(); draw();
 
-// === ЛОКАЛИЗАЦИЯ, НАСТРОЙКИ ===
-const langs = [
-  {code:'ru',name:'Русский'},
-  {code:'en',name:'English'},
-  {code:'ua',name:'Українська'},
-  {code:'es',name:'Español'},
-  {code:'de',name:'Deutsch'},
-  {code:'fr',name:'Français'},
-  {code:'it',name:'Italiano'},
-  {code:'pl',name:'Polski'},
-  {code:'tr',name:'Türkçe'},
-  {code:'zh',name:'中文'}
-];
-const i18n = {
-  en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later.", profile:"My Profile", subscription:"Subscription", settings:"Settings", notifications:"Notifications", theme:"Theme", language:"Interface Language", save:"Save changes"},
-  ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже.", profile:"Мой профиль", subscription:"Подписка", settings:"Настройки", notifications:"Уведомления", theme:"Тема", language:"Язык интерфейса", save:"Сохранить изменения"},
-  ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше.", profile:"Мій профіль", subscription:"Підписка", settings:"Налаштування", notifications:"Сповіщення", theme:"Тема", language:"Мова інтерфейсу", save:"Зберегти зміни"},
-  es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde.", profile:"Mi perfil", subscription:"Suscripción", settings:"Ajustes", notifications:"Notificaciones", theme:"Tema", language:"Idioma de interfaz", save:"Guardar cambios"},
-  de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen.", profile:"Mein Profil", subscription:"Abonnement", settings:"Einstellungen", notifications:"Benachrichtigungen", theme:"Thema", language:"Oberflächensprache", save:"Änderungen speichern"},
-  fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard.", profile:"Mon profil", subscription:"Abonnement", settings:"Paramètres", notifications:"Notifications", theme:"Thème", language:"Langue de l’interface", save:"Enregistrer les modifications"},
-  it:{ph:"Scrivi un messaggio...",send:"Invia",error:"Ops, qualcosa è andato storto. Riprova!", internal:"Errore interno, riprova più tardi.", profile:"Il mio profilo", subscription:"Abbonamento", settings:"Impostazioni", notifications:"Notifiche", theme:"Tema", language:"Lingua interfaccia", save:"Salva le modifiche"},
-  pl:{ph:"Napisz wiadomość...",send:"Wyślij",error:"Ups, coś poszło nie tak. Spróbuj ponownie!", internal:"Błąd wewnętrzny, spróbuj później.", profile:"Mój profil", subscription:"Subskrypcja", settings:"Ustawienia", notifications:"Powiadomienia", theme:"Motyw", language:"Język interfejsu", save:"Zapisz zmiany"},
-  tr:{ph:"Bir mesaj yaz...",send:"Gönder",error:"Bir şeyler ters gitti. Lütfen tekrar deneyin!", internal:"Dahili hata, lütfen daha sonra tekrar deneyin.", profile:"Profilim", subscription:"Abonelik", settings:"Ayarlar", notifications:"Bildirimler", theme:"Tema", language:"Arayüz Dili", save:"Değişiklikleri kaydet"},
-  zh:{ph:"输入消息...",send:"发送",error:"哎呀，出了点问题。请再试一次！", internal:"内部错误，请稍后再试。", profile:"我的资料", subscription:"订阅", settings:"设置", notifications:"通知", theme:"主题", language:"界面语言", save:"保存更改"},
-};
-
-let lang = (localStorage.getItem('neurona_lang')||navigator.language.slice(0,2));
-if(!i18n[lang]) lang='en';
-let settingsBuffer = {
-  theme: localStorage.getItem('neurona_theme') === 'dark',
-  notif: localStorage.getItem('neurona_notif') === 'on',
-  lang: lang
-};
-let lastSavedSettings = {...settingsBuffer};
-
-const input = document.getElementById('input'),
-      sendBtn = document.getElementById('send'),
-      msgsContainer = document.getElementById('messages'),
-      scrollDownBtn = document.getElementById('scroll-down'),
-      inputArea = document.querySelector('.input-area');
-const sideMenu = document.getElementById('sideMenu');
-const sideMenuBg = document.getElementById('sideMenuBg');
-const burger = document.getElementById('burgerBtn');
-const closeBtn = document.getElementById('sideCloseBtn');
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsGroup = document.getElementById('settingsGroup');
-const themeSwitch = document.getElementById('themeSwitch');
-const notifSwitch = document.getElementById('notifSwitch');
-const langRow = document.getElementById('langRow');
-const langList = document.getElementById('langList');
-const currLangName = document.getElementById('currLangName');
-const currLangGray = document.getElementById('currLangGray');
-const langArrow = document.getElementById('langArrow');
-const mainLogo = document.getElementById('mainLogo');
-const loaderLogo = document.getElementById('loaderLogo');
-const mainTitle = document.getElementById('mainTitle');
-const loaderTitle = document.getElementById('loaderTitle');
-const loaderSubtitle = document.getElementById('loaderSubtitle');
-const sideMenuList = document.getElementById('sideMenuList');
-const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-
-input.placeholder = i18n[settingsBuffer.lang].ph;
-sendBtn.textContent = i18n[settingsBuffer.lang].send;
-
-function updateMenuI18n() {
-  let menuMap = {
-    profile: i18n[settingsBuffer.lang].profile,
-    subscription: i18n[settingsBuffer.lang].subscription,
-    settings: i18n[settingsBuffer.lang].settings,
-    notifications: i18n[settingsBuffer.lang].notifications,
-    theme: i18n[settingsBuffer.lang].theme,
-    language: i18n[settingsBuffer.lang].language,
-    save: i18n[settingsBuffer.lang].save,
+  // === ЛОКАЛИЗАЦИЯ, НАСТРОЙКИ ===
+  const langs = [
+    {code:'ru',name:'Русский'},
+    {code:'en',name:'English'},
+    {code:'ua',name:'Українська'},
+    {code:'es',name:'Español'},
+    {code:'de',name:'Deutsch'},
+    {code:'fr',name:'Français'},
+    {code:'it',name:'Italiano'},
+    {code:'pl',name:'Polski'},
+    {code:'tr',name:'Türkçe'},
+    {code:'zh',name:'中文'}
+  ];
+  const i18n = {
+    en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later.", profile:"My Profile", subscription:"Subscription", settings:"Settings", notifications:"Notifications", theme:"Theme", language:"Interface Language", save:"Save changes"},
+    ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже.", profile:"Мой профиль", subscription:"Подписка", settings:"Настройки", notifications:"Уведомления", theme:"Тема", language:"Язык интерфейса", save:"Сохранить изменения"},
+    ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше.", profile:"Мій профіль", subscription:"Підписка", settings:"Налаштування", notifications:"Сповіщення", theme:"Тема", language:"Мова інтерфейсу", save:"Зберегти зміни"},
+    es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde.", profile:"Mi perfil", subscription:"Suscripción", settings:"Ajustes", notifications:"Notificaciones", theme:"Tema", language:"Idioma de interfaz", save:"Guardar cambios"},
+    de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen.", profile:"Mein Profil", subscription:"Abonnement", settings:"Einstellungen", notifications:"Benachrichtigungen", theme:"Thema", language:"Oberflächensprache", save:"Änderungen speichern"},
+    fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard.", profile:"Mon profil", subscription:"Abonnement", settings:"Paramètres", notifications:"Notifications", theme:"Thème", language:"Langue de l’interface", save:"Enregistrer les modifications"},
+    it:{ph:"Scrivi un messaggio...",send:"Invia",error:"Ops, qualcosa è andato storto. Riprova!", internal:"Errore interno, riprova più tardi.", profile:"Il mio profilo", subscription:"Abbonamento", settings:"Impostazioni", notifications:"Notifiche", theme:"Tema", language:"Lingua interfaccia", save:"Salva le modifiche"},
+    pl:{ph:"Napisz wiadomość...",send:"Wyślij",error:"Ups, coś poszło nie tak. Spróbuj ponownie!", internal:"Błąd wewnętrzny, spróbuj później.", profile:"Mój profil", subscription:"Subskrypcja", settings:"Ustawienia", notifications:"Powiadomienia", theme:"Motyw", language:"Język interfejsu", save:"Zapisz zmiany"},
+    tr:{ph:"Bir mesaj yaz...",send:"Gönder",error:"Bir şeyler ters gitti. Lütfen tekrar deneyin!", internal:"Dahili hata, lütfen daha sonra tekrar deneyin.", profile:"Profilim", subscription:"Abonelik", settings:"Ayarlar", notifications:"Bildirimler", theme:"Tema", language:"Arayüz Dili", save:"Değişiklikleri kaydet"},
+    zh:{ph:"输入消息...",send:"发送",error:"哎呀，出了点问题。请再试一次！", internal:"内部错误，请稍后再试。", profile:"我的资料", subscription:"订阅", settings:"设置", notifications:"通知", theme:"主题", language:"界面语言", save:"保存更改"},
   };
-  sideMenuList.querySelectorAll('[data-menu=profile] .menu-text').forEach(el=>el.textContent=menuMap.profile);
-  sideMenuList.querySelectorAll('[data-menu=subscription] .menu-text').forEach(el=>el.textContent=menuMap.subscription);
-  settingsBtn.querySelector('.menu-text').textContent = menuMap.settings;
-  settingsGroup.querySelectorAll('.side-switch-row')[0].querySelector('.menu-text').textContent = menuMap.notifications;
-  settingsGroup.querySelectorAll('.side-switch-row')[1].querySelector('.menu-text').textContent = menuMap.theme;
-  settingsGroup.querySelectorAll('.side-switch-row')[2].querySelector('.menu-text').textContent = menuMap.language;
-  saveSettingsBtn.textContent = menuMap.save;
-}
 
-function updateLangName(){
-  let found = langs.find(l=>l.code===settingsBuffer.lang);
-  currLangName.textContent = found ? found.name : settingsBuffer.lang;
-  currLangGray.textContent = `(${settingsBuffer.lang})`;
-}
-updateLangName();
+  let lang = (localStorage.getItem('neurona_lang')||navigator.language.slice(0,2));
+  if(!i18n[lang]) lang='en';
+  let settingsBuffer = {
+    theme: localStorage.getItem('neurona_theme') === 'dark',
+    notif: localStorage.getItem('neurona_notif') === 'on',
+    lang: lang
+  };
+  let lastSavedSettings = {...settingsBuffer};
 
-function setTheme(dark, fast){
-  document.body.classList.toggle('dark',dark);
-  mainLogo.style.filter = dark ? "invert(1)" : "";
-  loaderLogo.style.filter = dark ? "invert(1)" : "";
-  mainTitle.style.color = dark ? "#fff" : "#000";
-  loaderTitle.style.color = dark ? "#fff" : "#000";
-  loaderSubtitle.style.color = dark ? "#fff" : "#222";
-  Array.from(burger.children).forEach(span=>span.style.background=dark?'#fff':'#000');
-  themeSwitch.classList.toggle('on',dark);
-  if(fast){
-    document.body.style.transition = "none";
-    mainLogo.style.transition = "none";
-    loaderLogo.style.transition = "none";
-    mainTitle.style.transition = "none";
-    loaderTitle.style.transition = "none";
-    loaderSubtitle.style.transition = "none";
-  } else {
-    document.body.style.transition = "";
-    mainLogo.style.transition = "";
-    loaderLogo.style.transition = "";
-    mainTitle.style.transition = "";
-    loaderTitle.style.transition = "";
-    loaderSubtitle.style.transition = "";
+  // --- UI elements ---
+  const input = document.getElementById('input'),
+        sendBtn = document.getElementById('send'),
+        msgsContainer = document.getElementById('messages'),
+        scrollDownBtn = document.getElementById('scroll-down'),
+        inputArea = document.querySelector('.input-area');
+  const sideMenu = document.getElementById('sideMenu');
+  const sideMenuBg = document.getElementById('sideMenuBg');
+  const burger = document.getElementById('burgerBtn');
+  const closeBtn = document.getElementById('sideCloseBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsGroup = document.getElementById('settingsGroup');
+  const themeSwitch = document.getElementById('themeSwitch');
+  const notifSwitch = document.getElementById('notifSwitch');
+  const langRow = document.getElementById('langRow');
+  const langList = document.getElementById('langList');
+  const currLangName = document.getElementById('currLangName');
+  const currLangGray = document.getElementById('currLangGray');
+  const langArrow = document.getElementById('langArrow');
+  const mainLogo = document.getElementById('mainLogo');
+  const loaderLogo = document.getElementById('loaderLogo');
+  const mainTitle = document.getElementById('mainTitle');
+  const loaderTitle = document.getElementById('loaderTitle');
+  const loaderSubtitle = document.getElementById('loaderSubtitle');
+  const sideMenuList = document.getElementById('sideMenuList');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+  input.placeholder = i18n[settingsBuffer.lang].ph;
+  sendBtn.textContent = i18n[settingsBuffer.lang].send;
+
+  function updateMenuI18n() {
+    let menuMap = {
+      profile: i18n[settingsBuffer.lang].profile,
+      subscription: i18n[settingsBuffer.lang].subscription,
+      settings: i18n[settingsBuffer.lang].settings,
+      notifications: i18n[settingsBuffer.lang].notifications,
+      theme: i18n[settingsBuffer.lang].theme,
+      language: i18n[settingsBuffer.lang].language,
+      save: i18n[settingsBuffer.lang].save,
+    };
+    sideMenuList.querySelectorAll('[data-menu=profile] .menu-text').forEach(el=>el.textContent=menuMap.profile);
+    sideMenuList.querySelectorAll('[data-menu=subscription] .menu-text').forEach(el=>el.textContent=menuMap.subscription);
+    settingsBtn.querySelector('.menu-text').textContent = menuMap.settings;
+    settingsGroup.querySelectorAll('.side-switch-row')[0].querySelector('.menu-text').textContent = menuMap.notifications;
+    settingsGroup.querySelectorAll('.side-switch-row')[1].querySelector('.menu-text').textContent = menuMap.theme;
+    settingsGroup.querySelectorAll('.side-switch-row')[2].querySelector('.menu-text').textContent = menuMap.language;
+    saveSettingsBtn.textContent = menuMap.save;
   }
-}
 
-function setNotif(on){
-  notifSwitch.classList.toggle('on',on);
-}
-
-function showSaveBtnIfChanged() {
-  if (settingsBuffer.theme !== lastSavedSettings.theme ||
-      settingsBuffer.notif !== lastSavedSettings.notif ||
-      settingsBuffer.lang !== lastSavedSettings.lang) {
-    saveSettingsBtn.classList.remove('hide');
-    saveSettingsBtn.style.display = '';
-    setTimeout(()=>saveSettingsBtn.style.opacity='1',10);
-  } else {
-    saveSettingsBtn.style.opacity = "0";
-    setTimeout(()=>{saveSettingsBtn.classList.add('hide');}, 320);
+  function updateLangName(){
+    let found = langs.find(l=>l.code===settingsBuffer.lang);
+    currLangName.textContent = found ? found.name : settingsBuffer.lang;
+    currLangGray.textContent = `(${settingsBuffer.lang})`;
   }
-}
+  updateLangName();
 
-burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
-closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
-sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape' && sideMenu.classList.contains('active')) {
-    sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active');
+  function setTheme(dark, fast){
+    document.body.classList.toggle('dark',dark);
+    mainLogo.style.filter = dark ? "invert(1)" : "";
+    loaderLogo.style.filter = dark ? "invert(1)" : "";
+    mainTitle.style.color = dark ? "#fff" : "#000";
+    loaderTitle.style.color = dark ? "#fff" : "#000";
+    loaderSubtitle.style.color = dark ? "#fff" : "#222";
+    Array.from(burger.children).forEach(span=>span.style.background=dark?'#fff':'#000');
+    themeSwitch.classList.toggle('on',dark);
+    if(fast){
+      document.body.style.transition = "none";
+      mainLogo.style.transition = "none";
+      loaderLogo.style.transition = "none";
+      mainTitle.style.transition = "none";
+      loaderTitle.style.transition = "none";
+      loaderSubtitle.style.transition = "none";
+    } else {
+      document.body.style.transition = "";
+      mainLogo.style.transition = "";
+      loaderLogo.style.transition = "";
+      mainTitle.style.transition = "";
+      loaderTitle.style.transition = "";
+      loaderSubtitle.style.transition = "";
+    }
   }
-});
 
-let settingsOpen = false;
-settingsBtn.onclick = function() {
-  settingsOpen = !settingsOpen;
-  settingsGroup.classList.toggle('open',settingsOpen);
-  settingsBtn.querySelector('.side-arrow').style.transform = settingsOpen ? "rotate(180deg)" : "rotate(0deg)";
-  if(!settingsOpen) {
-    langList.classList.remove('show');
-    langArrow.classList.remove('open');
+  function setNotif(on){
+    notifSwitch.classList.toggle('on',on);
   }
-};
 
-themeSwitch.onclick = ()=>{
-  settingsBuffer.theme = !settingsBuffer.theme;
-  setTheme(settingsBuffer.theme, true);
-  showSaveBtnIfChanged();
-};
-notifSwitch.onclick = ()=>{
-  settingsBuffer.notif = !settingsBuffer.notif;
-  setNotif(settingsBuffer.notif);
-  showSaveBtnIfChanged();
-};
+  function showSaveBtnIfChanged() {
+    if (settingsBuffer.theme !== lastSavedSettings.theme ||
+        settingsBuffer.notif !== lastSavedSettings.notif ||
+        settingsBuffer.lang !== lastSavedSettings.lang) {
+      saveSettingsBtn.classList.remove('hide');
+      saveSettingsBtn.style.display = '';
+      setTimeout(()=>saveSettingsBtn.style.opacity='1',10);
+    } else {
+      saveSettingsBtn.style.opacity = "0";
+      setTimeout(()=>{saveSettingsBtn.classList.add('hide');}, 320);
+    }
+  }
 
-function renderLangList(){
-  langList.innerHTML = '';
-  langs.forEach(l=>{
-    const li = document.createElement('div');
-    li.className = 'side-lang-item' + (l.code===settingsBuffer.lang?' active':'');
-    li.textContent = l.name;
-    li.onclick = ()=>{
-      settingsBuffer.lang = l.code;
-      updateLangName();
-      input.placeholder = i18n[settingsBuffer.lang].ph;
-      sendBtn.textContent = i18n[settingsBuffer.lang].send;
-      updateMenuI18n();
+  burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
+  closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
+  sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && sideMenu.classList.contains('active')) {
+      sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active');
+    }
+  });
+
+  let settingsOpen = false;
+  settingsBtn.onclick = function() {
+    settingsOpen = !settingsOpen;
+    settingsGroup.classList.toggle('open',settingsOpen);
+    settingsBtn.querySelector('.side-arrow').style.transform = settingsOpen ? "rotate(180deg)" : "rotate(0deg)";
+    if(!settingsOpen) {
       langList.classList.remove('show');
       langArrow.classList.remove('open');
-      showSaveBtnIfChanged();
-    };
-    langList.appendChild(li);
-  });
-}
-renderLangList();
+    }
+  };
 
-langRow.onclick = (e)=>{
+  themeSwitch.onclick = ()=>{
+    settingsBuffer.theme = !settingsBuffer.theme;
+    setTheme(settingsBuffer.theme, true);
+    showSaveBtnIfChanged();
+  };
+  notifSwitch.onclick = ()=>{
+    settingsBuffer.notif = !settingsBuffer.notif;
+    setNotif(settingsBuffer.notif);
+    showSaveBtnIfChanged();
+  };
+
+  function renderLangList(){
+    langList.innerHTML = '';
+    langs.forEach(l=>{
+      const li = document.createElement('div');
+      li.className = 'side-lang-item' + (l.code===settingsBuffer.lang?' active':'');
+      li.textContent = l.name;
+      li.onclick = ()=>{
+        settingsBuffer.lang = l.code;
+        updateLangName();
+        input.placeholder = i18n[settingsBuffer.lang].ph;
+        sendBtn.textContent = i18n[settingsBuffer.lang].send;
+        updateMenuI18n();
+        langList.classList.remove('show');
+        langArrow.classList.remove('open');
+        showSaveBtnIfChanged();
+      };
+      langList.appendChild(li);
+    });
+  }
   renderLangList();
-  langList.classList.toggle('show');
-  langArrow.classList.toggle('open', langList.classList.contains('show'));
-  e.stopPropagation();
-};
-document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
-saveSettingsBtn.onclick = ()=>{
-  localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
-  localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
-  localStorage.setItem('neurona_lang', settingsBuffer.lang);
-  lastSavedSettings = {...settingsBuffer};
-  saveSettingsBtn.style.opacity = "0";
-  setTimeout(()=>saveSettingsBtn.classList.add('hide'), 320);
-  updateMenuI18n();
-  input.placeholder = i18n[settingsBuffer.lang].ph;
-  sendBtn.textContent = i18n[settingsBuffer.lang].send;
-};
+  langRow.onclick = (e)=>{
+    renderLangList();
+    langList.classList.toggle('show');
+    langArrow.classList.toggle('open', langList.classList.contains('show'));
+    e.stopPropagation();
+  };
+  document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
-function loadSettings(){
-  setTheme(settingsBuffer.theme, true);
-  setNotif(settingsBuffer.notif);
-  updateLangName();
-  renderLangList();
-  updateMenuI18n();
-  input.placeholder = i18n[settingsBuffer.lang].ph;
-  sendBtn.textContent = i18n[settingsBuffer.lang].send;
-}
-loadSettings();
+  saveSettingsBtn.onclick = ()=>{
+    localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
+    localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
+    localStorage.setItem('neurona_lang', settingsBuffer.lang);
+    lastSavedSettings = {...settingsBuffer};
+    saveSettingsBtn.style.opacity = "0";
+    setTimeout(()=>saveSettingsBtn.classList.add('hide'), 320);
+    updateMenuI18n();
+    input.placeholder = i18n[settingsBuffer.lang].ph;
+    sendBtn.textContent = i18n[settingsBuffer.lang].send;
+  };
 
-(function applyThemeOnLoad(){
-  let dark = settingsBuffer.theme;
-  setTheme(dark, true);
-})();
+  function loadSettings(){
+    setTheme(settingsBuffer.theme, true);
+    setNotif(settingsBuffer.notif);
+    updateLangName();
+    renderLangList();
+    updateMenuI18n();
+    input.placeholder = i18n[settingsBuffer.lang].ph;
+    sendBtn.textContent = i18n[settingsBuffer.lang].send;
+  }
+  loadSettings();
 
+  (function applyThemeOnLoad(){
+    let dark = settingsBuffer.theme;
+    setTheme(dark, true);
+  })();
 // ========== ЧАТ ==========
 let messages = [], typingProcess = null, botIsTyping = false;
 
@@ -936,6 +932,7 @@ window.addEventListener('load', ()=>{
 function formatBotMessage(text) {
   text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, "");
   text = text.replace(/\uFFFD/g, "");
+  // ссылки на новости
   text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, function(_, name, url) {
     let dark = document.body.classList.contains('dark');
     return `<a href="${url}" target="_blank" style="color:${dark ? '#68a6ff' : '#286be6'};font-size:.98em;"><b>${name}</b></a>`;
@@ -1052,6 +1049,7 @@ function addTyping(){
     <span class="tdot tdot2">.</span>
     <span class="tdot tdot3">.</span>
   </span>`;
+  // Анимация трёх точек
   let dots = d.querySelectorAll('.tdot');
   let idx = 0;
   let anim = setInterval(()=>{
@@ -1342,6 +1340,7 @@ function typeWriterEffect(text, who, time, cb) {
   timeEl.style.display = 'none';
   botIsTyping = true;
 
+  // плавная скорость вывода
   let baseSpeed = 11, minDelay=7, maxDelay=19;
   let typed = '';
   function type() {
