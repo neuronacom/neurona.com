@@ -1403,6 +1403,82 @@ input.addEventListener('keydown', function(e){
 setTimeout(()=>{scrollChatToBottom(true, true)}, 500);
 </script>
 <script src="neurona-chat.js"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+<script>
+  // Firebase configuration - REPLACE WITH YOUR OWN CONFIG
+  const firebaseConfig = {
+    apiKey: "your-api-key",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "your-app-id"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  
+  // Initialize Firebase Cloud Messaging
+  const messaging = firebase.messaging();
+  
+  // Request permission for notifications
+  async function requestNotificationPermission() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        console.log('Notification permission granted');
+        
+        // Get VAPID key from server
+        const vapidResponse = await fetch('/api/vapid-key');
+        const { vapidKey } = await vapidResponse.json();
+        
+        // Get FCM token
+        const token = await messaging.getToken({
+          vapidKey: vapidKey
+        });
+        console.log('FCM Token:', token);
+        
+        // Send token to server
+        if (token) {
+          await fetch('/api/fcm-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token })
+          });
+        }
+      } else {
+        console.log('Notification permission denied');
+      }
+    } catch (error) {
+      console.error('Error getting notification permission:', error);
+    }
+  }
+
+  // Handle incoming messages when app is in foreground
+  messaging.onMessage((payload) => {
+    console.log('Message received:', payload);
+    
+    // Show notification
+    if (payload.notification) {
+      new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: 'https://i.ibb.co/XfKRzvcy/27.png'
+      });
+    }
+  });
+
+  // Auto-request permission on load if notifications are enabled
+  if (settingsBuffer.notif) {
+    requestNotificationPermission();
+  }
+</script>
+
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
