@@ -675,7 +675,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="11" fill="#11c311"/><path d="M7 12.5l2.5 2.5 7-7" stroke="#fff" stroke-width="2.4" fill="none"/></svg>
   <span id="notifPopupText">Уведомления включены!</span>
 </div>
-<script src="neurona-chat.js"></script>
+<script>
 <script>
 // === АНИМАЦИЯ ФОНА (нейросеть) ===
 const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
@@ -1403,6 +1403,67 @@ input.addEventListener('keydown', function(e){
 setTimeout(()=>{scrollChatToBottom(true, true)}, 500);
 </script>
 <script src="neurona-chat.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+
+/* PUSH-УВЕДОМЛЕНИЯ */
+let notificationsAllowed = false;
+let notifLanguage = 'ru';
+
+function showNotifPopup(text) {
+  const el = document.getElementById('notifPopup');
+  el.querySelector('span').textContent = text;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function askNotificationPermission(lang) {
+  Notification.requestPermission().then(permission => {
+    notificationsAllowed = (permission === 'granted');
+    notifLanguage = lang || 'ru';
+    localStorage.setItem('neurona_notif_perm', notificationsAllowed ? 'on' : 'off');
+    if (notificationsAllowed) {
+      showNotifPopup(
+        lang === 'en' ? "Notifications enabled!" :
+        lang === 'ua' ? "Сповіщення увімкнено!" :
+        "Уведомления включены!"
+      );
+    }
+  });
+}
+document.getElementById('notifSwitch').onclick = () => {
+  settingsBuffer.notif = !settingsBuffer.notif;
+  setNotif(settingsBuffer.notif);
+  showSaveBtnIfChanged();
+  if (settingsBuffer.notif) askNotificationPermission(settingsBuffer.lang);
+};
+
+/* Автоматические уведомления о новостях */
+let lastNewsHash = '';
+async function pushLatestNews() {
+  if (!settingsBuffer.notif || !notificationsAllowed) return;
+  try {
+    let news = await fetchLatestNews();
+    let newsText = (typeof news === "string" ? news : '').replace(/<[^>]+>/g,'').slice(0,150) + '...';
+    let hash = newsText.slice(0,80);
+    if (hash && hash !== lastNewsHash) {
+      lastNewsHash = hash;
+      new Notification(
+        settingsBuffer.lang === 'en' ? 'Latest crypto news' :
+        settingsBuffer.lang === 'ua' ? 'Останні крипто-новини' :
+        'Новые крипто-новости',
+        { body: newsText, icon: "https://i.ibb.co/XfKRzvcy/27.png" }
+      );
+    }
+  } catch(e){}
+}
+setInterval(pushLatestNews, 1000*60*8); // каждые 8 минут
+
+window.addEventListener('load', () => {
+  if (localStorage.getItem('neurona_notif_perm') === 'on') notificationsAllowed = true;
+});
+</script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
