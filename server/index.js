@@ -4,14 +4,42 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 12000;
-
-// Для Cointelegraph/Coindesk RSS
+const webpush = require('web-push'); // Для push-уведомлений
 const Parser = require('rss-parser');
 const parser = new Parser();
 
+const TIMEOUT = 12000;
+const PORT = process.env.PORT || 3000;
+
+// VAPID ключи для push (замени на свои реальные!)
+const VAPID_KEYS = {
+  publicKey: process.env.VAPID_PUBLIC_KEY || 'BMMgZyVt_DH7p_nyZkAUtk6G0c3d0kL5wYoFekBJH4Fh7yZg5jG6h6k1ZrL8FQ-H4Bw3OIEE2r6uR1Q0a6HCBi8',
+  privateKey: process.env.VAPID_PRIVATE_KEY || 'dummy_private_key_change_me'
+};
+webpush.setVapidDetails(
+  'mailto:admin@neurona.ai',
+  VAPID_KEYS.publicKey,
+  VAPID_KEYS.privateKey
+);
+
+let subscriptions = [];
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.post('/api/subscribe', (req, res) => {
+  const sub = req.body;
+  if (!subscriptions.some(s => s.endpoint === sub.endpoint)) {
+    subscriptions.push(sub);
+  }
+  res.status(201).json({});
+});
+
+app.post('/api/unsubscribe', (req, res) => {
+  const endpoint = req.body.endpoint;
+  subscriptions = subscriptions.filter(s => s.endpoint !== endpoint);
+  res.status(201).json({});
+});
 
 async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   return Promise.race([
@@ -153,6 +181,24 @@ async function getAllCryptoNews() {
     .slice(0, 12);
 }
 
+// PUSH уведомления: раз в 10минут пушим новое
+let lastPushedTitle = null;
+async function pushLatestNews() {
+  const news = await getAllCryptoNews();
+  if (!news.length) return;
+  const latest = news[0];
+  if (latest.title === lastPushedTitle) return;
+  lastPushedTitle = latest.title;
+  for (const sub of subscriptions) {
+    webpush.sendNotification(sub, JSON.stringify({
+      title: 'NEURONA — Новость',
+      body: latest.title,
+      url: latest.url
+    })).catch(() => {});
+  }
+}
+setInterval(pushLatestNews, 10 * 60 * 1000);
+
 // -- API endpoints --
 
 app.get('/api/news', async (req, res) => {
@@ -261,5 +307,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
