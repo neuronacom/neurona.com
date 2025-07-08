@@ -4,7 +4,11 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
-const TIMEOUT = 9000;
+const TIMEOUT = 12000;
+
+// Для Cointelegraph/Coindesk RSS
+const Parser = require('rss-parser');
+const parser = new Parser();
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -18,6 +22,148 @@ async function fetchTimeout(url, options = {}, timeout = TIMEOUT) {
   ]);
 }
 
+async function getAllCryptoNews() {
+  let news = [];
+  const seen = new Set();
+
+  // 1. Cryptopanic
+  try {
+    const url = `https://cryptopanic.com/api/v1/posts/?auth_token=${process.env.CRYPTOPANIC_API_KEY}&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
+    const res = await fetchTimeout(url);
+    const js = await res.json();
+    (js.results || []).forEach(n => {
+      const key = (n.title || '') + (n.url || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: n.title,
+          url: n.source && n.source.url ? n.source.url : n.url,
+          time: n.published_at,
+          source: n.domain || (n.source && n.source.title) || 'cryptopanic',
+          impact: n.currencies && n.currencies.length ? n.currencies.join(', ') : ''
+        });
+      }
+    });
+  } catch {}
+
+  // 2. GNews
+  try {
+    const url = `https://gnews.io/api/v4/search?q=crypto&token=${process.env.GNEWS_API_KEY}&lang=en&max=7`;
+    const res = await fetchTimeout(url);
+    const js = await res.json();
+    (js.articles || []).forEach(a => {
+      const key = (a.title || '') + (a.url || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: a.title,
+          url: a.url,
+          time: a.publishedAt,
+          source: a.source?.name || 'gnews',
+          impact: ''
+        });
+      }
+    });
+  } catch {}
+
+  // 3. CryptoCompare News (EN)
+  try {
+    const url = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN';
+    const res = await fetchTimeout(url);
+    const js = await res.json();
+    (js.Data || []).forEach(a => {
+      const key = (a.title || '') + (a.url || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: a.title,
+          url: a.url,
+          time: a.published_on ? new Date(a.published_on * 1000).toISOString() : '',
+          source: a.source || 'CryptoCompare',
+          impact: a.categories || ''
+        });
+      }
+    });
+  } catch {}
+
+  // 4. Cointelegraph RSS
+  try {
+    const feed = await parser.parseURL('https://cointelegraph.com/rss');
+    (feed.items || []).forEach(a => {
+      const key = (a.title || '') + (a.link || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: a.title,
+          url: a.link,
+          time: a.pubDate,
+          source: 'Cointelegraph',
+          impact: ''
+        });
+      }
+    });
+  } catch {}
+
+  // 5. CoinDesk RSS
+  try {
+    const feed = await parser.parseURL('https://www.coindesk.com/arc/outboundfeeds/rss/');
+    (feed.items || []).forEach(a => {
+      const key = (a.title || '') + (a.link || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: a.title,
+          url: a.link,
+          time: a.pubDate,
+          source: 'CoinDesk',
+          impact: ''
+        });
+      }
+    });
+  } catch {}
+
+  // 6. Investing.com (через Cryptopanic)
+  try {
+    const url = 'https://cryptopanic.com/api/v1/posts/?auth_token=' + process.env.CRYPTOPANIC_API_KEY + '&public=true&currencies=BTC,ETH,TON,SOL,BNB&kind=news';
+    const res = await fetchTimeout(url);
+    const js = await res.json();
+    (js.results || []).forEach(n => {
+      const key = (n.title || '') + (n.url || '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        news.push({
+          title: n.title,
+          url: n.url,
+          time: n.published_at,
+          source: 'Investing',
+          impact: ''
+        });
+      }
+    });
+  } catch {}
+
+  // Сортировка, свежесть (24ч), максимум 12 новостей
+  const now = Date.now();
+  return news
+    .filter(a => {
+      const t = new Date(a.time || 0).getTime();
+      return now - t < 25 * 3600 * 1000;
+    })
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .slice(0, 12);
+}
+
+// -- API endpoints --
+
+app.get('/api/news', async (req, res) => {
+  try {
+    const news = await getAllCryptoNews();
+    res.json({ articles: news });
+  } catch (e) {
+    res.json({ articles: [] });
+  }
+});
+
 // CoinMarketCap API (Топ-5)
 app.get('/api/cmc', async (req, res) => {
   try {
@@ -29,64 +175,6 @@ app.get('/api/cmc', async (req, res) => {
     res.json(js);
   } catch (e) {
     res.json({ data: [], error: 'CMC error' });
-  }
-});
-
-// Крипто-новости: Cryptopanic + GNews, только свежие (24ч), без дублей, время и источник!
-app.get('/api/news', async (req, res) => {
-  try {
-    const news = [];
-    const seen = new Set();
-
-    // Cryptopanic (до 6 уникальных)
-    const cryptopanicUrl = `https://cryptopanic.com/api/v1/posts/?auth_token=${process.env.CRYPTOPANIC_API_KEY}&public=true&currencies=BTC,ETH,TON,SOL,BNB`;
-    const cr = await fetchTimeout(cryptopanicUrl);
-    const cj = await cr.json();
-    for (let n of (cj.results || [])) {
-      let link = n.source && n.source.url ? n.source.url : n.url;
-      if (!link) continue;
-      if (!seen.has(n.title)) {
-        news.push({
-          title: n.title,
-          url: link,
-          time: n.published_at ? new Date(n.published_at).toLocaleString() : '',
-          source: n.domain || (n.source && n.source.title) || 'cryptopanic',
-          impact: n.currencies && n.currencies.length ? n.currencies.join(', ') : ''
-        });
-        seen.add(n.title);
-        if (news.length >= 6) break;
-      }
-    }
-
-    // GNews (до 6 уникальных)
-    const gnewsUrl = `https://gnews.io/api/v4/search?q=crypto&token=${process.env.GNEWS_API_KEY}&lang=en&max=6`;
-    const gr = await fetchTimeout(gnewsUrl);
-    const gj = await gr.json();
-    for (let a of (gj.articles || [])) {
-      if (!a.title || !a.url) continue;
-      if (!seen.has(a.title)) {
-        news.push({
-          title: a.title,
-          url: a.url,
-          time: a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '',
-          source: a.source?.name || 'gnews',
-          impact: ''
-        });
-        seen.add(a.title);
-        if (news.length >= 12) break;
-      }
-    }
-
-    // Только свежие (24ч) и сортировка по времени
-    const now = Date.now();
-    const out = news.filter(a => {
-      const t = new Date(a.time || 0).getTime();
-      return now - t < 24 * 3600 * 1000;
-    }).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 9);
-
-    res.json({ articles: out });
-  } catch (e) {
-    res.json({ articles: [] });
   }
 });
 
@@ -147,7 +235,7 @@ app.get('/api/tview', async (req, res) => {
   }
 });
 
-// OpenAI (GPT-4o, gpt-4, gpt-3.5-turbo) — безопасно!
+// OpenAI (GPT-4o)
 app.post('/api/openai', async (req, res) => {
   try {
     const r = await fetchTimeout('https://api.openai.com/v1/chat/completions', {
