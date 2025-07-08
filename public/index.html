@@ -726,9 +726,9 @@ const langs = [
   {code:'zh',name:'中文'}
 ];
 const i18n = {
-  en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later.", profile:"My Profile", subscription:"Subscription", settings:"Settings", notifications:"Notifications", theme:"Theme", language:"Interface Language", save:"Save changes"},
-  ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже.", profile:"Мой профиль", subscription:"Подписка", settings:"Настройки", notifications:"Уведомления", theme:"Тема", language:"Язык интерфейса", save:"Сохранить изменения"},
-  ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше.", profile:"Мій профіль", subscription:"Підписка", settings:"Налаштування", notifications:"Сповіщення", theme:"Тема", language:"Мова інтерфейсу", save:"Зберегти зміни"},
+  en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later.", profile:"My Profile", subscription:"Subscription", settings:"Settings", notifications:"Notifications", theme:"Theme", language:"Interface Language", save:"Save changes", notifications_enabled:"Notifications enabled!", notifications_denied:"Notifications denied"},
+  ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже.", profile:"Мой профиль", subscription:"Подписка", settings:"Настройки", notifications:"Уведомления", theme:"Тема", language:"Язык интерфейса", save:"Сохранить изменения", notifications_enabled:"Уведомления включены!", notifications_denied:"Уведомления отклонены"},
+  ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше.", profile:"Мій профіль", subscription:"Підписка", settings:"Налаштування", notifications:"Сповіщення", theme:"Тема", language:"Мова інтерфейсу", save:"Зберегти зміни", notifications_enabled:"Сповіщення увімкнено!", notifications_denied:"Сповіщення відхилено"},
   es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde.", profile:"Mi perfil", subscription:"Suscripción", settings:"Ajustes", notifications:"Notificaciones", theme:"Tema", language:"Idioma de interfaz", save:"Guardar cambios"},
   de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen.", profile:"Mein Profil", subscription:"Abonnement", settings:"Einstellungen", notifications:"Benachrichtigungen", theme:"Thema", language:"Oberflächensprache", save:"Änderungen speichern"},
   fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard.", profile:"Mon profil", subscription:"Abonnement", settings:"Paramètres", notifications:"Notifications", theme:"Thème", language:"Langue de l’interface", save:"Enregistrer les modifications"},
@@ -905,10 +905,54 @@ langRow.onclick = (e)=>{
 };
 document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
 
-saveSettingsBtn.onclick = ()=>{
+function showNotificationPopup(message) {
+  const popup = document.getElementById('notifPopup');
+  const popupText = document.getElementById('notifPopupText');
+  popupText.textContent = message;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 3000);
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    console.log('This browser does not support notifications');
+    return false;
+  }
+
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+
+  if (Notification.permission !== 'denied') {
+    const permission = await Notification.requestPermission();
+    return permission === 'granted';
+  }
+
+  return false;
+}
+
+saveSettingsBtn.onclick = async ()=>{
+  const wasNotifOff = lastSavedSettings.notif === false;
+  const isNotifOn = settingsBuffer.notif === true;
+  
   localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
   localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
   localStorage.setItem('neurona_lang', settingsBuffer.lang);
+  
+  // If user is enabling notifications for the first time, request permission
+  if (wasNotifOff && isNotifOn) {
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      showNotificationPopup(i18n[settingsBuffer.lang].notifications_enabled || 'Уведомления включены!');
+    } else {
+      // Permission denied, turn off notifications
+      settingsBuffer.notif = false;
+      setNotif(false);
+      localStorage.setItem('neurona_notif', 'off');
+      showNotificationPopup(i18n[settingsBuffer.lang].notifications_denied || 'Уведомления отклонены');
+    }
+  }
+  
   lastSavedSettings = {...settingsBuffer};
   saveSettingsBtn.style.opacity = "0";
   setTimeout(()=>saveSettingsBtn.classList.add('hide'), 320);
