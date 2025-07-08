@@ -4,6 +4,32 @@ const fetch = require('node-fetch');
 const path = require('path');
 const app = express();
 
+// Firebase Admin SDK for push notifications
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin (in production, use service account key)
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.FIREBASE_PROJECT_ID || 'neurona-push'
+    });
+  } else {
+    console.log('Firebase service account not configured - push notifications disabled');
+  }
+} catch (error) {
+  console.log('Firebase initialization error:', error);
+}
+
+// Store FCM tokens (in production, use database)
+const fcmTokens = new Set();
+
+// Cache for notification throttling
+let lastNewsNotification = 0;
+let lastPriceNotification = 0;
+const NOTIFICATION_THROTTLE = 30 * 60 * 1000; // 30 minutes
+
 const TIMEOUT = 12000;
 
 // Для Cointelegraph/Coindesk RSS
@@ -158,6 +184,21 @@ async function getAllCryptoNews() {
 app.get('/api/news', async (req, res) => {
   try {
     const news = await getAllCryptoNews();
+    
+    // Send notification for fresh news (throttled)
+    if (news.length > 0 && Date.now() - lastNewsNotification > NOTIFICATION_THROTTLE) {
+      const latestNews = news[0];
+      if (latestNews && latestNews.title) {
+        await sendPushNotification(
+          'Новая криптоновость',
+          latestNews.title,
+          latestNews.url || '/',
+          { type: 'news', source: latestNews.source }
+        );
+        lastNewsNotification = Date.now();
+      }
+    }
+    
     res.json({ articles: news });
   } catch (e) {
     res.json({ articles: [] });
@@ -172,6 +213,25 @@ app.get('/api/cmc', async (req, res) => {
       { headers: { 'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY } }
     );
     const js = await r.json();
+    
+    // Send notification for significant price changes (throttled)
+    if (js.data && js.data.length > 0 && Date.now() - lastPriceNotification > NOTIFICATION_THROTTLE) {
+      const btc = js.data.find(coin => coin.symbol === 'BTC');
+      if (btc && btc.quote && btc.quote.USD && btc.quote.USD.percent_change_24h) {
+        const change = btc.quote.USD.percent_change_24h;
+        if (Math.abs(change) > 5) { // Notify for changes > 5%
+          const direction = change > 0 ? '📈' : '📉';
+          await sendPushNotification(
+            'Изменение цены Bitcoin',
+            `${direction} Bitcoin ${change > 0 ? '+' : ''}${change.toFixed(2)}% за 24ч`,
+            '/',
+            { type: 'price', symbol: 'BTC', change: change }
+          );
+          lastPriceNotification = Date.now();
+        }
+      }
+    }
+    
     res.json(js);
   } catch (e) {
     res.json({ data: [], error: 'CMC error' });
@@ -232,6 +292,78 @@ app.get('/api/tview', async (req, res) => {
     res.json({ support, resistance, url });
   } catch (e) {
     res.json({ support: null, resistance: null, url: null });
+  }
+});
+
+// === Push Notification Endpoints ===
+
+// Register FCM token
+app.post('/api/register-token', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (token) {
+      fcmTokens.add(token);
+      console.log('FCM token registered:', token.substring(0, 20) + '...');
+      res.json({ success: true });
+    } else {
+      res.status(400).json({ error: 'Token required' });
+    }
+  } catch (error) {
+    console.error('Error registering token:', error);
+    res.status(500).json({ error: 'Failed to register token' });
+  }
+});
+
+// Send push notification
+async function sendPushNotification(title, body, url = '/', data = {}) {
+  if (!admin.apps.length || fcmTokens.size === 0) {
+    console.log('Firebase not initialized or no tokens registered');
+    return;
+  }
+
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+      icon: 'https://i.ibb.co/XfKRzvcy/27.png'
+    },
+    data: {
+      url: url,
+      ...data
+    },
+    tokens: Array.from(fcmTokens)
+  };
+
+  try {
+    const response = await admin.messaging().sendMulticast(message);
+    console.log('Push notification sent:', response.successCount, 'successful,', response.failureCount, 'failed');
+    
+    // Remove invalid tokens
+    if (response.responses) {
+      response.responses.forEach((resp, idx) => {
+        if (resp.error) {
+          const token = Array.from(fcmTokens)[idx];
+          if (resp.error.code === 'messaging/invalid-registration-token' || 
+              resp.error.code === 'messaging/registration-token-not-registered') {
+            fcmTokens.delete(token);
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+  }
+}
+
+// Endpoint to trigger notifications (for testing)
+app.post('/api/send-notification', async (req, res) => {
+  try {
+    const { title, body, url, data } = req.body;
+    await sendPushNotification(title, body, url, data);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    res.status(500).json({ error: 'Failed to send notification' });
   }
 });
 

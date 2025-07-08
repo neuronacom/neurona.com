@@ -551,13 +551,13 @@
     }
     .tdot {
       display: inline-block;
-      width: 7px;
-      height: 7px;
+      width: 10px;
+      height: 10px;
       background: #bbb;
       border-radius: 50%;
       opacity: .7;
       animation: tdotbounce 1.1s infinite;
-      margin-right: 2px;
+      margin-right: 3px;
     }
     .tdot1 { animation-delay: 0s;}
     .tdot2 { animation-delay: 0.15s;}
@@ -1077,9 +1077,9 @@ function addTyping(){
   const d = document.createElement('div');
   d.className = 'message bot typing';
   d.innerHTML = `<span class="typing-dots">
-    <span class="tdot tdot1">.</span>
-    <span class="tdot tdot2">.</span>
-    <span class="tdot tdot3">.</span>
+    <span class="tdot tdot1"></span>
+    <span class="tdot tdot2"></span>
+    <span class="tdot tdot3"></span>
   </span>`;
   let dots = d.querySelectorAll('.tdot');
   let idx = 0;
@@ -1403,9 +1403,99 @@ input.addEventListener('keydown', function(e){
 setTimeout(()=>{scrollChatToBottom(true, true)}, 500);
 </script>
 <script src="neurona-chat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
+  }
+
+  // Firebase configuration for push notifications
+  const firebaseConfig = {
+    apiKey: "AIzaSyBd8gQKrHvS_kCQ9WOHhQKrD_QNvHHHfow",
+    authDomain: "neurona-push.firebaseapp.com",
+    projectId: "neurona-push",
+    storageBucket: "neurona-push.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abc123def456ghi789"
+  };
+
+  // Initialize Firebase (this will use environment variables in production)
+  try {
+    if (typeof firebase !== 'undefined') {
+      firebase.initializeApp(firebaseConfig);
+      const messaging = firebase.messaging();
+
+      // Request notification permission
+      async function requestNotificationPermission() {
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            console.log('Notification permission granted.');
+            
+            // Get FCM token
+            const token = await messaging.getToken({
+              vapidKey: 'BFkGGzcnKLMQIgTJP9_9QBZHshjhQ2ZLEZoJGOF8kkzFkFO9cLYfHcXH5GtjYzXFKKF8'
+            });
+            
+            if (token) {
+              console.log('FCM Token:', token);
+              // Store token for sending notifications
+              localStorage.setItem('fcm_token', token);
+              
+              // Send token to server
+              try {
+                await fetch('/api/register-token', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ token: token })
+                });
+              } catch (error) {
+                console.log('Error sending token to server:', error);
+              }
+            }
+          } else {
+            console.log('Unable to get permission to notify.');
+          }
+        } catch (error) {
+          console.log('An error occurred while retrieving token. ', error);
+        }
+      }
+
+      // Handle foreground messages
+      messaging.onMessage((payload) => {
+        console.log('Message received. ', payload);
+        
+        // Show notification if the app is in focus
+        if (payload.notification) {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: 'https://i.ibb.co/XfKRzvcy/27.png'
+          });
+        }
+      });
+
+      // Auto-request permission when notification switch is turned on
+      const notifSwitch = document.getElementById('notifSwitch');
+      if (notifSwitch) {
+        notifSwitch.addEventListener('change', function() {
+          if (this.checked) {
+            requestNotificationPermission();
+          }
+        });
+
+        // Check if notifications are already enabled
+        if (notifSwitch.checked && Notification.permission !== 'granted') {
+          requestNotificationPermission();
+        }
+      }
+    } else {
+      console.log('Firebase SDK not loaded - push notifications disabled');
+    }
+  } catch (error) {
+    console.log('Firebase initialization error:', error);
   }
 </script>
 </body>
