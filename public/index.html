@@ -551,13 +551,13 @@
     }
     .tdot {
       display: inline-block;
-      width: 7px;
-      height: 7px;
+      width: 12px;
+      height: 12px;
       background: #bbb;
       border-radius: 50%;
       opacity: .7;
       animation: tdotbounce 1.1s infinite;
-      margin-right: 2px;
+      margin-right: 3px;
     }
     .tdot1 { animation-delay: 0s;}
     .tdot2 { animation-delay: 0.15s;}
@@ -1077,9 +1077,9 @@ function addTyping(){
   const d = document.createElement('div');
   d.className = 'message bot typing';
   d.innerHTML = `<span class="typing-dots">
-    <span class="tdot tdot1">.</span>
-    <span class="tdot tdot2">.</span>
-    <span class="tdot tdot3">.</span>
+    <span class="tdot tdot1"></span>
+    <span class="tdot tdot2"></span>
+    <span class="tdot tdot3"></span>
   </span>`;
   let dots = d.querySelectorAll('.tdot');
   let idx = 0;
