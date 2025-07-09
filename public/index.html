@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
-/* Твой полный CSS — как в твоём сообщении, без дублирований! */
+    /* Твой полный CSS — как в твоём сообщении, без дублирований! */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
@@ -739,10 +739,10 @@ let settingsBuffer = {
 let lastSavedSettings = {...settingsBuffer};
 
 const input = document.getElementById('input'),
-const sendBtn = document.getElementById('send'),
-const msgsContainer = document.getElementById('messages'),
-const scrollDownBtn = document.getElementById('scroll-down'),
-const inputArea = document.querySelector('.input-area');
+      sendBtn = document.getElementById('send'),
+      msgsContainer = document.getElementById('messages'),
+      scrollDownBtn = document.getElementById('scroll-down'),
+      inputArea = document.querySelector('.input-area');
 const sideMenu = document.getElementById('sideMenu');
 const sideMenuBg = document.getElementById('sideMenuBg');
 const burger = document.getElementById('burgerBtn');
@@ -1544,148 +1544,17 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script>
-const SYMBOLS_TO_WATCH = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL'];
-const NOTIF_PERCENT_LEVELS = [1,2,3,4,5,6,7,8,9,10];
-let lastPrices = {}; // {BTC: {price:..., lastNotifPercents:[]}, ...}
-let lastNewsIds = [];
-let notifInterval = null;
-
-function getCMCWatchList(arr) {
-  return arr.filter(c =>
-    SYMBOLS_TO_WATCH.includes((c.symbol||"").toUpperCase())
-  );
-}
-function getPercentChange(oldVal, newVal) {
-  if (!oldVal) return 0;
-  return ((newVal - oldVal) / oldVal) * 100;
-}
-
-// Проверка и отправка прайс-уведомлений
-async function checkPricePush() {
-  try {
-    let cmcRes = await fetch('/api/cmc');
-    let cmcJson = await cmcRes.json();
-    let arr = cmcJson?.data || [];
-    let watchArr = getCMCWatchList(arr);
-
-    for (let c of watchArr) {
-      let symbol = c.symbol;
-      let now = c.quote?.USD?.price || 0;
-      let old = lastPrices[symbol]?.price || now;
-      let percent = getPercentChange(old, now);
-      let absPercent = Math.abs(percent);
-
-      if (!lastPrices[symbol]) lastPrices[symbol] = { price: now, lastNotifPercents: [] };
-      let notifPercents = lastPrices[symbol].lastNotifPercents || [];
-      let rounded = Math.round(absPercent);
-
-      // Присылаем уведомление ТОЛЬКО если изменение ровно 1,2...10% (и в эту сторону ещё не пушили)
-      if (NOTIF_PERCENT_LEVELS.includes(rounded) && !notifPercents.includes(rounded) && absPercent >= 0.95) {
-        let sign = percent > 0 ? '+' : '-';
-        let percentText = `${sign}${rounded}`;
-        let msg = `Цена ${symbol} изменилась на ${percentText}% (NEURONA)`;
-        sendLocalNotif(msg, `Текущая цена: $${now.toLocaleString(undefined, {maximumFractionDigits:5})}`, null);
-        notifPercents.push(rounded);
-        // Чистим чтобы хранились только последние 10 уровней
-        if (notifPercents.length > 10) notifPercents = notifPercents.slice(-10);
-      }
-
-      // Если изменилась менее чем на 1% — сбрасываем память, чтобы снова пушить когда доберёт до 1%
-      if (absPercent < 0.95) lastPrices[symbol].lastNotifPercents = [];
-      else lastPrices[symbol].lastNotifPercents = notifPercents;
-
-      lastPrices[symbol].price = now;
-    }
-  } catch(e){}
-}
-
-// Пуш последних новостей (ИИ формирует summary на сервере, или выводим кратко)
-async function checkNewsPush() {
-  try {
-    let panicRes = await fetch('/api/cryptopanic');
-    let newsRes = await fetch('/api/news');
-    let panicJson = await panicRes.json();
-    let newsJson = await newsRes.json();
-    let allNews = [];
-    if (panicJson.articles) allNews = allNews.concat(panicJson.articles);
-    if (newsJson.articles) allNews = allNews.concat(newsJson.articles);
-    allNews.sort((a,b)=>new Date(b.time||b.published_at||0)-new Date(a.time||a.published_at||0));
-
-    let fresh = allNews.filter(n => n.id && !lastNewsIds.includes(n.id)).slice(0,2);
-    for (let n of fresh) {
-      // В тексте — кратко, из ИИ или просто заголовок + " (NEURONA)"
-      sendLocalNotif(
-        n.title ? `${n.title} (NEURONA)` : "Свежая крипто-новость (NEURONA)",
-        (n.summary || n.title || '').slice(0,160) + (n.url ? '\n' + n.url : ''),
-        n.url || '/'
-      );
-      lastNewsIds.push(n.id);
-      if (lastNewsIds.length > 12) lastNewsIds = lastNewsIds.slice(-12);
-    }
-  } catch(e){}
-}
-
-// Универсальная отправка пуша (через сервис-воркер)
-function sendLocalNotif(title, body, url) {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
-  navigator.serviceWorker.getRegistration().then(reg => {
-    if (reg) {
-      reg.showNotification(title, {
-        body: body,
-        icon: 'https://i.ibb.co/XfKRzvcy/27.png',
-        badge: 'https://i.ibb.co/XfKRzvcy/27.png',
-        data: { url: url || '/' }
-      });
-    } else {
-      new Notification(title, { body: body, icon: 'https://i.ibb.co/XfKRzvcy/27.png' });
-    }
-  });
-}
-
-// --- Автостарт пушей (по кнопке/перезагрузке)
-function startNotifAutoPush() {
-  if (notifInterval) clearInterval(notifInterval);
-  notifInterval = setInterval(() => {
-    checkPricePush();
-    checkNewsPush();
-  }, 121000); // 2 мин
-  // Первый пуш сразу
-  checkPricePush();
-  checkNewsPush();
-}
-
-// -- Запуск только если разрешены уведомления
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('neurona_notif') === 'on') {
-    askNotifPermission().then(ok => {
-      if (ok) startNotifAutoPush();
-    });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
   }
-});
-document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-  if (document.getElementById('notifSwitch').classList.contains('on')) {
-    let ok = await askNotifPermission();
-    if (ok) startNotifAutoPush();
-    // Не показываем всплывашку, просто стандартное подтверждение (будет системное)
-  } else {
-    if (notifInterval) clearInterval(notifInterval);
+</script>
+</body>
+</html>
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
   }
-});
-
-// --- Безопасная функция разрешения пушей
-async function askNotifPermission() {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return false;
-  let result = await Notification.requestPermission();
-  return result === 'granted';
-}
-
-// --- Service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
 </script>
 </body>
 </html>
