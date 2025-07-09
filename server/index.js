@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 
 const TIMEOUT = 12000;
+const WATCHED_SYMBOLS = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL'];
 
 // Для Cointelegraph/Coindesk RSS
 const Parser = require('rss-parser');
@@ -164,15 +165,22 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-// CoinMarketCap API (Топ-5)
+// CoinMarketCap API (только BTC, ETH, BNB, XRP, SOL, всегда в этом порядке)
 app.get('/api/cmc', async (req, res) => {
   try {
     const r = await fetchTimeout(
-      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=5&convert=USD',
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=40&convert=USD',
       { headers: { 'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY } }
     );
     const js = await r.json();
-    res.json(js);
+    if (!js.data) return res.json({ data: [], error: 'No data' });
+    // Оставляем только нужные монеты, строго в нужном порядке
+    const out = [];
+    for (const symbol of WATCHED_SYMBOLS) {
+      let c = js.data.find(d => (d.symbol || '').toUpperCase() === symbol);
+      if (c) out.push(c);
+    }
+    res.json({ ...js, data: out });
   } catch (e) {
     res.json({ data: [], error: 'CMC error' });
   }
