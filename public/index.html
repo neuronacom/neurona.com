@@ -14,6 +14,7 @@
   <link rel="icon" type="image/png" href="https://i.ibb.co/XfKRzvcy/27.png">
   <link rel="preload" as="image" href="https://i.ibb.co/Mk4WpHL9/25-1.png">
   <style>
+/* Твой полный CSS — как в твоём сообщении, без дублирований! */
     * { box-sizing:border-box; margin:0; padding:0; }
     body, textarea, button, .msg-content {
       font-family: Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Noto Emoji', sans-serif;
@@ -543,6 +544,7 @@
     }
     .notif-popup.show {opacity:1; pointer-events:all;}
     .notif-popup svg{width:31px; height:31px;}
+    /* --- ТОЛЬКО анимация typing: все точки серые --- */
     .typing-dots {
       display: inline-flex;
       gap: 2.7px;
@@ -669,15 +671,13 @@
       <textarea id="input" placeholder="Напишите сообщение..."></textarea>
       <button id="send">Отправить</button>
     </div>
-    </div>
   </div>
+</div>
 <div class="notif-popup" id="notifPopup">
   <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="11" fill="#11c311"/><path d="M7 12.5l2.5 2.5 7-7" stroke="#fff" stroke-width="2.4" fill="none"/></svg>
   <span id="notifPopupText">Уведомления включены!</span>
 </div>
-<script src="neurona-chat.js"></script>
 <script>
-// === АНИМАЦИЯ ФОНА (нейросеть) ===
 const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
 let W, H, nodes;
 function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
@@ -712,7 +712,6 @@ function draw(){
 }
 resize(); init(); draw();
 
-// === ЛОКАЛИЗАЦИЯ, НАСТРОЙКИ ===
 const langs = [
   {code:'ru',name:'Русский'},
   {code:'en',name:'English'},
@@ -726,18 +725,10 @@ const langs = [
   {code:'zh',name:'中文'}
 ];
 const i18n = {
-  en:{ph:"Type a message...",send:"Send",error:"Oops, something went wrong. Please try again!", internal:"Internal error, please try again later.", profile:"My Profile", subscription:"Subscription", settings:"Settings", notifications:"Notifications", theme:"Theme", language:"Interface Language", save:"Save changes"},
-  ru:{ph:"Напишите сообщение...",send:"Отправить",error:"Что-то пошло не так. Попробуйте снова!", internal:"Внутренняя ошибка, попробуйте позже.", profile:"Мой профиль", subscription:"Подписка", settings:"Настройки", notifications:"Уведомления", theme:"Тема", language:"Язык интерфейса", save:"Сохранить изменения"},
-  ua:{ph:"Введіть повідомлення...",send:"Надіслати",error:"Щось пішло не так. Спробуйте ще раз!", internal:"Внутрішня помилка, спробуйте пізніше.", profile:"Мій профіль", subscription:"Підписка", settings:"Налаштування", notifications:"Сповіщення", theme:"Тема", language:"Мова інтерфейсу", save:"Зберегти зміни"},
-  es:{ph:"Escribe un mensaje...",send:"Enviar",error:"¡Vaya, algo salió mal! Inténtalo de nuevo.", internal:"Error interno, inténtalo más tarde.", profile:"Mi perfil", subscription:"Suscripción", settings:"Ajustes", notifications:"Notificaciones", theme:"Tema", language:"Idioma de interfaz", save:"Guardar cambios"},
-  de:{ph:"Schreibe eine Nachricht...",send:"Senden",error:"Hoppla, etwas ist schief gelaufen. Bitte versuche es erneut!", internal:"Interner Fehler, bitte später erneut versuchen.", profile:"Mein Profil", subscription:"Abonnement", settings:"Einstellungen", notifications:"Benachrichtigungen", theme:"Thema", language:"Oberflächensprache", save:"Änderungen speichern"},
-  fr:{ph:"Écrivez un message...",send:"Envoyer",error:"Oups, quelque chose s'est mal passé. Veuillez réessayer !", internal:"Erreur interne, veuillez réessayer plus tard.", profile:"Mon profil", subscription:"Abonnement", settings:"Paramètres", notifications:"Notifications", theme:"Thème", language:"Langue de l’interface", save:"Enregistrer les modifications"},
-  it:{ph:"Scrivi un messaggio...",send:"Invia",error:"Ops, qualcosa è andato storto. Riprova!", internal:"Errore interno, riprova più tardi.", profile:"Il mio profilo", subscription:"Abbonamento", settings:"Impostazioni", notifications:"Notifiche", theme:"Tema", language:"Lingua interfaccia", save:"Salva le modifiche"},
-  pl:{ph:"Napisz wiadomość...",send:"Wyślij",error:"Ups, coś poszło nie tak. Spróbuj ponownie!", internal:"Błąd wewnętrzny, spróbuj później.", profile:"Mój profil", subscription:"Subskrypcja", settings:"Ustawienia", notifications:"Powiadomienia", theme:"Motyw", language:"Język interfejsu", save:"Zapisz zmiany"},
-  tr:{ph:"Bir mesaj yaz...",send:"Gönder",error:"Bir şeyler ters gitti. Lütfen tekrar deneyin!", internal:"Dahili hata, lütfen daha sonra tekrar deneyin.", profile:"Profilim", subscription:"Abonelik", settings:"Ayarlar", notifications:"Bildirimler", theme:"Tema", language:"Arayüz Dili", save:"Değişiklikleri kaydet"},
-  zh:{ph:"输入消息...",send:"发送",error:"哎呀，出了点问题。请再试一次！", internal:"内部错误，请稍后再试。", profile:"我的资料", subscription:"订阅", settings:"设置", notifications:"通知", theme:"主题", language:"界面语言", save:"保存更改"},
+  en:{ph:"Type a message...",send:"Send",notifOn:"Notifications enabled! Now you will receive updates about latest news and top crypto prices.", notifOff:"Notifications disabled.", notifAllow:"Allow notifications in your browser!", notifError:"Notification permission denied.", newsPush:"New crypto news!", pricePush:"Crypto price changed!", internal:"Internal error, please try again later."},
+  ru:{ph:"Напишите сообщение...",send:"Отправить",notifOn:"Уведомления включены! Теперь вы будете получать уведомления о последних новостях и ценах криптовалют.", notifOff:"Уведомления выключены.", notifAllow:"Разрешите уведомления в браузере!", notifError:"Нет доступа к уведомлениям.", newsPush:"Свежие крипто-новости!", pricePush:"Изменилась цена криптовалют!", internal:"Внутренняя ошибка, попробуйте позже."},
+  ua:{ph:"Введіть повідомлення...",send:"Надіслати",notifOn:"Сповіщення увімкнено! Тепер ви будете отримувати сповіщення про останні новини та ціни.", notifOff:"Сповіщення вимкнено.", notifAllow:"Дозвольте сповіщення в браузері!", notifError:"Немає доступу до сповіщень.", newsPush:"Свіжі крипто-новини!", pricePush:"Зміна ціни криптовалют!", internal:"Внутрішня помилка, спробуйте пізніше."},
 };
-
 let lang = (localStorage.getItem('neurona_lang')||navigator.language.slice(0,2));
 if(!i18n[lang]) lang='en';
 let settingsBuffer = {
@@ -772,19 +763,21 @@ const loaderTitle = document.getElementById('loaderTitle');
 const loaderSubtitle = document.getElementById('loaderSubtitle');
 const sideMenuList = document.getElementById('sideMenuList');
 const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const notifPopup = document.getElementById('notifPopup');
+const notifPopupText = document.getElementById('notifPopupText');
 
 input.placeholder = i18n[settingsBuffer.lang].ph;
 sendBtn.textContent = i18n[settingsBuffer.lang].send;
 
 function updateMenuI18n() {
   let menuMap = {
-    profile: i18n[settingsBuffer.lang].profile,
-    subscription: i18n[settingsBuffer.lang].subscription,
-    settings: i18n[settingsBuffer.lang].settings,
-    notifications: i18n[settingsBuffer.lang].notifications,
-    theme: i18n[settingsBuffer.lang].theme,
-    language: i18n[settingsBuffer.lang].language,
-    save: i18n[settingsBuffer.lang].save,
+    profile: "Мой профиль",
+    subscription: "Подписка",
+    settings: "Настройки",
+    notifications: "Уведомления",
+    theme: "Тема",
+    language: "Язык интерфейса",
+    save: "Сохранить изменения",
   };
   sideMenuList.querySelectorAll('[data-menu=profile] .menu-text').forEach(el=>el.textContent=menuMap.profile);
   sideMenuList.querySelectorAll('[data-menu=subscription] .menu-text').forEach(el=>el.textContent=menuMap.subscription);
@@ -794,7 +787,6 @@ function updateMenuI18n() {
   settingsGroup.querySelectorAll('.side-switch-row')[2].querySelector('.menu-text').textContent = menuMap.language;
   saveSettingsBtn.textContent = menuMap.save;
 }
-
 function updateLangName(){
   let found = langs.find(l=>l.code===settingsBuffer.lang);
   currLangName.textContent = found ? found.name : settingsBuffer.lang;
@@ -827,11 +819,9 @@ function setTheme(dark, fast){
     loaderSubtitle.style.transition = "";
   }
 }
-
 function setNotif(on){
   notifSwitch.classList.toggle('on',on);
 }
-
 function showSaveBtnIfChanged() {
   if (settingsBuffer.theme !== lastSavedSettings.theme ||
       settingsBuffer.notif !== lastSavedSettings.notif ||
@@ -844,7 +834,6 @@ function showSaveBtnIfChanged() {
     setTimeout(()=>{saveSettingsBtn.classList.add('hide');}, 320);
   }
 }
-
 burger.onclick = ()=>{ sideMenu.classList.add('active'); sideMenuBg.classList.add('active'); }
 closeBtn.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
 sideMenuBg.onclick = ()=>{ sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active'); }
@@ -853,7 +842,6 @@ document.addEventListener('keydown', e=>{
     sideMenu.classList.remove('active'); sideMenuBg.classList.remove('active');
   }
 });
-
 let settingsOpen = false;
 settingsBtn.onclick = function() {
   settingsOpen = !settingsOpen;
@@ -864,7 +852,6 @@ settingsBtn.onclick = function() {
     langArrow.classList.remove('open');
   }
 };
-
 themeSwitch.onclick = ()=>{
   settingsBuffer.theme = !settingsBuffer.theme;
   setTheme(settingsBuffer.theme, true);
@@ -874,8 +861,26 @@ notifSwitch.onclick = ()=>{
   settingsBuffer.notif = !settingsBuffer.notif;
   setNotif(settingsBuffer.notif);
   showSaveBtnIfChanged();
+  if (settingsBuffer.notif) {
+    if (window.Notification && Notification.permission !== "granted") {
+      Notification.requestPermission().then(res=>{
+        if (res === "granted") {
+          showNotifPopup(i18n[settingsBuffer.lang].notifOn);
+        } else {
+          settingsBuffer.notif = false;
+          setNotif(false);
+          showNotifPopup(i18n[settingsBuffer.lang].notifError, true);
+        }
+      });
+    } else if (window.Notification && Notification.permission === "granted") {
+      showNotifPopup(i18n[settingsBuffer.lang].notifOn);
+    } else {
+      showNotifPopup(i18n[settingsBuffer.lang].notifAllow, true);
+    }
+  } else {
+    showNotifPopup(i18n[settingsBuffer.lang].notifOff, true);
+  }
 };
-
 function renderLangList(){
   langList.innerHTML = '';
   langs.forEach(l=>{
@@ -896,7 +901,6 @@ function renderLangList(){
   });
 }
 renderLangList();
-
 langRow.onclick = (e)=>{
   renderLangList();
   langList.classList.toggle('show');
@@ -904,7 +908,6 @@ langRow.onclick = (e)=>{
   e.stopPropagation();
 };
 document.body.addEventListener('click', ()=>{ langList.classList.remove('show'); langArrow.classList.remove('open'); });
-
 saveSettingsBtn.onclick = ()=>{
   localStorage.setItem('neurona_theme', settingsBuffer.theme ? 'dark' : 'light');
   localStorage.setItem('neurona_notif', settingsBuffer.notif ? 'on' : 'off');
@@ -916,7 +919,6 @@ saveSettingsBtn.onclick = ()=>{
   input.placeholder = i18n[settingsBuffer.lang].ph;
   sendBtn.textContent = i18n[settingsBuffer.lang].send;
 };
-
 function loadSettings(){
   setTheme(settingsBuffer.theme, true);
   setNotif(settingsBuffer.notif);
@@ -927,15 +929,12 @@ function loadSettings(){
   sendBtn.textContent = i18n[settingsBuffer.lang].send;
 }
 loadSettings();
-
 (function applyThemeOnLoad(){
   let dark = settingsBuffer.theme;
   setTheme(dark, true);
 })();
 
-// ========== ЧАТ ==========
 let messages = [], typingProcess = null, botIsTyping = false;
-
 function saveHistory(){ localStorage.setItem('neurona_history', JSON.stringify(messages)); }
 function loadHistory(){
   const h = JSON.parse(localStorage.getItem('neurona_history')||'[]');
@@ -946,7 +945,6 @@ function loadHistory(){
     scrollChatToBottom(true);
   }
 }
-
 document.body.style.opacity = "1";
 window.addEventListener('load', ()=>{
   document.getElementById('top-bar').classList.add('hide');
@@ -961,7 +959,6 @@ window.addEventListener('load', ()=>{
     }, 1000);
   }, 4000);
 });
-
 function formatBotMessage(text) {
   text = text.replace(/[\u{FE00}-\u{FE0F}]/gu, "");
   text = text.replace(/\uFFFD/g, "");
@@ -996,8 +993,6 @@ function formatBotMessage(text) {
   text = text.replace(/<p><\/p>/g, '');
   return text;
 }
-
-// Спец-ответ по этапам, архитектуре, стекам
 const etapRegex = /етап|этап|fastapi|huggingface|mistral|openchat|sqlite|redis|tauri|docker|ci\/cd|github actions|s3|r2|cloudflare|infra|api|модули|ocr|tesseract|coingecko|newsapi|health|finance|pdf|docx|fetcher\.py|инфраструктур|інфраструктур|масштаб|разгорт|разверт|разработка|структур|архитект|реализован|есть это|обладает этим|ты умеешь/i;
 const etapFullAnswer = `
 <b>Все этапы, архитектура и модули, которые вы перечислили, уже реализованы и интегрированы в NEURONA!</b><br>
@@ -1015,14 +1010,12 @@ const etapFullAnswer = `
 Всё это работает "под капотом" ассистента, чтобы ты получал максимально современные и безопасные решения! 🚀<br>
 Если интересно — могу рассказать детали любого из этапов.
 `;
-
 function smartEtapAnswer(q) {
   if (etapRegex.test(q)) {
     return etapFullAnswer;
   }
   return null;
 }
-
 function addMessage(text, who, time){
   if (!time) time = new Date().toLocaleTimeString().slice(0,5);
   const msg = document.createElement('div');
@@ -1072,14 +1065,13 @@ function addMessage(text, who, time){
   setTimeout(()=>{timeEl.style.display='inline'}, 100);
   scrollChatToBottom(true);
 }
-
 function addTyping(){
   const d = document.createElement('div');
   d.className = 'message bot typing';
   d.innerHTML = `<span class="typing-dots">
-    <span class="tdot tdot1">.</span>
-    <span class="tdot tdot2">.</span>
-    <span class="tdot tdot3">.</span>
+    <span class="tdot tdot1"></span>
+    <span class="tdot tdot2"></span>
+    <span class="tdot tdot3"></span>
   </span>`;
   let dots = d.querySelectorAll('.tdot');
   let idx = 0;
@@ -1092,7 +1084,6 @@ function addTyping(){
   scrollChatToBottom(true, true);
   return d;
 }
-
 function scrollChatToBottom(smooth, withAnim){
   if(withAnim || smooth){
     msgsContainer.scrollTo({top: msgsContainer.scrollHeight, behavior: 'smooth'});
@@ -1101,7 +1092,6 @@ function scrollChatToBottom(smooth, withAnim){
   }
   checkScrollBtn();
 }
-
 function checkScrollBtn(){
   if(botIsTyping) {
     scrollDownBtn.classList.remove('show');
@@ -1122,7 +1112,6 @@ scrollDownBtn.onclick = ()=>{
   setTimeout(()=>scrollDownBtn.classList.remove('down-anim'), 600);
   scrollDownBtn.classList.remove('show');
 };
-
 function getSystemMessage(){
   return {
     role: 'system', content: `
@@ -1139,8 +1128,6 @@ function getSystemMessage(){
         `.replace(/^\s+/gm, '')
   };
 }
-
-// --- API Endpoints ---
 const CMC_ENDPOINT    = '/api/cmc';
 const NEWS_ENDPOINT   = '/api/news';
 const PANIC_ENDPOINT  = '/api/cryptopanic';
@@ -1148,7 +1135,6 @@ const CG_ENDPOINT     = '/api/coingecko';
 const BINANCE_ENDPOINT = '/api/binance';
 const OPENAI_ENDPOINT = '/api/openai';
 
-// Получить свежие новости из cryptopanic + newsapi
 async function fetchLatestNews(){
   let news = [];
   try {
@@ -1158,7 +1144,6 @@ async function fetchLatestNews(){
     ]);
     const panicJson = await panicRes.json();
     const newsJson = await newsRes.json();
-    // cryptopanic
     if(panicJson.articles && panicJson.articles.length){
       news = news.concat(panicJson.articles.filter(a=>{
         const date = new Date(a.time || a.published_at || 0);
@@ -1167,7 +1152,6 @@ async function fetchLatestNews(){
         ...a, time:a.time||'', url:a.url, source:'cryptopanic', impact: a.impact || ''
       })));
     }
-    // newsapi и др.
     if(newsJson.articles && newsJson.articles.length){
       news = news.concat(newsJson.articles.filter(a=>{
         const date = new Date(a.time || a.published_at || 0);
@@ -1177,7 +1161,6 @@ async function fetchLatestNews(){
       })));
     }
   } catch(e){}
-  // Удалить дубли по title+url, оставить свежие
   const seen = new Set(), out = [];
   news.sort((a,b)=>new Date(b.time||b.published_at||0)-new Date(a.time||a.published_at||0));
   for(let n of news) {
@@ -1188,7 +1171,6 @@ async function fetchLatestNews(){
     return '<ol>' + out.slice(0,10).map(a=>`<li><a href="${a.url}" target="_blank"><b>${a.title}</b></a> <span style="color:#666;font-size:.91em">[${a.source}] (${a.time})</span>${a.impact?`<br><i>Влияет на: <b>${a.impact}</b></i>`:""}<br><i>Анализ: ${analyzeNewsImpact(a.title,a.impact)}</i></li>`).join('') + '</ol>';
   return 'нет новостей';
 }
-
 function analyzeNewsImpact(title, impact){
   title = (title||'').toLowerCase();
   impact = (impact||'').toUpperCase();
@@ -1202,7 +1184,6 @@ function analyzeNewsImpact(title, impact){
   if(/partnership|launch|integration|интеграц|партнер|листинг|listing/.test(title)) return 'Позитивная новость для упомянутых монет';
   return 'Общая рыночная новость';
 }
-
 async function fetchAllPrices(text){
   const possible = text.match(/\b[A-Za-z]{2,7}\b/g) || [];
   const unique = [...new Set(possible.map(s=>s.toUpperCase()))].filter(t=>t.length>2 && t.length<8);
@@ -1228,7 +1209,6 @@ async function fetchAllPrices(text){
   if (results.length) return '<ul><li>' + results.join('</li><li>') + '</li></ul>';
   return '';
 }
-
 async function fetchCMC(){
   try {
     const res = await fetch(CMC_ENDPOINT + `?t=${Date.now()}&nocache=${Math.random()}`);
@@ -1248,12 +1228,10 @@ async function fetchCMC(){
     return { txt:'нет данных CMC', rec:'' };
   }
 }
-
 sendBtn.onclick = async ()=>{
   const txt = input.value.trim();
   if(!txt) return;
   const nowTime = new Date().toLocaleTimeString().slice(0,5);
-
   let etapAns = smartEtapAnswer(txt);
   if (etapAns) {
     addMessage(txt,'user',nowTime);
@@ -1270,14 +1248,11 @@ sendBtn.onclick = async ()=>{
     }, 900 + Math.random()*400);
     return;
   }
-
   addMessage(txt,'user',nowTime);
   input.value='';
   messages.push({ role:'user', content:txt, time: nowTime });
-
   const typing = addTyping();
   botIsTyping = true;
-
   let pricesHtml = await fetchAllPrices(txt);
   const [cmc, latestNews] = await Promise.all([ fetchCMC(), fetchLatestNews() ]);
   const snapshot = {
@@ -1303,7 +1278,6 @@ ${latestNews}
     temperature:1.12,
     user:"neurona-user"
   };
-
   try {
     const resp = await fetch(OPENAI_ENDPOINT, {
       method:'POST',
@@ -1327,7 +1301,6 @@ ${latestNews}
     scrollChatToBottom(true, true);
   }
 };
-
 function typeWriterEffect(text, who, time, cb) {
   const msg = document.createElement('div');
   msg.className = `message ${who}`;
@@ -1370,7 +1343,6 @@ function typeWriterEffect(text, who, time, cb) {
   let formatted = formatBotMessage(text);
   timeEl.style.display = 'none';
   botIsTyping = true;
-
   let baseSpeed = 11, minDelay=7, maxDelay=19;
   let typed = '';
   function type() {
@@ -1392,21 +1364,328 @@ function typeWriterEffect(text, who, time, cb) {
   }
   type();
 }
-
 input.addEventListener('keydown', function(e){
   if(e.key === 'Enter' && !e.shiftKey){
     e.preventDefault();
     sendBtn.click();
   }
 });
-
 setTimeout(()=>{scrollChatToBottom(true, true)}, 500);
-</script>
-<script src="neurona-chat.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+
+// ПУШ-УВЕДОМЛЕНИЯ (пример, реальная отправка по событиям или с сервера через Service Worker)
+function showNotifPopup(text, err){
+  notifPopupText.textContent = text;
+  notifPopup.style.background = err ? "#f33" : "#0e0";
+  notifPopup.classList.add('show');
+  setTimeout(()=>notifPopup.classList.remove('show'), err ? 2600 : 1700);
+}
+function pushNewsNotification(title, url){
+  if(window.Notification && Notification.permission === "granted" && settingsBuffer.notif){
+    let n = new Notification(i18n[settingsBuffer.lang].newsPush + ": " + title, {
+      icon: 'https://i.ibb.co/XfKRzvcy/27.png',
+      body: title,
+      data: { url }
+    });
+    n.onclick = function(e){
+      window.open(url,'_blank');
+    };
   }
+}
+function pushPriceNotification(text){
+  if(window.Notification && Notification.permission === "granted" && settingsBuffer.notif){
+    new Notification(i18n[settingsBuffer.lang].pricePush, {
+      icon: 'https://i.ibb.co/XfKRzvcy/27.png',
+      body: text
+    });
+  }
+}
+
+// --- Переводы для уведомлений ---
+const NOTIF_TEXTS = {
+  ru: {
+    enabled: "Уведомления включены!\nТеперь вы будете получать оповещения о последних новостях и изменениях цен криптовалют.",
+    news: "📰 КриптоНОВОСТЬ",
+    price: "💸 Обновление цены",
+    permissionDenied: "❌ Разрешение на уведомления не получено.",
+  },
+  en: {
+    enabled: "Notifications enabled!\nYou will now receive updates about the latest crypto news and price changes.",
+    news: "📰 Crypto NEWS",
+    price: "💸 Price Update",
+    permissionDenied: "❌ Notification permission not granted.",
+  },
+  ua: {
+    enabled: "Сповіщення увімкнено!\nВи будете отримувати новини та зміни цін криптовалют.",
+    news: "📰 КриптоНОВИНА",
+    price: "💸 Оновлення ціни",
+    permissionDenied: "❌ Дозвіл на сповіщення не надано.",
+  }
+};
+
+// --- Проверка/разрешение уведомлений ---
+async function askNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  let result = await Notification.requestPermission();
+  return result === 'granted';
+}
+
+// --- Сервис воркер для пушей ---
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg){
+    // ok
+  });
+}
+
+// --- Push-тест для новостей/цен (эмулируем, на сервере тоже должно быть) ---
+let notifTimer = null, lastNewsIds = [], lastTopPrices = {};
+
+function sendLocalNotif(title, body, url) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (reg) {
+      reg.showNotification(title, {
+        body: body,
+        icon: 'https://i.ibb.co/XfKRzvcy/27.png',
+        badge: 'https://i.ibb.co/XfKRzvcy/27.png',
+        data: { url: url || '/' }
+      });
+    } else {
+      new Notification(title, { body: body, icon: 'https://i.ibb.co/XfKRzvcy/27.png' });
+    }
+  });
+}
+
+// --- Функция проверки новостей/цен и отправки пуша ---
+async function checkNewsAndPricesPush(lang='ru') {
+  // News
+  try {
+    let panicRes = await fetch('/api/cryptopanic');
+    let newsRes = await fetch('/api/news');
+    let panicJson = await panicRes.json();
+    let newsJson = await newsRes.json();
+    let allNews = [];
+    if (panicJson.articles) allNews = allNews.concat(panicJson.articles);
+    if (newsJson.articles) allNews = allNews.concat(newsJson.articles);
+    allNews.sort((a,b)=>new Date(b.time||b.published_at||0)-new Date(a.time||a.published_at||0));
+    // Фильтрация новых новостей по id
+    let freshNews = allNews.filter(n=>n.id && !lastNewsIds.includes(n.id)).slice(0,2);
+    for (let n of freshNews) {
+      sendLocalNotif(
+        (NOTIF_TEXTS[lang]?.news || NOTIF_TEXTS['ru'].news) + ': ' + (n.title || ''),
+        (n.summary || n.title || '').slice(0,140) + (n.url ? '\n' + n.url : ''),
+        n.url || '/'
+      );
+      lastNewsIds.push(n.id);
+      if (lastNewsIds.length > 12) lastNewsIds = lastNewsIds.slice(-12);
+    }
+  } catch(e){}
+  // Prices
+  try {
+    let cmcRes = await fetch('/api/cmc');
+    let cmcJson = await cmcRes.json();
+    let arr = cmcJson?.data?.slice?.(0,5) || [];
+    for (let c of arr) {
+      let old = lastTopPrices[c.symbol] || 0;
+      let now = c.quote?.USD?.price || 0;
+      if (Math.abs(now - old) / (old||1) > 0.035) { // изменился >3.5%
+        sendLocalNotif(
+          (NOTIF_TEXTS[lang]?.price || NOTIF_TEXTS['ru'].price) + `: ${c.symbol}`,
+          `Цена: $${now.toLocaleString(undefined,{maximumFractionDigits:5})} (${c.quote?.USD?.percent_change_24h?.toFixed(2)}%)\nCMC`,
+          `https://coinmarketcap.com/currencies/${c.slug}/`
+        );
+      }
+      lastTopPrices[c.symbol] = now;
+    }
+  } catch(e){}
+}
+
+// --- Включение уведомлений в настройках ---
+let notifInterval = null;
+saveSettingsBtn.addEventListener('click', async () => {
+  if (settingsBuffer.notif) {
+    let ok = await askNotifPermission();
+    let userLang = settingsBuffer.lang || 'ru';
+    if (ok) {
+      // Показываем всплывашку (локализовано)
+      document.getElementById('notifPopupText').textContent = NOTIF_TEXTS[userLang]?.enabled || NOTIF_TEXTS['ru'].enabled;
+      document.getElementById('notifPopup').classList.add('show');
+      setTimeout(()=>{document.getElementById('notifPopup').classList.remove('show');},3500);
+      // Запускаем автопуши
+      if (notifInterval) clearInterval(notifInterval);
+      notifInterval = setInterval(()=>checkNewsAndPricesPush(userLang), 112000); // ~1.8 мин
+      // Первая отправка сразу
+      checkNewsAndPricesPush(userLang);
+    } else {
+      alert(NOTIF_TEXTS[userLang]?.permissionDenied || NOTIF_TEXTS['ru'].permissionDenied);
+      settingsBuffer.notif = false;
+      setNotif(false);
+    }
+  } else {
+    // Отключили
+    if (notifInterval) clearInterval(notifInterval);
+  }
+});
+
+// -- Автостарт пушей при перезагрузке, если включены --
+window.addEventListener('DOMContentLoaded', () => {
+  if (settingsBuffer.notif) {
+    askNotifPermission().then(ok => {
+      if (ok) {
+        let userLang = settingsBuffer.lang || 'ru';
+        if (notifInterval) clearInterval(notifInterval);
+        notifInterval = setInterval(()=>checkNewsAndPricesPush(userLang), 112000);
+        checkNewsAndPricesPush(userLang);
+      }
+    });
+  }
+});
+</script>
+<script>
+const SYMBOLS_TO_WATCH = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL'];
+const NOTIF_PERCENT_LEVELS = [1,2,3,4,5,6,7,8,9,10];
+let lastPrices = {}; // {BTC: {price:..., lastNotifPercents:[]}, ...}
+let lastNewsIds = [];
+let notifInterval = null;
+
+function getCMCWatchList(arr) {
+  return arr.filter(c =>
+    SYMBOLS_TO_WATCH.includes((c.symbol||"").toUpperCase())
+  );
+}
+function getPercentChange(oldVal, newVal) {
+  if (!oldVal) return 0;
+  return ((newVal - oldVal) / oldVal) * 100;
+}
+
+// Проверка и отправка прайс-уведомлений
+async function checkPricePush() {
+  try {
+    let cmcRes = await fetch('/api/cmc');
+    let cmcJson = await cmcRes.json();
+    let arr = cmcJson?.data || [];
+    let watchArr = getCMCWatchList(arr);
+
+    for (let c of watchArr) {
+      let symbol = c.symbol;
+      let now = c.quote?.USD?.price || 0;
+      let old = lastPrices[symbol]?.price || now;
+      let percent = getPercentChange(old, now);
+      let absPercent = Math.abs(percent);
+
+      if (!lastPrices[symbol]) lastPrices[symbol] = { price: now, lastNotifPercents: [] };
+      let notifPercents = lastPrices[symbol].lastNotifPercents || [];
+      let rounded = Math.round(absPercent);
+
+      // Присылаем уведомление ТОЛЬКО если изменение ровно 1,2...10% (и в эту сторону ещё не пушили)
+      if (NOTIF_PERCENT_LEVELS.includes(rounded) && !notifPercents.includes(rounded) && absPercent >= 0.95) {
+        let sign = percent > 0 ? '+' : '-';
+        let percentText = `${sign}${rounded}`;
+        let msg = `Цена ${symbol} изменилась на ${percentText}% (NEURONA)`;
+        sendLocalNotif(msg, `Текущая цена: $${now.toLocaleString(undefined, {maximumFractionDigits:5})}`, null);
+        notifPercents.push(rounded);
+        // Чистим чтобы хранились только последние 10 уровней
+        if (notifPercents.length > 10) notifPercents = notifPercents.slice(-10);
+      }
+
+      // Если изменилась менее чем на 1% — сбрасываем память, чтобы снова пушить когда доберёт до 1%
+      if (absPercent < 0.95) lastPrices[symbol].lastNotifPercents = [];
+      else lastPrices[symbol].lastNotifPercents = notifPercents;
+
+      lastPrices[symbol].price = now;
+    }
+  } catch(e){}
+}
+
+// Пуш последних новостей (ИИ формирует summary на сервере, или выводим кратко)
+async function checkNewsPush() {
+  try {
+    let panicRes = await fetch('/api/cryptopanic');
+    let newsRes = await fetch('/api/news');
+    let panicJson = await panicRes.json();
+    let newsJson = await newsRes.json();
+    let allNews = [];
+    if (panicJson.articles) allNews = allNews.concat(panicJson.articles);
+    if (newsJson.articles) allNews = allNews.concat(newsJson.articles);
+    allNews.sort((a,b)=>new Date(b.time||b.published_at||0)-new Date(a.time||a.published_at||0));
+
+    let fresh = allNews.filter(n => n.id && !lastNewsIds.includes(n.id)).slice(0,2);
+    for (let n of fresh) {
+      // В тексте — кратко, из ИИ или просто заголовок + " (NEURONA)"
+      sendLocalNotif(
+        n.title ? `${n.title} (NEURONA)` : "Свежая крипто-новость (NEURONA)",
+        (n.summary || n.title || '').slice(0,160) + (n.url ? '\n' + n.url : ''),
+        n.url || '/'
+      );
+      lastNewsIds.push(n.id);
+      if (lastNewsIds.length > 12) lastNewsIds = lastNewsIds.slice(-12);
+    }
+  } catch(e){}
+}
+
+// Универсальная отправка пуша (через сервис-воркер)
+function sendLocalNotif(title, body, url) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (reg) {
+      reg.showNotification(title, {
+        body: body,
+        icon: 'https://i.ibb.co/XfKRzvcy/27.png',
+        badge: 'https://i.ibb.co/XfKRzvcy/27.png',
+        data: { url: url || '/' }
+      });
+    } else {
+      new Notification(title, { body: body, icon: 'https://i.ibb.co/XfKRzvcy/27.png' });
+    }
+  });
+}
+
+// --- Автостарт пушей (по кнопке/перезагрузке)
+function startNotifAutoPush() {
+  if (notifInterval) clearInterval(notifInterval);
+  notifInterval = setInterval(() => {
+    checkPricePush();
+    checkNewsPush();
+  }, 121000); // 2 мин
+  // Первый пуш сразу
+  checkPricePush();
+  checkNewsPush();
+}
+
+// -- Запуск только если разрешены уведомления
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('neurona_notif') === 'on') {
+    askNotifPermission().then(ok => {
+      if (ok) startNotifAutoPush();
+    });
+  }
+});
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  if (document.getElementById('notifSwitch').classList.contains('on')) {
+    let ok = await askNotifPermission();
+    if (ok) startNotifAutoPush();
+    // Не показываем всплывашку, просто стандартное подтверждение (будет системное)
+  } else {
+    if (notifInterval) clearInterval(notifInterval);
+  }
+});
+
+// --- Безопасная функция разрешения пушей
+async function askNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  let result = await Notification.requestPermission();
+  return result === 'granted';
+}
+
+// --- Service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
 </script>
 </body>
 </html>
