@@ -944,18 +944,16 @@ function loadHistory(){
   }
 }
 document.body.style.opacity = "1";
-window.addEventListener('DOMContentLoaded', function() {
-  const loader = document.getElementById('loader');
-  const topBar = document.getElementById('top-bar');
-  topBar.classList.add('hide');
-  setTimeout(function() {
-    loader.classList.add('hide');
-    setTimeout(function() {
+window.addEventListener('load', ()=>{
+  document.getElementById('top-bar').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('loader').classList.add('hide');
+    setTimeout(()=>{
       document.body.classList.add('shown');
-      loader.style.display = 'none';
-      topBar.classList.remove('hide');
+      document.getElementById('loader').style.display='none';
+      document.getElementById('top-bar').classList.remove('hide');
       loadHistory();
-      setTimeout(function() { scrollChatToBottom(true); }, 300);
+      setTimeout(()=>scrollChatToBottom(true), 300);
     }, 1000);
   }, 4000);
 });
